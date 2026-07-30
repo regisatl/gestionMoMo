@@ -1,0 +1,105 @@
+/* ============================================
+   GestionMoMo — Global CSS
+   Design System: Manrope + #0A66C2
+   ============================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* Couleurs principales */
+  --color-primary:        #0A66C2;
+  --color-primary-light:  #3385D6;
+  --color-primary-dark:   #084E96;
+  --color-primary-alpha:  rgba(10, 102, 194, 0.12);
+
+  /* Sémantiques */
+  --color-success:        #16A34A;
+  --color-success-light:  #DCFCE7;
+  --color-error:          #DC2626;
+  --color-error-light:    #FEE2E2;
+  --color-warning:        #D97706;
+  --color-warning-light:  #FEF3C7;
+  --color-info:           #0284C7;
+  --color-info-light:     #E0F2FE;
+
+  /* Light mode (défaut) */
+  --bg:                   #FFFFFF;
+  --bg-secondary:         #F9FAFB;
+  --bg-card:              #FFFFFF;
+  --surface:              #F3F4F6;
+  --border:               #E5E7EB;
+  --text:                 #242424;
+  --text-secondary:       #6B7280;
+  --text-disabled:        #9CA3AF;
+  --text-inverse:         #FFFFFF;
+  --placeholder:          #9CA3AF;
+  --shadow:               rgba(0, 0, 0, 0.08);
+  --input-bg:             #F9FAFB;
+  --input-border:         #D1D5DB;
+  --sidebar-bg:           #FFFFFF;
+  --header-bg:            #FFFFFF;
+
+  /* Typographie */
+  --font:                 'Manrope', sans-serif;
+
+  /* Radius */
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   14px;
+  --radius-xl:   20px;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition: 200ms ease;
+}
+
+/* Dark mode */
+[data-theme="dark"] {
+  --bg:              #1E1E1E;
+  --bg-secondary:    #2A2A2A;
+  --bg-card:         #2D2D2D;
+  --surface:         #333333;
+  --border:          #3D3D3D;
+  --text:            #F5F5F5;
+  --text-secondary:  #A0A0A0;
+  --text-disabled:   #666666;
+  --text-inverse:    #1E1E1E;
+  --placeholder:     #666666;
+  --shadow:          rgba(0, 0, 0, 0.4);
+  --input-bg:        #2D2D2D;
+  --input-border:    #3D3D3D;
+  --sidebar-bg:      #242424;
+  --header-bg:       #242424;
+}
+
+html, body, #root {
+  height: 100%;
+  font-family: var(--font);
+  background-color: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color var(--transition), color var(--transition);
+}
+
+a { color: inherit; text-decoration: none; }
+button { font-family: var(--font); cursor: pointer; border: none; background: none; }
+input, textarea, select { font-family: var(--font); }
+
+/* Scrollbar custom */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-disabled); }
+
+/* Utilitaires */
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
