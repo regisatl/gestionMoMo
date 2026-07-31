@@ -74,7 +74,7 @@ const SettingsPage = () => {
   const { t } = useTranslation();
   const { user, updateUser } = useAuth();
   const { isDark, themeMode, setTheme } = useTheme();
-  const { language, changeLanguage, supportedLanguages } = useLanguage();
+  const { language, langMode, changeLanguage, supportedLanguages, systemLang } = useLanguage();
   const { addToast } = useNotifications();
 
   const [name, setName] = useState(user?.name || '');
@@ -182,7 +182,13 @@ const SettingsPage = () => {
 
         {/* Langue */}
         <Card title={t('settings.languageTitle')}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+          {/* Aperçu de la langue active */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '12px',
+            padding: '12px 14px', borderRadius: '10px',
+            background: 'var(--surface)', border: '1px solid var(--border)',
+            marginBottom: '16px',
+          }}>
             <div style={{
               width: '36px', height: '36px', borderRadius: '10px',
               background: 'var(--color-primary-alpha)',
@@ -193,53 +199,53 @@ const SettingsPage = () => {
             </div>
             <div>
               <p style={{ fontFamily: 'var(--font)', fontWeight: 600, fontSize: '14px', color: 'var(--text)', margin: 0 }}>
-                {t('settings.languageTitle')}
+                {language === 'fr' ? '🇫🇷 Français' : '🇬🇧 English'}
               </p>
               <p style={{ fontFamily: 'var(--font)', fontSize: '12px', color: 'var(--text-secondary)', margin: '2px 0 0' }}>
-                {t('settings.languageDesc')}
+                {langMode === 'system'
+                  ? t('settings.langSystemActive', { lang: systemLang === 'fr' ? 'Français' : 'English' })
+                  : t('settings.languageDesc')}
               </p>
             </div>
           </div>
 
-          {/* Boutons langue */}
+          {/* Sélecteur 3 modes : Système / FR / EN */}
           <div style={{ display: 'flex', gap: '8px' }}>
-            {supportedLanguages.map((lang) => {
-              const isActive = language === lang;
-              const flag  = lang === 'fr' ? '🇫🇷' : '🇬🇧';
+            {[
+              { value: 'system', label: t('settings.langSystem'), icon: <Monitor size={20} strokeWidth={2} /> },
+              { value: 'fr',     label: 'Français',               icon: <span style={{ fontSize: '20px', lineHeight: 1 }}>🇫🇷</span> },
+              { value: 'en',     label: 'English',                icon: <span style={{ fontSize: '20px', lineHeight: 1 }}>🇬🇧</span> },
+            ].map(({ value, label, icon }) => {
+              const isActive = langMode === value;
               return (
                 <button
-                  key={lang}
-                  onClick={() => changeLanguage(lang)}
+                  key={value}
+                  onClick={() => changeLanguage(value)}
                   style={{
                     flex: 1,
                     display: 'flex', flexDirection: 'column',
                     alignItems: 'center', gap: '8px',
                     padding: '14px 8px',
                     borderRadius: '12px',
-                    border: isActive
-                      ? '2px solid var(--color-primary)'
-                      : '2px solid var(--border)',
-                    background: isActive
-                      ? 'var(--color-primary-alpha)'
-                      : 'var(--surface)',
+                    border: isActive ? '2px solid var(--color-primary)' : '2px solid var(--border)',
+                    background: isActive ? 'var(--color-primary-alpha)' : 'var(--surface)',
                     cursor: 'pointer',
                     transition: 'all 0.15s',
                   }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) e.currentTarget.style.borderColor = 'var(--color-primary-light)';
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) e.currentTarget.style.borderColor = 'var(--border)';
-                  }}
+                  onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.borderColor = 'var(--color-primary-light)'; }}
+                  onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.borderColor = 'var(--border)'; }}
                 >
-                  <span style={{ fontSize: '22px', lineHeight: 1 }}>{flag}</span>
+                  <span style={{ color: isActive ? 'var(--color-primary)' : 'var(--text-secondary)', display: 'flex' }}>
+                    {icon}
+                  </span>
                   <span style={{
                     fontFamily: 'var(--font)',
                     fontWeight: isActive ? 700 : 500,
                     fontSize: '12px',
                     color: isActive ? 'var(--color-primary)' : 'var(--text-secondary)',
+                    whiteSpace: 'nowrap',
                   }}>
-                    {langNames[lang]}
+                    {label}
                   </span>
                 </button>
               );

@@ -149,6 +149,7 @@ const fr = {
     transactionsCount: 'Transactions',
     benefit: 'Bénéfice',
     evolution7Days: 'Évolution 7 jours',
+    depositsEvolution: 'Courbe des dépôts',
     noData: 'Pas encore de données.',
     summary: 'Résumé du jour',
     completed: 'Complétées',

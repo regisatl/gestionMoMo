@@ -262,6 +262,8 @@ const en = {
     themeLight: 'Light',
     themeDark: 'Dark',
     themeSystemActive: 'Follows system preferences',
+    langSystem: 'System',
+    langSystemActive: 'Detected: {{lang}}',
     languageTitle: 'Language',
     languageDesc: 'Choose the interface language',
     securityTitle: 'Security — Change password',

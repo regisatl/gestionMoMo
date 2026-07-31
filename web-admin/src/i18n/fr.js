@@ -262,6 +262,8 @@ const fr = {
     themeLight: 'Clair',
     themeDark: 'Sombre',
     themeSystemActive: 'Suit les préférences du système',
+    langSystem: 'Système',
+    langSystemActive: 'Détecté : {{lang}}',
     languageTitle: 'Langue',
     languageDesc: "Choisir la langue de l'interface",
     securityTitle: 'Sécurité — Modifier le mot de passe',

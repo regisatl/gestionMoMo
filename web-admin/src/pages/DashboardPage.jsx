@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Chart as ChartJS,
   CategoryScale, LinearScale, BarElement, LineElement,
-  PointElement, Title, Tooltip, Legend, ArcElement,
+  PointElement, Title, Tooltip, Legend, ArcElement, Filler,
 } from 'chart.js';
 import { Bar, Line, Doughnut } from 'react-chartjs-2';
 import {
@@ -17,7 +17,7 @@ import Badge from '../components/ui/Badge';
 import api from '../services/api';
 import useChartTheme from '../hooks/useChartTheme';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, ArcElement);
+ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, ArcElement, Filler);
 
 const StatBox = ({ label, value, Icon, color, delta, onClick }) => (
   <div
@@ -59,7 +59,7 @@ const DashboardPage = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { buildChartOptions } = useChartTheme();
+  const { buildChartOptions, createGradient, isDark } = useChartTheme();
   const [report, setReport] = useState(null);
   const [chartData, setChartData] = useState([]);
   const [recentTxns, setRecentTxns] = useState([]);
@@ -93,8 +93,28 @@ const DashboardPage = () => {
   const barChartData = {
     labels: chartLabels,
     datasets: [
-      { label: t('dashboard.chartLabels.deposits'),    data: depositData,    backgroundColor: 'rgba(22,163,74,0.75)',  borderRadius: 6 },
-      { label: t('dashboard.chartLabels.withdrawals'), data: withdrawalData, backgroundColor: 'rgba(220,38,38,0.65)', borderRadius: 6 },
+      {
+        label: t('dashboard.chartLabels.deposits'),
+        data: depositData,
+        backgroundColor: createGradient('#16A34A', 0.85, 0.55),
+        borderColor: '#16A34A',
+        borderWidth: 0,
+        borderRadius: { topLeft: 6, topRight: 6 },
+        borderSkipped: 'bottom',
+        barPercentage: 0.6,
+        categoryPercentage: 0.8,
+      },
+      {
+        label: t('dashboard.chartLabels.withdrawals'),
+        data: withdrawalData,
+        backgroundColor: createGradient('#DC2626', 0.80, 0.50),
+        borderColor: '#DC2626',
+        borderWidth: 0,
+        borderRadius: { topLeft: 6, topRight: 6 },
+        borderSkipped: 'bottom',
+        barPercentage: 0.6,
+        categoryPercentage: 0.8,
+      },
     ],
   };
 
@@ -103,8 +123,16 @@ const DashboardPage = () => {
     datasets: [{
       label: t('dashboard.chartLabels.benefit'),
       data: chartData.map((d) => d.benefit || 0),
-      borderColor: '#0A66C2', backgroundColor: 'rgba(10,102,194,0.1)',
-      tension: 0.4, fill: true, pointRadius: 3,
+      borderColor: '#0A66C2',
+      backgroundColor: createGradient('#0A66C2', 0.30, 0),
+      borderWidth: 2.5,
+      tension: 0.45,
+      fill: true,
+      pointRadius: 0,
+      pointHoverRadius: 5,
+      pointHoverBackgroundColor: '#0A66C2',
+      pointHoverBorderColor: isDark ? '#2D2D2D' : '#fff',
+      pointHoverBorderWidth: 2,
     }],
   };
 
@@ -117,7 +145,9 @@ const DashboardPage = () => {
     datasets: [{
       data: [report?.completedCount || 0, report?.pendingCount || 0, report?.failedCount || 0],
       backgroundColor: ['#16A34A', '#D97706', '#DC2626'],
-      borderWidth: 0,
+      borderWidth: 3,
+      borderColor: isDark ? '#2D2D2D' : '#FFFFFF',
+      hoverOffset: 6,
     }],
   };
 
@@ -161,7 +191,15 @@ const DashboardPage = () => {
         <Card title={t('dashboard.transactionStatusToday')}>
           <div style={{ height: '220px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {(report?.completedCount || report?.pendingCount || report?.failedCount) ? (
-              <Doughnut data={doughnutData} options={{ ...chartOptions, scales: undefined, cutout: '60%' }} />
+          <Doughnut data={doughnutData} options={{
+                ...chartOptions,
+                scales: undefined,
+                cutout: '65%',
+                plugins: {
+                  ...chartOptions.plugins,
+                  legend: { ...chartOptions.plugins.legend, position: 'bottom' },
+                },
+              }} />
             ) : noDataEl}
           </div>
         </Card>

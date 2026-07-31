@@ -149,6 +149,7 @@ const en = {
     transactionsCount: 'Transactions',
     benefit: 'Benefit',
     evolution7Days: '7-day trend',
+    depositsEvolution: 'Deposits trend',
     noData: 'No data yet.',
     summary: "Today's summary",
     completed: 'Completed',
