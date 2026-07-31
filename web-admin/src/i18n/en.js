@@ -40,9 +40,25 @@ const en = {
     passwordLabel: 'Password',
     passwordPlaceholder: '••••••••',
     loginButton: 'Sign in',
+    loggingIn: 'Signing in...',
     invalidCredentials: 'Invalid credentials.',
     logoutConfirmTitle: 'Sign out',
     logoutConfirmMessage: 'Are you sure you want to sign out?',
+  },
+
+  // ─── Login page (specific texts) ──────────────────────────────
+  login: {
+    adminPlatform:      'Administration Platform',
+    secureAccess:       'Secure Access',
+    welcomeBack:        'Welcome back!',
+    heroTitle:          'Manage your finances\nwith confidence',
+    heroSubtitle:       'Complete dashboard for your MoMo transactions',
+    statTransactions:   'Transactions',
+    statSecurity:       'Security',
+    statUptime:         'Uptime',
+    featureRealtime:    'Real-time transaction monitoring',
+    featureMultiCurrency: 'Multi-account MoMo management',
+    featureAnalytics:   'Advanced reports & analytics',
   },
 
   // ─── Toast messages ───────────────────────────────────────────

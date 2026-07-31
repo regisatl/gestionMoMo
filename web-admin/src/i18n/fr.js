@@ -40,9 +40,25 @@ const fr = {
     passwordLabel: 'Mot de passe',
     passwordPlaceholder: '••••••••',
     loginButton: 'Se connecter',
+    loggingIn: 'Connexion...',
     invalidCredentials: 'Identifiants incorrects.',
     logoutConfirmTitle: 'Déconnexion',
     logoutConfirmMessage: 'Voulez-vous vraiment vous déconnecter ?',
+  },
+
+  // ─── Page Login (textes spécifiques) ──────────────────────────
+  login: {
+    adminPlatform:      'Plateforme Administration',
+    secureAccess:       'Accès sécurisé',
+    welcomeBack:        'Bon retour !',
+    heroTitle:          'Gérez vos finances\nen toute confiance',
+    heroSubtitle:       'Tableau de bord complet pour vos transactions MoMo',
+    statTransactions:   'Transactions',
+    statSecurity:       'Sécurité',
+    statUptime:         'Disponibilité',
+    featureRealtime:    'Surveillance des transactions en temps réel',
+    featureMultiCurrency: 'Gestion multi-comptes MoMo',
+    featureAnalytics:   'Rapports & analytics avancés',
   },
 
   // ─── Messages Toast ───────────────────────────────────────────

@@ -38,6 +38,10 @@ const fr = {
     loginButton: 'Se connecter',
     next: 'Continuer',
     forgotPassword: 'Mot de passe oublié ?',
+    welcomeTitle: 'Bon retour !',
+    secureLogin: 'Connexion sécurisée',
+    pinSubtitle: 'Saisissez votre code PIN à 5 chiffres',
+    verifying: 'Vérification en cours...',
     forgotPin: 'PIN oublié ?',
     phoneRequired: 'Numéro de téléphone requis',
     phoneInvalid: 'Format invalide — ex : +2290112345678',
@@ -48,6 +52,15 @@ const fr = {
     verifying: 'Vérification en cours...',
     forgotPasswordTitle: 'PIN oublié',
     resetPasswordButton: 'Réinitialiser',
+    welcomeTitle: 'Bon retour !',
+    pinSubtitle: 'Saisissez votre code PIN à 5 chiffres',
+  },
+
+  // ─── Login screen ─────────────────────────────────────────────
+  login: {
+    featureSec:  'Sécurisé',
+    featureFast: 'Rapide',
+    featureLive: 'En direct',
   },
 
   // ─── Navigation (tabs) ────────────────────────────────────────

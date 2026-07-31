@@ -39,6 +39,7 @@ const en = {
     next: 'Continue',
     forgotPassword: 'Forgot password?',
     forgotPin: 'Forgot PIN?',
+    secureLogin: 'Secure Login',
     phoneRequired: 'Phone number is required',
     phoneInvalid: 'Invalid format — e.g. +2290112345678',
     passwordRequired: 'Password is required',
@@ -48,6 +49,15 @@ const en = {
     verifying: 'Verifying...',
     forgotPasswordTitle: 'Forgot PIN',
     resetPasswordButton: 'Reset',
+    welcomeTitle: 'Welcome back!',
+    pinSubtitle: 'Enter your 5-digit PIN code',
+  },
+
+  // ─── Login screen ─────────────────────────────────────────────
+  login: {
+    featureSec:  'Secure',
+    featureFast: 'Fast',
+    featureLive: 'Live',
   },
 
   // ─── Navigation (tabs) ────────────────────────────────────────
