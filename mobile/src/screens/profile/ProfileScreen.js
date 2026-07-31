@@ -1,6 +1,8 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Switch, Alert, Modal } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import PlexusBackground from '../../components/ui/PlexusBackground';
+import ModalWrapper from '../../components/ui/ModalWrapper';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
@@ -97,6 +99,7 @@ const ProfileScreen = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={['top']}>
+      <PlexusBackground />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 20 }}>
         <Text style={{ fontFamily: theme.typography.fontFamily.extraBold, fontSize: 22, color: theme.text, marginBottom: 20 }}>
           {t('profile.title')}
@@ -184,32 +187,28 @@ const ProfileScreen = () => {
       </ScrollView>
 
       {/* Language modal */}
-      <Modal visible={showLangModal} transparent animationType="fade" onRequestClose={() => setShowLangModal(false)}>
-        <TouchableOpacity style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', alignItems: 'center' }} activeOpacity={1} onPress={() => setShowLangModal(false)}>
-          <View style={{ width: 280, backgroundColor: theme.backgroundCard, borderRadius: 20, overflow: 'hidden', borderWidth: 1, borderColor: theme.border }}>
-            <View style={{ padding: 20, borderBottomWidth: 1, borderBottomColor: theme.border }}>
-              <Text style={{ fontFamily: theme.typography.fontFamily.bold, fontSize: 16, color: theme.text, textAlign: 'center' }}>
-                {t('profile.language')}
+      <ModalWrapper visible={showLangModal} onClose={() => setShowLangModal(false)} width={280}>
+        <View style={{ padding: 20, borderBottomWidth: 1, borderBottomColor: theme.border }}>
+          <Text style={{ fontFamily: theme.typography.fontFamily.bold, fontSize: 16, color: theme.text, textAlign: 'center' }}>
+            {t('profile.language')}
+          </Text>
+        </View>
+        {supportedLanguages.map((lang, idx) => (
+          <TouchableOpacity
+            key={lang}
+            onPress={() => handleLanguageChange(lang)}
+            style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: idx < supportedLanguages.length - 1 ? 1 : 0, borderBottomColor: theme.border, backgroundColor: language === lang ? theme.colors.primaryAlpha : 'transparent' }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <Icon name="flag" size={18} color={theme.textSecondary} />
+              <Text style={{ fontFamily: theme.typography.fontFamily.medium, fontSize: 15, color: theme.text }}>
+                {langNames[lang]}
               </Text>
             </View>
-            {supportedLanguages.map((lang, idx) => (
-              <TouchableOpacity
-                key={lang}
-                onPress={() => handleLanguageChange(lang)}
-                style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: idx < supportedLanguages.length - 1 ? 1 : 0, borderBottomColor: theme.border, backgroundColor: language === lang ? theme.colors.primaryAlpha : 'transparent' }}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                  <Icon name="flag" size={18} color={theme.textSecondary} />
-                  <Text style={{ fontFamily: theme.typography.fontFamily.medium, fontSize: 15, color: theme.text }}>
-                    {langNames[lang]}
-                  </Text>
-                </View>
-                {language === lang && <Icon name="check-circle" size={18} color={theme.colors.primary} />}
-              </TouchableOpacity>
-            ))}
-          </View>
-        </TouchableOpacity>
-      </Modal>
+            {language === lang && <Icon name="check-circle" size={18} color={theme.colors.primary} />}
+          </TouchableOpacity>
+        ))}
+      </ModalWrapper>
     </SafeAreaView>
   );
 };

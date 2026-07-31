@@ -4,6 +4,7 @@ import {
   TextInput, RefreshControl, StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import PlexusBackground from '../../components/ui/PlexusBackground';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import Badge from '../../components/ui/Badge';
@@ -100,6 +101,7 @@ const TransactionsScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={['top']}>
+      <PlexusBackground />
       <StatusBar barStyle={theme.isDark ? 'light-content' : 'dark-content'} />
 
       {/* Header */}

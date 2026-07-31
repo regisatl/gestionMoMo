@@ -3,7 +3,6 @@ import {
   View, Text, ScrollView, TouchableOpacity,
   KeyboardAvoidingView, Platform, StatusBar,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
@@ -11,6 +10,7 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import PinInput from '../../components/ui/PinInput';
 import Icon from '../../components/ui/Icon';
+import ScreenWrapper from '../../components/ui/ScreenWrapper';
 import useToast from '../../hooks/useToast';
 import { validateBeninPhone } from '../../utils/validation';
 
@@ -71,10 +71,11 @@ const LoginScreen = ({ navigation }) => {
   }, [pin]);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={['top', 'bottom']}>
+    <ScreenWrapper edges={['top', 'bottom']}>
       <StatusBar
         barStyle={theme.isDark ? 'light-content' : 'dark-content'}
-        backgroundColor={theme.background}
+        backgroundColor="transparent"
+        translucent
       />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -178,7 +179,7 @@ const LoginScreen = ({ navigation }) => {
           </Text>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </ScreenWrapper>
   );
 };
 

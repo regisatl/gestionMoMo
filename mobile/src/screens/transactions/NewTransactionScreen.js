@@ -4,6 +4,7 @@ import {
   KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import PlexusBackground from '../../components/ui/PlexusBackground';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import Button from '../../components/ui/Button';
@@ -86,6 +87,7 @@ const NewTransactionScreen = ({ navigation, route }) => {
   if (success) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: theme.background, justifyContent: 'center', padding: 24 }}>
+        <PlexusBackground />
         <View style={{ alignItems: 'center' }}>
           <View style={{ width: 88, height: 88, borderRadius: 28, backgroundColor: '#DCFCE7', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
             <Icon name="check-circle" size={44} color="#16A34A" />
@@ -105,6 +107,7 @@ const NewTransactionScreen = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={['top']}>
+      <PlexusBackground />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 20 }}>
 

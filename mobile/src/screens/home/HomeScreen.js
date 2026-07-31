@@ -4,6 +4,7 @@ import {
   TouchableOpacity, StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import PlexusBackground from '../../components/ui/PlexusBackground';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
@@ -80,6 +81,7 @@ const HomeScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={['top']}>
       <StatusBar barStyle="light-content" backgroundColor={theme.colors.primary} />
+      <PlexusBackground />
 
       <ScrollView
         showsVerticalScrollIndicator={false}

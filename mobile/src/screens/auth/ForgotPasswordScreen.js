@@ -3,8 +3,8 @@ import {
   View, Text, ScrollView, TouchableOpacity,
   KeyboardAvoidingView, Platform, StatusBar,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import ScreenWrapper from '../../components/ui/ScreenWrapper';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Icon from '../../components/ui/Icon';
@@ -42,10 +42,11 @@ const ForgotPasswordScreen = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={['top', 'bottom']}>
+    <ScreenWrapper edges={['top', 'bottom']}>
       <StatusBar
         barStyle={theme.isDark ? 'light-content' : 'dark-content'}
-        backgroundColor={theme.background}
+        backgroundColor="transparent"
+        translucent
       />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -121,7 +122,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
           )}
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </ScreenWrapper>
   );
 };
 

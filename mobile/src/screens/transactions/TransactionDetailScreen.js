@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import PlexusBackground from '../../components/ui/PlexusBackground';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import Card from '../../components/ui/Card';
@@ -44,6 +45,7 @@ const TransactionDetailScreen = ({ navigation, route }) => {
   if (loading) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: theme.background, justifyContent: 'center', alignItems: 'center' }}>
+        <PlexusBackground />
         <ActivityIndicator size="large" color={theme.colors.primary} />
       </SafeAreaView>
     );
@@ -52,6 +54,7 @@ const TransactionDetailScreen = ({ navigation, route }) => {
   if (!transaction) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: theme.background, justifyContent: 'center', alignItems: 'center', gap: 12 }}>
+        <PlexusBackground />
         <Icon name="alert-circle-outline" size={40} color={theme.border} />
         <Text style={{ fontFamily: theme.typography.fontFamily.medium, color: theme.textSecondary }}>
           {t('common.noData')}
@@ -64,6 +67,7 @@ const TransactionDetailScreen = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={['top']}>
+      <PlexusBackground />
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={{ flexDirection: 'row', alignItems: 'center', padding: 20, marginBottom: 4 }}>
