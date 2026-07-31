@@ -1,22 +1,29 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, Sun, Moon, Bell } from 'lucide-react';
+import { Menu, Sun, Moon, Bell, Languages } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useNotifications } from '../../context/NotificationContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 const Header = ({ title, sidebarCollapsed, onToggleSidebar }) => {
   const { t } = useTranslation();
   const { isDark, toggleTheme } = useTheme();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const { language, changeLanguage, supportedLanguages } = useLanguage();
   const [showNotifPanel, setShowNotifPanel] = useState(false);
+  const [showLangPanel, setShowLangPanel] = useState(false);
   const notifRef = useRef(null);
+  const langRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const handler = (e) => {
       if (notifRef.current && !notifRef.current.contains(e.target)) {
         setShowNotifPanel(false);
+      }
+      if (langRef.current && !langRef.current.contains(e.target)) {
+        setShowLangPanel(false);
       }
     };
     document.addEventListener('mousedown', handler);
@@ -70,6 +77,72 @@ const Header = ({ title, sidebarCollapsed, onToggleSidebar }) => {
         >
           {isDark ? <Sun size={18} strokeWidth={2} /> : <Moon size={18} strokeWidth={2} />}
         </button>
+
+        {/* Sélecteur de langue */}
+        <div ref={langRef} style={{ position: 'relative' }}>
+          <button
+            onClick={() => setShowLangPanel((v) => !v)}
+            aria-label={t('settings.languageTitle')}
+            title={t('settings.languageTitle')}
+            style={{
+              ...iconBtnStyle,
+              gap: '5px',
+              width: 'auto',
+              padding: '0 10px',
+              minWidth: '38px',
+              fontFamily: 'var(--font)',
+              fontWeight: 700,
+              fontSize: '12px',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-primary-alpha)'; e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.color = 'var(--color-primary)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--surface)'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+          >
+            <Languages size={16} strokeWidth={2} />
+            <span style={{ letterSpacing: '0.3px', textTransform: 'uppercase' }}>{language}</span>
+          </button>
+
+          {/* Dropdown langue */}
+          {showLangPanel && (
+            <div style={{
+              position: 'absolute', top: '46px', right: 0,
+              width: '160px',
+              background: 'var(--bg-card)', border: '1px solid var(--border)',
+              borderRadius: '12px', boxShadow: '0 8px 24px var(--shadow)',
+              overflow: 'hidden', zIndex: 200,
+            }}>
+              {supportedLanguages.map((lang, idx) => {
+                const isActive = language === lang;
+                const flag = lang === 'fr' ? '🇫🇷' : '🇬🇧';
+                const label = lang === 'fr' ? 'Français' : 'English';
+                return (
+                  <button
+                    key={lang}
+                    onClick={() => { changeLanguage(lang); setShowLangPanel(false); }}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
+                      padding: '10px 14px',
+                      background: isActive ? 'var(--color-primary-alpha)' : 'transparent',
+                      border: 'none',
+                      borderBottom: idx < supportedLanguages.length - 1 ? '1px solid var(--border)' : 'none',
+                      cursor: 'pointer',
+                      fontFamily: 'var(--font)', fontWeight: isActive ? 700 : 500,
+                      fontSize: '13px',
+                      color: isActive ? 'var(--color-primary)' : 'var(--text)',
+                      textAlign: 'left',
+                      transition: 'background 0.1s',
+                    }}
+                    onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = 'var(--surface)'; }}
+                    onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
+                  >
+                    <span style={{ fontSize: '16px' }}>{flag}</span>
+                    <span style={{ flex: 1 }}>{label}</span>
+                    {isActive && <span style={{ fontSize: '14px', color: 'var(--color-primary)' }}>✓</span>}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
         {/* Notifications */}
         <div ref={notifRef} style={{ position: 'relative' }}>
