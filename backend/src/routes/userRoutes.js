@@ -5,11 +5,18 @@ const { protect, restrictTo } = require('../middleware/auth');
 
 router.use(protect);
 
-router.get('/', restrictTo('super_admin'), userController.getAllUsers);
+// Liste & création
+router.get('/',          restrictTo('super_admin'), userController.getAllUsers);
+router.post('/',         restrictTo('super_admin'), userController.createUser);
 router.get('/merchants', restrictTo('super_admin'), userController.getMerchants);
-router.get('/:id', userController.getUserById);
-router.patch('/:id', userController.updateUser);
-router.patch('/:id/status', restrictTo('super_admin'), userController.updateUserStatus);
-router.delete('/:id', restrictTo('super_admin'), userController.deleteUser);
+
+// Actions sur un utilisateur spécifique
+router.get('/:id',              userController.getUserById);
+router.patch('/:id',            userController.updateUser);
+router.patch('/:id/status',     restrictTo('super_admin'), userController.updateUserStatus);
+router.patch('/:id/reset-password', restrictTo('super_admin'), userController.resetPassword);
+router.patch('/:id/reset-pin',  restrictTo('super_admin'), userController.resetPin);
+router.patch('/:id/restore',    restrictTo('super_admin'), userController.restoreUser);
+router.delete('/:id',           restrictTo('super_admin'), userController.deleteUser);
 
 module.exports = router;

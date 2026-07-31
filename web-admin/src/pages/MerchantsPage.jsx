@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, Store, Phone, User, Mail, Building2 } from 'lucide-react';
+import {
+  Search, Store, Phone, User, Mail, Building2,
+  Pencil, KeyRound, PowerOff, Power, Trash2, RotateCcw,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
@@ -11,71 +14,79 @@ import api from '../services/api';
 
 const fmt = (n = 0) => new Intl.NumberFormat('fr-FR').format(n);
 
+/* ── Shared icon-button ── */
+const IconBtn = ({ icon: Icon, color, title, onClick, disabled }) => (
+  <button
+    title={title}
+    onClick={onClick}
+    disabled={disabled}
+    style={{
+      width: '30px', height: '30px', borderRadius: '8px',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      border: `1.5px solid ${color}30`,
+      background: `${color}12`,
+      color, cursor: disabled ? 'not-allowed' : 'pointer',
+      opacity: disabled ? 0.5 : 1,
+      transition: 'background 0.15s, transform 0.1s',
+      flexShrink: 0,
+    }}
+    onMouseEnter={(e) => { if (!disabled) { e.currentTarget.style.background = `${color}25`; e.currentTarget.style.transform = 'scale(1.1)'; } }}
+    onMouseLeave={(e) => { e.currentTarget.style.background = `${color}12`; e.currentTarget.style.transform = 'scale(1)'; }}
+  >
+    <Icon size={14} strokeWidth={2.2} />
+  </button>
+);
+
+/* ── Th helper ── */
+const Th = ({ children }) => (
+  <th style={{ fontFamily: 'var(--font)', fontWeight: 600, fontSize: '11px', color: 'var(--text-secondary)', textAlign: 'left', padding: '12px 14px', textTransform: 'uppercase', letterSpacing: '0.4px', whiteSpace: 'nowrap' }}>
+    {children}
+  </th>
+);
+
+const EMPTY_FORM = { name: '', phone: '', email: '', businessName: '', password: '' };
+
 const MerchantsPage = () => {
   const { t } = useTranslation();
   const { addToast } = useNotifications();
-  const [merchants, setMerchants] = useState([]);
-  const [pagination, setPagination] = useState({ total: 0, pages: 1 });
-  const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [showModal, setShowModal] = useState(false);
-  const [actionLoading, setActionLoading] = useState(null);
 
-  /* ── New merchant form state ── */
-  const [form, setForm] = useState({ name: '', phone: '', email: '', businessName: '', password: '' });
-  const [formErrors, setFormErrors] = useState({});
-  const [createLoading, setCreateLoading] = useState(false);
+  /* ── list state ── */
+  const [merchants, setMerchants]     = useState([]);
+  const [pagination, setPagination]   = useState({ total: 0, pages: 1 });
+  const [loading, setLoading]         = useState(false);
+  const [page, setPage]               = useState(1);
+  const [search, setSearch]           = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [showDeleted, setShowDeleted] = useState(false);
+
+  /* ── modals ── */
+  const [createOpen, setCreateOpen]   = useState(false);
+  const [editTarget, setEditTarget]   = useState(null);   // merchant obj
+  const [resetTarget, setResetTarget] = useState(null);   // merchant obj
+  const [deleteTarget, setDeleteTarget] = useState(null); // merchant obj
+
+  /* ── form ── */
+  const [form, setForm]               = useState(EMPTY_FORM);
+  const [formErrors, setFormErrors]   = useState({});
+  const [formLoading, setFormLoading] = useState(false);
+
+  /* ── action loading ── */
+  const [actionId, setActionId]       = useState(null);
+
+  /* ── reset-password form ── */
+  const [newPassword, setNewPassword] = useState('');
+  const [deleteReason, setDeleteReason] = useState('');
 
   const setField = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
-  const validateForm = () => {
-    const errs = {};
-    if (!form.name.trim())     errs.name     = t('merchants.form.nameRequired');
-    if (!form.phone.trim())    errs.phone    = t('merchants.form.phoneRequired');
-    if (!form.password.trim()) errs.password = t('merchants.form.passwordRequired');
-    setFormErrors(errs);
-    return Object.keys(errs).length === 0;
-  };
-
-  const handleCreateMerchant = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-    setCreateLoading(true);
-    try {
-      await api.post('/users/merchants', {
-        name:         form.name,
-        phone:        form.phone,
-        email:        form.email || undefined,
-        businessName: form.businessName || undefined,
-        password:     form.password,
-        role:         'merchant',
-      });
-      addToast({ type: 'success', title: t('toast.merchantCreated'), message: form.businessName || form.name });
-      setShowModal(false);
-      setForm({ name: '', phone: '', email: '', businessName: '', password: '' });
-      setFormErrors({});
-      loadMerchants();
-    } catch (err) {
-      addToast({ type: 'error', title: t('toast.merchantCreateError'), message: err.response?.data?.error });
-    } finally {
-      setCreateLoading(false);
-    }
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setForm({ name: '', phone: '', email: '', businessName: '', password: '' });
-    setFormErrors({});
-  };
-
-  const loadMerchants = useCallback(async () => {
+  /* ────────────────── Load ────────────────── */
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const params = { page, limit: 20 };
-      if (statusFilter) params.status = statusFilter;
-      if (search.trim()) params.search = search.trim();
+      if (statusFilter)       params.status  = statusFilter;
+      if (search.trim())      params.search  = search.trim();
+      if (showDeleted)        params.deleted = 'true';
       const { data } = await api.get('/users/merchants', { params });
       setMerchants(data.merchants);
       setPagination(data.pagination);
@@ -83,123 +94,248 @@ const MerchantsPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, statusFilter, search]);
+  }, [page, statusFilter, search, showDeleted]);
 
-  useEffect(() => { loadMerchants(); }, [loadMerchants]);
+  useEffect(() => { load(); }, [load]);
 
-  const handleStatusChange = async (merchantId, newStatus) => {
-    setActionLoading(merchantId);
+  /* ────────────────── Create ────────────────── */
+  const validate = () => {
+    const errs = {};
+    if (!form.name.trim())     errs.name     = t('merchants.form.nameRequired');
+    if (!form.phone.trim())    errs.phone    = t('merchants.form.phoneRequired');
+    if (!form.password.trim()) errs.password = t('merchants.form.passwordRequired');
+    setFormErrors(errs);
+    return !Object.keys(errs).length;
+  };
+
+  const handleCreate = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+    setFormLoading(true);
     try {
-      await api.patch(`/users/${merchantId}/status`, { status: newStatus });
-      loadMerchants();
-      addToast({
-        type: 'success',
-        title: newStatus === 'suspended' ? t('toast.merchantSuspended') : t('toast.merchantActivated'),
-      });
+      await api.post('/users', { ...form, role: 'merchant' });
+      addToast({ type: 'success', title: t('toast.merchantCreated'), message: form.businessName || form.name });
+      setCreateOpen(false);
+      setForm(EMPTY_FORM);
+      setFormErrors({});
+      load();
     } catch (err) {
-      addToast({
-        type: 'error',
-        title: t('toast.merchantActionError'),
-        message: err.response?.data?.error,
-      });
+      addToast({ type: 'error', title: t('toast.merchantCreateError'), message: err.response?.data?.error });
     } finally {
-      setActionLoading(null);
+      setFormLoading(false);
     }
   };
 
-  const merchantLabel = pagination.total <= 1
+  /* ────────────────── Edit ────────────────── */
+  const openEdit = (m) => {
+    setEditTarget(m);
+    setForm({ name: m.name, phone: m.phone, email: m.email || '', businessName: m.businessName || '', password: '' });
+    setFormErrors({});
+  };
+
+  const handleEdit = async (e) => {
+    e.preventDefault();
+    if (!form.name.trim()) { setFormErrors({ name: t('merchants.form.nameRequired') }); return; }
+    setFormLoading(true);
+    try {
+      await api.patch(`/users/${editTarget._id}`, {
+        name: form.name, email: form.email || undefined, businessName: form.businessName || undefined,
+      });
+      addToast({ type: 'success', title: t('toast.merchantUpdated') });
+      setEditTarget(null);
+      load();
+    } catch (err) {
+      addToast({ type: 'error', title: t('common.error'), message: err.response?.data?.error });
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  /* ────────────────── Reset password ────────────────── */
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    if (newPassword.length < 6) {
+      addToast({ type: 'error', title: t('toast.passwordError'), message: t('toast.passwordTooShort') });
+      return;
+    }
+    setFormLoading(true);
+    try {
+      await api.patch(`/users/${resetTarget._id}/reset-password`, { newPassword });
+      addToast({ type: 'success', title: t('toast.passwordReset') });
+      setResetTarget(null);
+      setNewPassword('');
+    } catch (err) {
+      addToast({ type: 'error', title: t('toast.passwordError'), message: err.response?.data?.error });
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  /* ────────────────── Toggle status ────────────────── */
+  const handleToggleStatus = async (m) => {
+    const next = m.status === 'active' ? 'suspended' : 'active';
+    setActionId(m._id + '_status');
+    try {
+      await api.patch(`/users/${m._id}/status`, { status: next });
+      addToast({ type: 'success', title: next === 'suspended' ? t('toast.merchantSuspended') : t('toast.merchantActivated') });
+      load();
+    } catch (err) {
+      addToast({ type: 'error', title: t('toast.merchantActionError'), message: err.response?.data?.error });
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  /* ────────────────── Soft delete ────────────────── */
+  const handleDelete = async (e) => {
+    e.preventDefault();
+    setFormLoading(true);
+    try {
+      await api.delete(`/users/${deleteTarget._id}`, { data: { reason: deleteReason } });
+      addToast({ type: 'success', title: t('toast.merchantDeleted') });
+      setDeleteTarget(null);
+      setDeleteReason('');
+      load();
+    } catch (err) {
+      addToast({ type: 'error', title: t('common.error'), message: err.response?.data?.error });
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  /* ────────────────── Restore ────────────────── */
+  const handleRestore = async (m) => {
+    setActionId(m._id + '_restore');
+    try {
+      await api.patch(`/users/${m._id}/restore`);
+      addToast({ type: 'success', title: t('toast.merchantRestored') });
+      load();
+    } catch (err) {
+      addToast({ type: 'error', title: t('common.error'), message: err.response?.data?.error });
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  /* ────────────────── Helpers ────────────────── */
+  const closeCreate = () => { setCreateOpen(false); setForm(EMPTY_FORM); setFormErrors({}); };
+  const closeEdit   = () => { setEditTarget(null); setForm(EMPTY_FORM); setFormErrors({}); };
+  const closeReset  = () => { setResetTarget(null); setNewPassword(''); };
+  const closeDelete = () => { setDeleteTarget(null); setDeleteReason(''); };
+
+  const countLabel = pagination.total <= 1
     ? t('merchants.merchantCount', { count: pagination.total })
     : t('merchants.merchantCountPlural', { count: pagination.total });
 
+  /* ────────────────── Render ────────────────── */
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      {/* Header actions */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', flex: 1 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+      {/* Toolbar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', flex: 1 }}>
           <Input
             placeholder={t('merchants.searchPlaceholder')}
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            icon={<Search size={16} color="var(--text-secondary)" />}
-            style={{ flex: '1 1 240px', minWidth: '180px' }}
+            icon={<Search size={15} color="var(--text-secondary)" />}
+            style={{ flex: '1 1 220px', minWidth: '160px' }}
           />
           <select
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-            style={{ height: '42px', padding: '0 12px', borderRadius: '10px', border: '1.5px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)', fontFamily: 'var(--font)', fontSize: '14px' }}
+            style={{ height: '42px', padding: '0 12px', borderRadius: '10px', border: '1.5px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)', fontFamily: 'var(--font)', fontSize: '13px' }}
           >
             <option value="">{t('merchants.filters.allStatuses')}</option>
             <option value="active">{t('merchants.filters.active')}</option>
             <option value="inactive">{t('merchants.filters.inactive')}</option>
             <option value="suspended">{t('merchants.filters.suspended')}</option>
           </select>
+          <button
+            onClick={() => { setShowDeleted((v) => !v); setPage(1); }}
+            style={{
+              height: '42px', padding: '0 14px', borderRadius: '10px', cursor: 'pointer',
+              border: `1.5px solid ${showDeleted ? 'var(--color-error)' : 'var(--input-border)'}`,
+              background: showDeleted ? 'var(--color-error-light)' : 'var(--input-bg)',
+              color: showDeleted ? 'var(--color-error)' : 'var(--text-secondary)',
+              fontFamily: 'var(--font)', fontSize: '13px', fontWeight: 500,
+              display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.15s',
+            }}
+          >
+            <Trash2 size={14} strokeWidth={2} />
+            {t('common.showDeleted')}
+          </button>
         </div>
-        <Button variant="primary" onClick={() => setShowModal(true)} icon={<Store size={16} strokeWidth={2} />}>
+        <Button variant="primary" onClick={() => setCreateOpen(true)} icon={<Store size={15} strokeWidth={2} />}>
           {t('merchants.newMerchant')}
         </Button>
       </div>
 
-      {/* Tableau */}
+      {/* Table */}
       <Card padding="0">
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                {[
-                  t('merchants.tableHeaders.merchant'),
-                  t('merchants.tableHeaders.phone'),
-                  t('merchants.tableHeaders.momoAccount'),
-                  t('merchants.tableHeaders.balance'),
-                  t('merchants.tableHeaders.status'),
-                  t('merchants.tableHeaders.createdAt'),
-                  t('merchants.tableHeaders.actions'),
-                ].map((h) => (
-                  <th key={h} style={{ fontFamily: 'var(--font)', fontWeight: 600, fontSize: '11px', color: 'var(--text-secondary)', textAlign: 'left', padding: '12px 16px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                    {h}
-                  </th>
-                ))}
+                <Th>{t('merchants.tableHeaders.merchant')}</Th>
+                <Th>{t('merchants.tableHeaders.phone')}</Th>
+                <Th>{t('merchants.tableHeaders.momoAccount')}</Th>
+                <Th>{t('merchants.tableHeaders.balance')}</Th>
+                <Th>{t('merchants.tableHeaders.status')}</Th>
+                <Th>{t('merchants.tableHeaders.createdAt')}</Th>
+                <Th>{t('merchants.tableHeaders.actions')}</Th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>{t('merchants.loading')}</td></tr>
+                <tr><td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>{t('common.loading')}</td></tr>
               ) : merchants.length === 0 ? (
                 <tr><td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>{t('merchants.noMerchants')}</td></tr>
               ) : merchants.map((m) => (
-                <tr key={m._id} style={{ borderBottom: '1px solid var(--border)', transition: 'background 0.1s' }}
+                <tr
+                  key={m._id}
+                  style={{ borderBottom: '1px solid var(--border)', transition: 'background 0.1s', opacity: m.isDeleted ? 0.6 : 1 }}
                   onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface)'}
                   onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                 >
-                  <td style={{ padding: '13px 16px' }}>
+                  <td style={{ padding: '12px 14px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--color-primary-alpha)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font)', fontWeight: 700, fontSize: '14px', color: 'var(--color-primary)', flexShrink: 0 }}>
+                      <div style={{ width: '34px', height: '34px', borderRadius: '9px', background: 'var(--color-primary-alpha)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font)', fontWeight: 700, fontSize: '13px', color: 'var(--color-primary)', flexShrink: 0 }}>
                         {m.name?.charAt(0)?.toUpperCase()}
                       </div>
                       <div>
-                        <div style={{ fontFamily: 'var(--font)', fontWeight: 600, fontSize: '14px', color: 'var(--text)' }}>{m.businessName || m.name}</div>
-                        <div style={{ fontFamily: 'var(--font)', fontSize: '12px', color: 'var(--text-secondary)' }}>{m.email || '—'}</div>
+                        <div style={{ fontFamily: 'var(--font)', fontWeight: 600, fontSize: '13px', color: 'var(--text)' }}>{m.businessName || m.name}</div>
+                        <div style={{ fontFamily: 'var(--font)', fontSize: '11px', color: 'var(--text-secondary)' }}>{m.email || '—'}</div>
                       </div>
                     </div>
                   </td>
-                  <td style={{ padding: '13px 16px', fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text)' }}>{m.phone}</td>
-                  <td style={{ padding: '13px 16px', fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text-secondary)' }}>{m.account?.momoAccountNumber || '—'}</td>
-                  <td style={{ padding: '13px 16px', fontFamily: 'var(--font)', fontSize: '14px', fontWeight: 700, color: 'var(--color-success)' }}>
-                    {m.account ? `${fmt(m.account.balance)} F` : '—'}
+                  <td style={{ padding: '12px 14px', fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text)' }}>{m.phone}</td>
+                  <td style={{ padding: '12px 14px', fontFamily: 'var(--font)', fontSize: '12px', color: 'var(--text-secondary)' }}>{m.account?.momoAccountNumber || '—'}</td>
+                  <td style={{ padding: '12px 14px', fontFamily: 'var(--font)', fontSize: '13px', fontWeight: 700, color: 'var(--color-success)' }}>{m.account ? `${fmt(m.account.balance)} F` : '—'}</td>
+                  <td style={{ padding: '12px 14px' }}>
+                    {m.isDeleted
+                      ? <span style={{ fontFamily: 'var(--font)', fontSize: '11px', fontWeight: 600, color: 'var(--color-error)', background: 'var(--color-error-light)', padding: '2px 8px', borderRadius: '6px' }}>{t('common.deleted')}</span>
+                      : <Badge status={m.status} />
+                    }
                   </td>
-                  <td style={{ padding: '13px 16px' }}><Badge status={m.status} /></td>
-                  <td style={{ padding: '13px 16px', fontFamily: 'var(--font)', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                    {new Date(m.createdAt).toLocaleDateString('fr-FR')}
-                  </td>
-                  <td style={{ padding: '13px 16px' }}>
-                    <div style={{ display: 'flex', gap: '6px' }}>
-                      {m.status === 'active' ? (
-                        <Button size="sm" variant="secondary" loading={actionLoading === m._id} onClick={() => handleStatusChange(m._id, 'suspended')}>
-                          {t('merchants.suspend')}
-                        </Button>
+                  <td style={{ padding: '12px 14px', fontFamily: 'var(--font)', fontSize: '12px', color: 'var(--text-secondary)' }}>{new Date(m.createdAt).toLocaleDateString('fr-FR')}</td>
+                  <td style={{ padding: '12px 14px' }}>
+                    <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+                      {m.isDeleted ? (
+                        <IconBtn icon={RotateCcw} color="#16A34A" title={t('common.restore')} onClick={() => handleRestore(m)} disabled={actionId === m._id + '_restore'} />
                       ) : (
-                        <Button size="sm" variant="success" loading={actionLoading === m._id} onClick={() => handleStatusChange(m._id, 'active')}>
-                          {t('merchants.activate')}
-                        </Button>
+                        <>
+                          <IconBtn icon={Pencil}    color="#0A66C2" title={t('common.edit')}           onClick={() => openEdit(m)} />
+                          <IconBtn icon={KeyRound}  color="#7C3AED" title={t('common.resetPassword')}  onClick={() => { setResetTarget(m); setNewPassword(''); }} />
+                          <IconBtn
+                            icon={m.status === 'active' ? PowerOff : Power}
+                            color={m.status === 'active' ? '#D97706' : '#16A34A'}
+                            title={m.status === 'active' ? t('merchants.suspend') : t('merchants.activate')}
+                            onClick={() => handleToggleStatus(m)}
+                            disabled={actionId === m._id + '_status'}
+                          />
+                          <IconBtn icon={Trash2}   color="#DC2626" title={t('common.delete')}          onClick={() => setDeleteTarget(m)} />
+                        </>
                       )}
                     </div>
                   </td>
@@ -208,88 +344,109 @@ const MerchantsPage = () => {
             </tbody>
           </table>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderTop: '1px solid var(--border)' }}>
-          <span style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text-secondary)' }}>
-            {merchantLabel}
-          </span>
+
+        {/* Pagination */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderTop: '1px solid var(--border)' }}>
+          <span style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text-secondary)' }}>{countLabel}</span>
           <div style={{ display: 'flex', gap: '6px' }}>
             <Button size="sm" variant="secondary" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>{t('common.previous')}</Button>
-            <span style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text)', padding: '6px 12px', background: 'var(--surface)', borderRadius: '8px' }}>
-              {page} {t('common.of')} {pagination.pages || 1}
-            </span>
+            <span style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text)', padding: '6px 12px', background: 'var(--surface)', borderRadius: '8px' }}>{page} {t('common.of')} {pagination.pages || 1}</span>
             <Button size="sm" variant="secondary" disabled={page >= pagination.pages} onClick={() => setPage((p) => p + 1)}>{t('common.next')}</Button>
           </div>
         </div>
       </Card>
 
-      {/* ── Create merchant modal ── */}
-      <Modal
-        open={showModal}
-        onClose={handleCloseModal}
-        title={t('merchants.newMerchant')}
-        width={480}
-      >
-        <form onSubmit={handleCreateMerchant} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <Input
-                label={t('merchants.form.fullName')}
-                value={form.name}
-                onChange={setField('name')}
-                placeholder="Jean Dupont"
-                icon={<User size={15} color="var(--text-secondary)" />}
-                error={formErrors.name}
-                required
-              />
-            </div>
+      {/* ── CREATE modal ── */}
+      <Modal open={createOpen} onClose={closeCreate} title={t('merchants.newMerchant')} width={540}>
+        <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          <Input
+            label={t('merchants.form.fullName')}
+            value={form.name} onChange={setField('name')}
+            placeholder="Jean Dupont"
+            icon={<User size={15} color="var(--text-secondary)" />}
+            error={formErrors.name} required
+          />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             <Input
               label={t('merchants.form.phone')}
-              value={form.phone}
-              onChange={setField('phone')}
+              value={form.phone} onChange={setField('phone')}
               placeholder="+2290112345678"
               icon={<Phone size={15} color="var(--text-secondary)" />}
-              error={formErrors.phone}
-              required
+              error={formErrors.phone} required
             />
             <Input
               label={t('merchants.form.email')}
-              type="email"
-              value={form.email}
-              onChange={setField('email')}
+              type="email" value={form.email} onChange={setField('email')}
               placeholder="jean@example.com"
               icon={<Mail size={15} color="var(--text-secondary)" />}
             />
-            <div style={{ gridColumn: '1 / -1' }}>
-              <Input
-                label={t('merchants.form.businessName')}
-                value={form.businessName}
-                onChange={setField('businessName')}
-                placeholder={t('merchants.form.businessNamePlaceholder')}
-                icon={<Building2 size={15} color="var(--text-secondary)" />}
-              />
-            </div>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <Input
-                label={t('merchants.form.password')}
-                type="password"
-                value={form.password}
-                onChange={setField('password')}
-                placeholder="••••••••"
-                error={formErrors.password}
-                required
-              />
-            </div>
           </div>
-          <p style={{ fontFamily: 'var(--font)', fontSize: '12px', color: 'var(--text-secondary)', margin: 0 }}>
+          <Input
+            label={t('merchants.form.businessName')}
+            value={form.businessName} onChange={setField('businessName')}
+            placeholder={t('merchants.form.businessNamePlaceholder')}
+            icon={<Building2 size={15} color="var(--text-secondary)" />}
+          />
+          <Input
+            label={t('merchants.form.password')}
+            type="password" value={form.password} onChange={setField('password')}
+            placeholder="••••••••"
+            error={formErrors.password} required
+          />
+          <p style={{ fontFamily: 'var(--font)', fontSize: '12px', color: 'var(--text-secondary)', margin: 0, paddingTop: '2px' }}>
             {t('merchants.form.hint')}
           </p>
-          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '4px' }}>
-            <Button type="button" variant="secondary" onClick={handleCloseModal}>
-              {t('common.cancel')}
-            </Button>
-            <Button type="submit" variant="primary" loading={createLoading} icon={<Store size={15} strokeWidth={2} />}>
-              {t('merchants.form.create')}
-            </Button>
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '4px' }}>
+            <Button type="button" variant="secondary" onClick={closeCreate}>{t('common.cancel')}</Button>
+            <Button type="submit" variant="primary" loading={formLoading} icon={<Store size={14} strokeWidth={2} />}>{t('merchants.form.create')}</Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* ── EDIT modal ── */}
+      <Modal open={!!editTarget} onClose={closeEdit} title={t('common.edit') + ' — ' + (editTarget?.businessName || editTarget?.name || '')} width={480}>
+        <form onSubmit={handleEdit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          <Input label={t('merchants.form.fullName')} value={form.name} onChange={setField('name')} error={formErrors.name} required />
+          <Input label={t('merchants.form.email')} type="email" value={form.email} onChange={setField('email')} />
+          <Input label={t('merchants.form.businessName')} value={form.businessName} onChange={setField('businessName')} />
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '4px' }}>
+            <Button type="button" variant="secondary" onClick={closeEdit}>{t('common.cancel')}</Button>
+            <Button type="submit" variant="primary" loading={formLoading}>{t('common.save')}</Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* ── RESET PASSWORD modal ── */}
+      <Modal open={!!resetTarget} onClose={closeReset} title={t('common.resetPassword') + ' — ' + (resetTarget?.name || '')} width={420}>
+        <form onSubmit={handleResetPassword} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          <Input
+            label={t('merchants.form.newPassword')}
+            type="password" value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="Minimum 6 caractères"
+            required
+          />
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '4px' }}>
+            <Button type="button" variant="secondary" onClick={closeReset}>{t('common.cancel')}</Button>
+            <Button type="submit" variant="primary" loading={formLoading} icon={<KeyRound size={14} />}>{t('common.resetPassword')}</Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* ── DELETE modal ── */}
+      <Modal open={!!deleteTarget} onClose={closeDelete} title={t('common.confirmDelete')} width={420}>
+        <form onSubmit={handleDelete} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          <p style={{ fontFamily: 'var(--font)', fontSize: '14px', color: 'var(--text)', margin: 0 }}>
+            {t('merchants.deleteConfirm', { name: deleteTarget?.businessName || deleteTarget?.name })}
+          </p>
+          <Input
+            label={t('common.deleteReason')}
+            value={deleteReason} onChange={(e) => setDeleteReason(e.target.value)}
+            placeholder={t('common.deleteReasonPlaceholder')}
+          />
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '4px' }}>
+            <Button type="button" variant="secondary" onClick={closeDelete}>{t('common.cancel')}</Button>
+            <Button type="submit" variant="danger" loading={formLoading} icon={<Trash2 size={14} />}>{t('common.delete')}</Button>
           </div>
         </form>
       </Modal>

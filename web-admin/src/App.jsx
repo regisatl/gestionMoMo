@@ -17,6 +17,8 @@ import ReportsPage from './pages/ReportsPage';
 import NotificationsPage from './pages/NotificationsPage';
 import AuditPage from './pages/AuditPage';
 import SettingsPage from './pages/SettingsPage';
+import UsersPage from './pages/UsersPage';
+import AccountsPage from './pages/AccountsPage';
 
 // Route protégée
 const ProtectedRoute = ({ children, roles }) => {
@@ -45,8 +47,8 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       <Route path="/accounts" element={
-        <ProtectedRoute>
-          <DashboardLayout><div style={{ fontFamily: 'var(--font)', color: 'var(--text-secondary)' }}>Comptes — À implémenter</div></DashboardLayout>
+        <ProtectedRoute roles={['super_admin']}>
+          <DashboardLayout><AccountsPage /></DashboardLayout>
         </ProtectedRoute>
       } />
       <Route path="/reports" element={
@@ -61,7 +63,7 @@ const AppRoutes = () => {
       } />
       <Route path="/users" element={
         <ProtectedRoute roles={['super_admin']}>
-          <DashboardLayout><div style={{ fontFamily: 'var(--font)', color: 'var(--text-secondary)' }}>Utilisateurs — À implémenter</div></DashboardLayout>
+          <DashboardLayout><UsersPage /></DashboardLayout>
         </ProtectedRoute>
       } />
       <Route path="/notifications" element={

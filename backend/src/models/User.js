@@ -56,6 +56,12 @@ const userSchema = new mongoose.Schema(
     // Réinitialisation mot de passe
     resetPasswordToken: { type: String, select: false },
     resetPasswordExpires: { type: Date, select: false },
+
+    // Soft delete
+    isDeleted:    { type: Boolean, default: false, index: true },
+    deletedAt:    { type: Date,    default: null },
+    deletedBy:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    deleteReason: { type: String,  default: null },
   },
   {
     timestamps: true,

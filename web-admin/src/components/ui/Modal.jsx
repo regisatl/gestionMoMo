@@ -129,7 +129,7 @@ const Modal = ({ open, onClose, title, width = 480, children }) => {
           )}
 
           {/* Body */}
-          <div style={{ padding: '20px' }}>
+          <div style={{ padding: '24px' }}>
             {children}
           </div>
         </div>
