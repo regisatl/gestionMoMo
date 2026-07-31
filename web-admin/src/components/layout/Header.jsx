@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { useLanguage } from '../../context/LanguageContext';
+import Tooltip from '../ui/Tooltip';
 
 const Header = ({ title, sidebarCollapsed, onToggleSidebar }) => {
   const { t } = useTranslation();
@@ -67,39 +68,41 @@ const Header = ({ title, sidebarCollapsed, onToggleSidebar }) => {
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
 
         {/* Toggle thème */}
-        <button
-          onClick={toggleTheme}
-          aria-label={isDark ? t('header.lightMode') : t('header.darkMode')}
-          title={isDark ? t('header.lightMode') : t('header.darkMode')}
-          style={iconBtnStyle}
-          onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-primary-alpha)'; e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.color = 'var(--color-primary)'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--surface)'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
-        >
-          {isDark ? <Sun size={18} strokeWidth={2} /> : <Moon size={18} strokeWidth={2} />}
-        </button>
-
-        {/* Sélecteur de langue */}
-        <div ref={langRef} style={{ position: 'relative' }}>
+        <Tooltip content={isDark ? t('header.lightMode') : t('header.darkMode')} placement="bottom">
           <button
-            onClick={() => setShowLangPanel((v) => !v)}
-            aria-label={t('settings.languageTitle')}
-            title={t('settings.languageTitle')}
-            style={{
-              ...iconBtnStyle,
-              gap: '5px',
-              width: 'auto',
-              padding: '0 10px',
-              minWidth: '38px',
-              fontFamily: 'var(--font)',
-              fontWeight: 700,
-              fontSize: '12px',
-            }}
+            onClick={toggleTheme}
+            aria-label={isDark ? t('header.lightMode') : t('header.darkMode')}
+            style={iconBtnStyle}
             onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-primary-alpha)'; e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.color = 'var(--color-primary)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--surface)'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
           >
-            <Languages size={16} strokeWidth={2} />
-            <span style={{ letterSpacing: '0.3px', textTransform: 'uppercase' }}>{language}</span>
+            {isDark ? <Sun size={18} strokeWidth={2} /> : <Moon size={18} strokeWidth={2} />}
           </button>
+        </Tooltip>
+
+        {/* Sélecteur de langue */}
+        <div ref={langRef} style={{ position: 'relative' }}>
+          <Tooltip content={t('settings.languageTitle')} placement="bottom">
+            <button
+              onClick={() => setShowLangPanel((v) => !v)}
+              aria-label={t('settings.languageTitle')}
+              style={{
+                ...iconBtnStyle,
+                gap: '5px',
+                width: 'auto',
+                padding: '0 10px',
+                minWidth: '38px',
+                fontFamily: 'var(--font)',
+                fontWeight: 700,
+                fontSize: '12px',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-primary-alpha)'; e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.color = 'var(--color-primary)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--surface)'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+            >
+              <Languages size={16} strokeWidth={2} />
+              <span style={{ letterSpacing: '0.3px', textTransform: 'uppercase' }}>{language}</span>
+            </button>
+          </Tooltip>
 
           {/* Dropdown langue */}
           {showLangPanel && (
@@ -146,27 +149,29 @@ const Header = ({ title, sidebarCollapsed, onToggleSidebar }) => {
 
         {/* Notifications */}
         <div ref={notifRef} style={{ position: 'relative' }}>
-          <button
-            onClick={() => setShowNotifPanel((v) => !v)}
-            aria-label={t('header.notifications')}
-            style={{ ...iconBtnStyle, position: 'relative' }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-primary-alpha)'; e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.color = 'var(--color-primary)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--surface)'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
-          >
-            <Bell size={18} strokeWidth={2} />
-            {unreadCount > 0 && (
-              <span style={{
-                position: 'absolute', top: '4px', right: '4px',
-                width: '16px', height: '16px', borderRadius: '50%',
-                background: 'var(--color-error)', color: '#fff',
-                fontSize: '9px', fontFamily: 'var(--font)', fontWeight: 700,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                pointerEvents: 'none',
-              }}>
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
-            )}
-          </button>
+          <Tooltip content={t('header.notifications')} placement="bottom" maxWidth={120}>
+            <button
+              onClick={() => setShowNotifPanel((v) => !v)}
+              aria-label={t('header.notifications')}
+              style={{ ...iconBtnStyle, position: 'relative' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-primary-alpha)'; e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.color = 'var(--color-primary)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--surface)'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+            >
+              <Bell size={18} strokeWidth={2} />
+              {unreadCount > 0 && (
+                <span style={{
+                  position: 'absolute', top: '4px', right: '4px',
+                  width: '16px', height: '16px', borderRadius: '50%',
+                  background: 'var(--color-error)', color: '#fff',
+                  fontSize: '9px', fontFamily: 'var(--font)', fontWeight: 700,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  pointerEvents: 'none',
+                }}>
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
+          </Tooltip>
 
           {/* Panel notifications */}
           {showNotifPanel && (

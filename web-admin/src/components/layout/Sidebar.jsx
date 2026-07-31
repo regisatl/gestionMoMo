@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
 import styles from './Sidebar.module.css';
+import Tooltip from '../ui/Tooltip';
 
 const Sidebar = ({ collapsed, onToggle }) => {
   const { t } = useTranslation();
@@ -91,26 +92,26 @@ const Sidebar = ({ collapsed, onToggle }) => {
         {visibleItems.map((item) => {
           const { Icon } = item;
           return (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              end={item.path === '/'}
-              title={collapsed ? t(item.labelKey) : undefined}
-              className={({ isActive }) =>
-                [
-                  styles.navLink,
-                  collapsed ? styles.navLinkCollapsed : '',
-                  isActive ? styles.navLinkActive : '',
-                ].join(' ')
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <Icon size={18} strokeWidth={isActive ? 2.5 : 2} style={{ flexShrink: 0 }} />
-                  {!collapsed && t(item.labelKey)}
-                </>
-              )}
-            </NavLink>
+            <Tooltip key={item.path} content={collapsed ? t(item.labelKey) : null} placement="right">
+              <NavLink
+                to={item.path}
+                end={item.path === '/'}
+                className={({ isActive }) =>
+                  [
+                    styles.navLink,
+                    collapsed ? styles.navLinkCollapsed : '',
+                    isActive ? styles.navLinkActive : '',
+                  ].join(' ')
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    <Icon size={18} strokeWidth={isActive ? 2.5 : 2} style={{ flexShrink: 0 }} />
+                    {!collapsed && t(item.labelKey)}
+                  </>
+                )}
+              </NavLink>
+            </Tooltip>
           );
         })}
       </nav>
@@ -151,26 +152,27 @@ const Sidebar = ({ collapsed, onToggle }) => {
         )}
 
         {/* Bouton déconnexion */}
-        <button
-          onClick={() => setShowConfirm(true)}
-          title={collapsed ? t('nav.logout') : undefined}
-          style={{
-            width: '100%', display: 'flex', alignItems: 'center',
-            gap: collapsed ? '0' : '10px',
-            justifyContent: collapsed ? 'center' : 'flex-start',
-            padding: collapsed ? '10px' : '10px 12px',
-            borderRadius: '10px', border: 'none',
-            background: 'transparent', cursor: 'pointer',
-            fontFamily: 'var(--font)', fontWeight: 500, fontSize: '13px',
-            color: 'var(--color-error)',
-            transition: 'background 0.15s',
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-error-light)'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-        >
-          <LogOut size={16} strokeWidth={2} />
-          {!collapsed && t('nav.logout')}
-        </button>
+        <Tooltip content={collapsed ? t('nav.logout') : null} placement="right">
+          <button
+            onClick={() => setShowConfirm(true)}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center',
+              gap: collapsed ? '0' : '10px',
+              justifyContent: collapsed ? 'center' : 'flex-start',
+              padding: collapsed ? '10px' : '10px 12px',
+              borderRadius: '10px', border: 'none',
+              background: 'transparent', cursor: 'pointer',
+              fontFamily: 'var(--font)', fontWeight: 500, fontSize: '13px',
+              color: 'var(--color-error)',
+              transition: 'background 0.15s',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-error-light)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+          >
+            <LogOut size={16} strokeWidth={2} />
+            {!collapsed && t('nav.logout')}
+          </button>
+        </Tooltip>
       </div>
     </aside>
 

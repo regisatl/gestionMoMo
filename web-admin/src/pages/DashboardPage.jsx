@@ -15,6 +15,7 @@ import { useAuth } from '../context/AuthContext';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import api from '../services/api';
+import useChartTheme from '../hooks/useChartTheme';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, ArcElement);
 
@@ -58,6 +59,7 @@ const DashboardPage = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { buildChartOptions } = useChartTheme();
   const [report, setReport] = useState(null);
   const [chartData, setChartData] = useState([]);
   const [recentTxns, setRecentTxns] = useState([]);
@@ -119,14 +121,7 @@ const DashboardPage = () => {
     }],
   };
 
-  const chartOptions = {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { position: 'top', labels: { font: { family: 'Manrope', size: 12 }, color: 'var(--text-secondary)' } } },
-    scales: {
-      x: { ticks: { font: { family: 'Manrope', size: 11 }, color: 'var(--text-secondary)' }, grid: { display: false } },
-      y: { ticks: { font: { family: 'Manrope', size: 11 }, color: 'var(--text-secondary)' }, grid: { color: 'var(--border)' } },
-    },
-  };
+  const chartOptions = buildChartOptions();
 
   const TYPE_COLORS = { deposit: '#16A34A', withdrawal: '#DC2626', transfer: '#0A66C2', payment: '#7C3AED', refund: '#D97706' };
 

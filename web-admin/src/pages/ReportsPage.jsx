@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import Card from '../components/ui/Card';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import useChartTheme from '../hooks/useChartTheme';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend);
 
@@ -17,6 +18,7 @@ const fmt = (n = 0) => new Intl.NumberFormat('fr-FR').format(n);
 const ReportsPage = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { buildChartOptions, chartColors } = useChartTheme();
   const [chartData, setChartData] = useState([]);
   const [globalStats, setGlobalStats] = useState(null);
   const [days, setDays] = useState(30);
@@ -52,14 +54,7 @@ const ReportsPage = () => {
     ],
   };
 
-  const opts = {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { position: 'top', labels: { font: { family: 'Manrope', size: 12 }, color: 'var(--text-secondary)' } } },
-    scales: {
-      x: { ticks: { font: { family: 'Manrope', size: 11 }, color: 'var(--text-secondary)' }, grid: { display: false } },
-      y: { ticks: { font: { family: 'Manrope', size: 11 }, color: 'var(--text-secondary)' }, grid: { color: 'var(--border)' } },
-    },
-  };
+  const opts = buildChartOptions();
 
   const noDataEl = (
     <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>
@@ -127,7 +122,12 @@ const ReportsPage = () => {
               ...opts,
               scales: {
                 ...opts.scales,
-                y2: { position: 'right', ticks: { font: { family: 'Manrope', size: 11 }, color: '#7C3AED' }, grid: { display: false } },
+                y2: {
+                  position: 'right',
+                  ticks: { font: { family: 'Manrope', size: 11 }, color: '#7C3AED' },
+                  grid: { display: false },
+                  border: { color: chartColors.gridColor },
+                },
               },
             }} />
           ) : noDataEl}

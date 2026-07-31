@@ -40,6 +40,12 @@
   --toast-info-border:    #0A66C2;
   --toast-info-text:      #1E3A5F;
 
+  /* Tooltip — Light mode */
+  --tooltip-bg:           #1A1A2E;
+  --tooltip-text:         #F5F5F5;
+  --tooltip-border:       rgba(255, 255, 255, 0.08);
+  --tooltip-shadow:       0 4px 16px rgba(0, 0, 0, 0.22);
+
   /* Light mode (défaut) */
   --bg:                   #FFFFFF;
   --bg-secondary:         #F9FAFB;
@@ -89,6 +95,12 @@
   --sidebar-bg:      #242424;
   --header-bg:       #242424;
 
+  /* Tooltip — Dark mode */
+  --tooltip-bg:           #F0F4FF;
+  --tooltip-text:         #1A1A2E;
+  --tooltip-border:       rgba(0, 0, 0, 0.08);
+  --tooltip-shadow:       0 4px 16px rgba(0, 0, 0, 0.45);
+
   /* Toast — Dark mode */
   --toast-success-bg:     #052E16;
   --toast-success-border: #22C55E;
@@ -130,4 +142,10 @@ input, textarea, select { font-family: var(--font); }
   position: absolute; width: 1px; height: 1px;
   padding: 0; margin: -1px; overflow: hidden;
   clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+/* Animation Tooltip */
+@keyframes tooltipFadeIn {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
 }

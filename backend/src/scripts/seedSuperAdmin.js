@@ -18,7 +18,7 @@ const seedSuperAdmin = async () => {
   try {
     const existing = await User.findOne({ role: 'super_admin' });
     if (existing) {
-      logger.info(`✅ Super Admin déjà présent : ${existing.phone}`);
+      // Super admin déjà présent — pas de log pour éviter le bruit au démarrage
       return;
     }
 
