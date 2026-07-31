@@ -99,10 +99,15 @@ const MerchantsPage = () => {
   useEffect(() => { load(); }, [load]);
 
   /* ────────────────── Create ────────────────── */
+  const PHONE_RE = /^\+22901\d{8}$/;
+  const EMAIL_RE = /^\S+@\S+\.\S+$/;
+
   const validate = () => {
     const errs = {};
-    if (!form.name.trim())     errs.name     = t('merchants.form.nameRequired');
-    if (!form.phone.trim())    errs.phone    = t('merchants.form.phoneRequired');
+    if (!form.name.trim())  errs.name = t('merchants.form.nameRequired');
+    if (!form.phone.trim()) errs.phone = t('merchants.form.phoneRequired');
+    else if (!PHONE_RE.test(form.phone.trim())) errs.phone = t('merchants.form.phoneInvalid');
+    if (form.email.trim() && !EMAIL_RE.test(form.email.trim())) errs.email = t('merchants.form.emailInvalid');
     if (!form.password.trim()) errs.password = t('merchants.form.passwordRequired');
     setFormErrors(errs);
     return !Object.keys(errs).length;
@@ -379,6 +384,7 @@ const MerchantsPage = () => {
               type="email" value={form.email} onChange={setField('email')}
               placeholder="jean@example.com"
               icon={<Mail size={15} color="var(--text-secondary)" />}
+              error={formErrors.email}
             />
           </div>
           <Input
