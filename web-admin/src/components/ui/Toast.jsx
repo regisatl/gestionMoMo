@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react';
+import { CheckCircle, XCircle, AlertTriangle, Info, ArrowLeftRight, X } from 'lucide-react';
 import { useNotifications } from '../../context/NotificationContext';
 
-const TYPE_STYLES = {
-  success:     { bg: '#DCFCE7', border: '#16A34A', text: '#14532D', icon: '✓' },
-  error:       { bg: '#FEE2E2', border: '#DC2626', text: '#7F1D1D', icon: '✕' },
-  warning:     { bg: '#FEF3C7', border: '#D97706', text: '#78350F', icon: '!' },
-  info:        { bg: '#E0F2FE', border: '#0284C7', text: '#0C4A6E', icon: 'i' },
-  transaction: { bg: '#EFF6FF', border: '#0A66C2', text: '#1E3A5F', icon: '↔' },
+const TYPE_CONFIG = {
+  success:     { icon: CheckCircle,    bg: 'var(--toast-success-bg)',     border: 'var(--toast-success-border)', text: 'var(--toast-success-text)' },
+  error:       { icon: XCircle,        bg: 'var(--toast-error-bg)',       border: 'var(--toast-error-border)',   text: 'var(--toast-error-text)' },
+  warning:     { icon: AlertTriangle,  bg: 'var(--toast-warning-bg)',     border: 'var(--toast-warning-border)', text: 'var(--toast-warning-text)' },
+  info:        { icon: Info,           bg: 'var(--toast-info-bg)',        border: 'var(--toast-info-border)',    text: 'var(--toast-info-text)' },
+  transaction: { icon: ArrowLeftRight, bg: 'var(--toast-info-bg)',        border: 'var(--toast-info-border)',    text: 'var(--toast-info-text)' },
 };
 
 const ToastItem = ({ toast, onDismiss }) => {
   const [visible, setVisible] = useState(false);
-  const s = TYPE_STYLES[toast.type] || TYPE_STYLES.info;
+  const cfg = TYPE_CONFIG[toast.type] || TYPE_CONFIG.info;
+  const Icon = cfg.icon;
 
   useEffect(() => {
     requestAnimationFrame(() => setVisible(true));
@@ -19,43 +21,68 @@ const ToastItem = ({ toast, onDismiss }) => {
 
   const dismiss = () => {
     setVisible(false);
-    setTimeout(() => onDismiss(toast.id), 200);
+    setTimeout(() => onDismiss(toast.id), 220);
   };
 
   return (
     <div
+      role="alert"
+      aria-live="polite"
       style={{
-        display: 'flex', alignItems: 'flex-start', gap: '10px',
-        background: s.bg, borderLeft: `4px solid ${s.border}`,
-        borderRadius: '10px', padding: '12px 14px',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
-        maxWidth: '360px', width: '100%',
-        transform: visible ? 'translateX(0)' : 'translateX(120%)',
+        display: 'flex', alignItems: 'flex-start', gap: '12px',
+        background: cfg.bg,
+        border: `1px solid ${cfg.border}`,
+        borderLeft: `4px solid ${cfg.border}`,
+        borderRadius: '12px',
+        padding: '14px 16px',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
+        width: '360px',
+        maxWidth: 'calc(100vw - 48px)',
+        transform: visible ? 'translateY(0)' : 'translateY(32px)',
         opacity: visible ? 1 : 0,
-        transition: 'transform 0.25s ease, opacity 0.25s ease',
-        marginBottom: '8px',
+        transition: 'transform 0.25s cubic-bezier(0.34,1.56,0.64,1), opacity 0.22s ease',
       }}
     >
-      <div style={{
-        width: '24px', height: '24px', borderRadius: '50%',
-        background: s.border, color: '#fff',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: '12px', fontWeight: 700, flexShrink: 0,
-      }}>
-        {s.icon}
-      </div>
+      {/* Icône */}
+      <Icon
+        size={20}
+        strokeWidth={2}
+        color={cfg.border}
+        style={{ flexShrink: 0, marginTop: '1px' }}
+      />
+
+      {/* Texte */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontFamily: 'var(--font)', fontWeight: 600, fontSize: '13px', color: s.text }}>
+        <div style={{
+          fontFamily: 'var(--font)', fontWeight: 600, fontSize: '13px',
+          color: cfg.text, lineHeight: '1.4',
+        }}>
           {toast.title}
         </div>
         {toast.message && (
-          <div style={{ fontFamily: 'var(--font)', fontWeight: 400, fontSize: '12px', color: s.text, opacity: 0.8, marginTop: '2px' }}>
+          <div style={{
+            fontFamily: 'var(--font)', fontWeight: 400, fontSize: '12px',
+            color: cfg.text, opacity: 0.75, marginTop: '3px', lineHeight: '1.4',
+          }}>
             {toast.message}
           </div>
         )}
       </div>
-      <button onClick={dismiss} style={{ color: s.text, opacity: 0.5, fontSize: '14px', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', flexShrink: 0 }}>
-        ✕
+
+      {/* Fermer */}
+      <button
+        onClick={dismiss}
+        aria-label="Dismiss"
+        style={{
+          background: 'none', border: 'none', cursor: 'pointer',
+          padding: '2px', flexShrink: 0, color: cfg.text, opacity: 0.5,
+          display: 'flex', alignItems: 'center',
+          transition: 'opacity 0.15s',
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; }}
+        onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.5'; }}
+      >
+        <X size={14} strokeWidth={2.5} />
       </button>
     </div>
   );
@@ -64,14 +91,28 @@ const ToastItem = ({ toast, onDismiss }) => {
 const ToastContainer = () => {
   const { toasts, dismissToast } = useNotifications();
 
+  if (toasts.length === 0) return null;
+
   return (
-    <div style={{
-      position: 'fixed', bottom: '24px', right: '24px',
-      zIndex: 9999, display: 'flex', flexDirection: 'column-reverse',
-      alignItems: 'flex-end',
-    }}>
+    <div
+      aria-label="Notifications"
+      style={{
+        position: 'fixed',
+        bottom: '28px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 9999,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '10px',
+        pointerEvents: 'none',
+      }}
+    >
       {toasts.map((toast) => (
-        <ToastItem key={toast.id} toast={toast} onDismiss={dismissToast} />
+        <div key={toast.id} style={{ pointerEvents: 'auto' }}>
+          <ToastItem toast={toast} onDismiss={dismissToast} />
+        </div>
       ))}
     </div>
   );

@@ -37,6 +37,29 @@ const en = {
     logoutConfirmMessage: 'Are you sure you want to sign out?',
   },
 
+  // ─── Toast messages ───────────────────────────────────────────
+  toast: {
+    // Settings
+    profileSaved:        'Profile updated',
+    profileSavedMsg:     'Your information has been saved.',
+    profileError:        'Save failed',
+    passwordChanged:     'Password changed',
+    passwordChangedMsg:  'Your new password is active.',
+    passwordError:       'Error',
+    passwordMismatch:    'Passwords do not match.',
+    passwordTooShort:    'Minimum 8 characters required.',
+    // Merchants
+    merchantSuspended:   'Merchant suspended',
+    merchantActivated:   'Merchant activated',
+    merchantActionError: 'Action failed',
+    // Notifications
+    allMarkedRead:       'All notifications read',
+    allMarkedReadMsg:    'Your inbox is now empty.',
+    // Auth
+    logoutSuccess:       'Signed out',
+    logoutSuccessMsg:    'See you next time.',
+  },
+
   // ─── Sidebar / Navigation ─────────────────────────────────────
   nav: {
     dashboard: 'Dashboard',

@@ -7,11 +7,13 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
+import { useNotifications } from '../../context/NotificationContext';
 import styles from './Sidebar.module.css';
 
 const Sidebar = ({ collapsed, onToggle }) => {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
+  const { addToast } = useNotifications();
   const navigate = useNavigate();
   const [showConfirm, setShowConfirm] = React.useState(false);
 
@@ -32,6 +34,7 @@ const Sidebar = ({ collapsed, onToggle }) => {
   const handleLogoutConfirmed = async () => {
     setShowConfirm(false);
     await logout();
+    addToast({ type: 'success', title: t('toast.logoutSuccess'), message: t('toast.logoutSuccessMsg') });
     navigate('/login');
   };
 

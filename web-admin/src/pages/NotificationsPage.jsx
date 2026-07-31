@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { useNotifications } from '../context/NotificationContext';
-
 const TYPE_ICONS = {
   success:     CheckCheck,
   error:       AlertCircle,
@@ -21,7 +20,12 @@ const TYPE_COLORS = {
 
 const NotificationsPage = () => {
   const { t } = useTranslation();
-  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, addToast } = useNotifications();
+
+  const handleMarkAllAsRead = async () => {
+    await markAllAsRead();
+    addToast({ type: 'success', title: t('toast.allMarkedRead'), message: t('toast.allMarkedReadMsg') });
+  };
 
   const unreadLabel = unreadCount > 1
     ? t('notifications.unreadPlural', { count: unreadCount })
@@ -37,7 +41,7 @@ const NotificationsPage = () => {
           {unreadLabel}
         </p>
         {unreadCount > 0 && (
-          <Button size="sm" variant="outline" onClick={markAllAsRead} icon={<CheckCheck size={14} strokeWidth={2} />}>
+          <Button size="sm" variant="outline" onClick={handleMarkAllAsRead} icon={<CheckCheck size={14} strokeWidth={2} />}>
             {t('notifications.markAllRead')}
           </Button>
         )}

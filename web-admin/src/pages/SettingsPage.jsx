@@ -7,6 +7,7 @@ import Input from '../components/ui/Input';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useNotifications } from '../context/NotificationContext';
 import api from '../services/api';
 
 const SettingsPage = () => {
@@ -14,18 +15,17 @@ const SettingsPage = () => {
   const { user, updateUser } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const { language, changeLanguage, supportedLanguages } = useLanguage();
+  const { addToast } = useNotifications();
 
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
   const [businessName, setBusinessName] = useState(user?.businessName || '');
   const [profileLoading, setProfileLoading] = useState(false);
-  const [profileMsg, setProfileMsg] = useState('');
 
   const [currentPwd, setCurrentPwd] = useState('');
   const [newPwd, setNewPwd] = useState('');
   const [confirmPwd, setConfirmPwd] = useState('');
   const [pwdLoading, setPwdLoading] = useState(false);
-  const [pwdMsg, setPwdMsg] = useState({ text: '', type: '' });
 
   const roleLabels = {
     super_admin: t('settings.roles.super_admin'),
@@ -44,35 +44,33 @@ const SettingsPage = () => {
     try {
       const { data } = await api.patch(`/users/${user._id}`, { name, email, businessName });
       updateUser(data.user);
-      setProfileMsg(t('settings.profileSuccess'));
+      addToast({ type: 'success', title: t('toast.profileSaved'), message: t('toast.profileSavedMsg') });
     } catch (err) {
-      setProfileMsg(err.response?.data?.error || t('settings.profileError'));
+      addToast({ type: 'error', title: t('toast.profileError'), message: err.response?.data?.error || t('settings.profileError') });
     } finally {
       setProfileLoading(false);
-      setTimeout(() => setProfileMsg(''), 3000);
     }
   };
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (newPwd !== confirmPwd) {
-      setPwdMsg({ text: t('settings.passwordMismatch'), type: 'error' });
+      addToast({ type: 'error', title: t('toast.passwordError'), message: t('toast.passwordMismatch') });
       return;
     }
     if (newPwd.length < 8) {
-      setPwdMsg({ text: t('settings.passwordTooShort'), type: 'error' });
+      addToast({ type: 'error', title: t('toast.passwordError'), message: t('toast.passwordTooShort') });
       return;
     }
     setPwdLoading(true);
     try {
       await api.patch('/auth/change-password', { currentPassword: currentPwd, newPassword: newPwd });
-      setPwdMsg({ text: t('settings.passwordSuccess'), type: 'success' });
+      addToast({ type: 'success', title: t('toast.passwordChanged'), message: t('toast.passwordChangedMsg') });
       setCurrentPwd(''); setNewPwd(''); setConfirmPwd('');
     } catch (err) {
-      setPwdMsg({ text: err.response?.data?.error || t('settings.passwordError'), type: 'error' });
+      addToast({ type: 'error', title: t('toast.passwordError'), message: err.response?.data?.error || t('settings.passwordError') });
     } finally {
       setPwdLoading(false);
-      setTimeout(() => setPwdMsg({ text: '', type: '' }), 3000);
     }
   };
 
@@ -88,11 +86,6 @@ const SettingsPage = () => {
           )}
           <Input label={t('settings.phoneLabel')} value={user?.phone || ''} disabled />
           <Input label={t('settings.roleLabel')} value={roleLabels[user?.role] || user?.role} disabled />
-          {profileMsg && (
-            <p style={{ fontFamily: 'var(--font)', fontSize: '13px', color: profileMsg.includes(t('settings.profileSuccess')) ? 'var(--color-success)' : 'var(--color-error)' }}>
-              {profileMsg}
-            </p>
-          )}
           <Button type="submit" variant="primary" loading={profileLoading}>{t('settings.saveProfile')}</Button>
         </form>
       </Card>
@@ -168,11 +161,6 @@ const SettingsPage = () => {
           <Input label={t('settings.currentPasswordLabel')} type="password" value={currentPwd} onChange={(e) => setCurrentPwd(e.target.value)} required />
           <Input label={t('settings.newPasswordLabel')} type="password" value={newPwd} onChange={(e) => setNewPwd(e.target.value)} required />
           <Input label={t('settings.confirmPasswordLabel')} type="password" value={confirmPwd} onChange={(e) => setConfirmPwd(e.target.value)} required />
-          {pwdMsg.text && (
-            <p style={{ fontFamily: 'var(--font)', fontSize: '13px', color: pwdMsg.type === 'success' ? 'var(--color-success)' : 'var(--color-error)' }}>
-              {pwdMsg.text}
-            </p>
-          )}
           <Button type="submit" variant="primary" loading={pwdLoading}>{t('settings.changePasswordButton')}</Button>
         </form>
       </Card>

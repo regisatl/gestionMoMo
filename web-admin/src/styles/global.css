@@ -26,6 +26,20 @@
   --color-info:           #0284C7;
   --color-info-light:     #E0F2FE;
 
+  /* Toast — Light mode */
+  --toast-success-bg:     #F0FDF4;
+  --toast-success-border: #16A34A;
+  --toast-success-text:   #14532D;
+  --toast-error-bg:       #FEF2F2;
+  --toast-error-border:   #DC2626;
+  --toast-error-text:     #7F1D1D;
+  --toast-warning-bg:     #FFFBEB;
+  --toast-warning-border: #D97706;
+  --toast-warning-text:   #78350F;
+  --toast-info-bg:        #EFF6FF;
+  --toast-info-border:    #0A66C2;
+  --toast-info-text:      #1E3A5F;
+
   /* Light mode (défaut) */
   --bg:                   #FFFFFF;
   --bg-secondary:         #F9FAFB;
@@ -74,6 +88,20 @@
   --input-border:    #3D3D3D;
   --sidebar-bg:      #242424;
   --header-bg:       #242424;
+
+  /* Toast — Dark mode */
+  --toast-success-bg:     #052E16;
+  --toast-success-border: #22C55E;
+  --toast-success-text:   #86EFAC;
+  --toast-error-bg:       #450A0A;
+  --toast-error-border:   #F87171;
+  --toast-error-text:     #FCA5A5;
+  --toast-warning-bg:     #431407;
+  --toast-warning-border: #FBBF24;
+  --toast-warning-text:   #FDE68A;
+  --toast-info-bg:        #0C1A2E;
+  --toast-info-border:    #3B82F6;
+  --toast-info-text:      #93C5FD;
 }
 
 html, body, #root {

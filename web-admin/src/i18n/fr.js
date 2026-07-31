@@ -37,6 +37,29 @@ const fr = {
     logoutConfirmMessage: 'Voulez-vous vraiment vous déconnecter ?',
   },
 
+  // ─── Messages Toast ───────────────────────────────────────────
+  toast: {
+    // Paramètres
+    profileSaved:        'Profil mis à jour',
+    profileSavedMsg:     'Vos informations ont été enregistrées.',
+    profileError:        'Échec de la sauvegarde',
+    passwordChanged:     'Mot de passe modifié',
+    passwordChangedMsg:  'Votre nouveau mot de passe est actif.',
+    passwordError:       'Erreur',
+    passwordMismatch:    'Les mots de passe ne correspondent pas.',
+    passwordTooShort:    'Minimum 8 caractères requis.',
+    // Marchands
+    merchantSuspended:   'Marchand suspendu',
+    merchantActivated:   'Marchand activé',
+    merchantActionError: 'Action échouée',
+    // Notifications
+    allMarkedRead:       'Toutes les notifications lues',
+    allMarkedReadMsg:    'Votre boîte est maintenant vide.',
+    // Auth
+    logoutSuccess:       'Déconnexion réussie',
+    logoutSuccessMsg:    'À bientôt.',
+  },
+
   // ─── Sidebar / Navigation ─────────────────────────────────────
   nav: {
     dashboard: 'Tableau de bord',

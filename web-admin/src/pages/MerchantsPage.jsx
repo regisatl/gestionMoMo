@@ -5,12 +5,14 @@ import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import { useNotifications } from '../context/NotificationContext';
 import api from '../services/api';
 
 const fmt = (n = 0) => new Intl.NumberFormat('fr-FR').format(n);
 
 const MerchantsPage = () => {
   const { t } = useTranslation();
+  const { addToast } = useNotifications();
   const [merchants, setMerchants] = useState([]);
   const [pagination, setPagination] = useState({ total: 0, pages: 1 });
   const [loading, setLoading] = useState(false);
@@ -42,7 +44,16 @@ const MerchantsPage = () => {
     try {
       await api.patch(`/users/${merchantId}/status`, { status: newStatus });
       loadMerchants();
-    } catch (_) {
+      addToast({
+        type: 'success',
+        title: newStatus === 'suspended' ? t('toast.merchantSuspended') : t('toast.merchantActivated'),
+      });
+    } catch (err) {
+      addToast({
+        type: 'error',
+        title: t('toast.merchantActionError'),
+        message: err.response?.data?.error,
+      });
     } finally {
       setActionLoading(null);
     }
