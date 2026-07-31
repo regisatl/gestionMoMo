@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sun, Moon, Globe } from 'lucide-react';
+import { Sun, Moon, Globe, Monitor } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
@@ -10,10 +10,70 @@ import { useLanguage } from '../context/LanguageContext';
 import { useNotifications } from '../context/NotificationContext';
 import api from '../services/api';
 
+/* ─── Sélecteur de thème — 3 boutons (Système / Clair / Sombre) ─── */
+const ThemeSelector = ({ themeMode, setTheme, t }) => {
+  const options = [
+    { value: 'system', label: t('settings.themeSystem'), Icon: Monitor },
+    { value: 'light',  label: t('settings.themeLight'),  Icon: Sun    },
+    { value: 'dark',   label: t('settings.themeDark'),   Icon: Moon   },
+  ];
+
+  return (
+    <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
+      {options.map(({ value, label, Icon }) => {
+        const isActive = themeMode === value;
+        return (
+          <button
+            key={value}
+            onClick={() => setTheme(value)}
+            style={{
+              flex: 1,
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', gap: '8px',
+              padding: '14px 8px',
+              borderRadius: '12px',
+              border: isActive
+                ? '2px solid var(--color-primary)'
+                : '2px solid var(--border)',
+              background: isActive
+                ? 'var(--color-primary-alpha)'
+                : 'var(--surface)',
+              cursor: 'pointer',
+              transition: 'all 0.15s',
+            }}
+            onMouseEnter={(e) => {
+              if (!isActive) e.currentTarget.style.borderColor = 'var(--color-primary-light)';
+            }}
+            onMouseLeave={(e) => {
+              if (!isActive) e.currentTarget.style.borderColor = 'var(--border)';
+            }}
+          >
+            <Icon
+              size={20}
+              strokeWidth={2}
+              color={isActive ? 'var(--color-primary)' : 'var(--text-secondary)'}
+            />
+            <span style={{
+              fontFamily: 'var(--font)',
+              fontWeight: isActive ? 700 : 500,
+              fontSize: '12px',
+              color: isActive ? 'var(--color-primary)' : 'var(--text-secondary)',
+              whiteSpace: 'nowrap',
+            }}>
+              {label}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
+/* ─── Page ─── */
 const SettingsPage = () => {
   const { t } = useTranslation();
   const { user, updateUser } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
+  const { isDark, themeMode, setTheme } = useTheme();
   const { language, changeLanguage, supportedLanguages } = useLanguage();
   const { addToast } = useNotifications();
 
@@ -75,95 +135,156 @@ const SettingsPage = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '640px' }}>
-      {/* Profil */}
-      <Card title={t('settings.profileTitle')}>
-        <form onSubmit={handleProfileSave} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <Input label={t('settings.fullNameLabel')} value={name} onChange={(e) => setName(e.target.value)} required />
-          <Input label={t('settings.emailLabel')} type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-          {user?.role === 'merchant' && (
-            <Input label={t('settings.businessNameLabel')} value={businessName} onChange={(e) => setBusinessName(e.target.value)} />
-          )}
-          <Input label={t('settings.phoneLabel')} value={user?.phone || ''} disabled />
-          <Input label={t('settings.roleLabel')} value={roleLabels[user?.role] || user?.role} disabled />
-          <Button type="submit" variant="primary" loading={profileLoading}>{t('settings.saveProfile')}</Button>
-        </form>
-      </Card>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
-      {/* Apparence */}
-      <Card title={t('settings.appearanceTitle')}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--color-primary-alpha)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {isDark ? <Moon size={18} color="var(--color-primary)" strokeWidth={2} /> : <Sun size={18} color="var(--color-primary)" strokeWidth={2} />}
+      {/* ── Ligne 1 : Apparence + Langue côte à côte ── */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+        gap: '24px',
+        alignItems: 'start',
+      }}>
+
+        {/* Apparence */}
+        <Card title={t('settings.appearanceTitle')}>
+          {/* Aperçu du mode actif */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '12px',
+            padding: '12px 14px', borderRadius: '10px',
+            background: 'var(--surface)', border: '1px solid var(--border)',
+          }}>
+            <div style={{
+              width: '36px', height: '36px', borderRadius: '10px',
+              background: 'var(--color-primary-alpha)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              {isDark
+                ? <Moon size={18} color="var(--color-primary)" strokeWidth={2} />
+                : <Sun  size={18} color="var(--color-primary)" strokeWidth={2} />
+              }
             </div>
             <div>
-              <p style={{ fontFamily: 'var(--font)', fontWeight: 600, fontSize: '14px', color: 'var(--text)' }}>{t('settings.darkModeLabel')}</p>
-              <p style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text-secondary)', marginTop: '2px' }}>{t('settings.darkModeDesc')}</p>
+              <p style={{ fontFamily: 'var(--font)', fontWeight: 600, fontSize: '14px', color: 'var(--text)', margin: 0 }}>
+                {isDark ? t('settings.themeDark') : t('settings.themeLight')}
+              </p>
+              <p style={{ fontFamily: 'var(--font)', fontSize: '12px', color: 'var(--text-secondary)', margin: '2px 0 0' }}>
+                {themeMode === 'system'
+                  ? t('settings.themeSystemActive')
+                  : t('settings.darkModeDesc')}
+              </p>
             </div>
           </div>
-          <button
-            onClick={toggleTheme}
-            role="switch"
-            aria-checked={isDark}
-            style={{
-              width: '52px', height: '28px', borderRadius: '14px',
-              background: isDark ? 'var(--color-primary)' : 'var(--border)',
-              border: 'none', cursor: 'pointer', position: 'relative',
-              transition: 'background 0.25s',
-            }}
-          >
-            <span style={{
-              position: 'absolute', top: '3px',
-              left: isDark ? '27px' : '3px',
-              width: '22px', height: '22px', borderRadius: '50%',
-              background: '#fff', transition: 'left 0.25s',
-              boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
-            }} />
-          </button>
-        </div>
-      </Card>
 
-      {/* Langue */}
-      <Card title={t('settings.languageTitle')}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--color-primary-alpha)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {/* Sélecteur 3 modes */}
+          <ThemeSelector themeMode={themeMode} setTheme={setTheme} t={t} />
+        </Card>
+
+        {/* Langue */}
+        <Card title={t('settings.languageTitle')}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+            <div style={{
+              width: '36px', height: '36px', borderRadius: '10px',
+              background: 'var(--color-primary-alpha)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            }}>
               <Globe size={18} color="var(--color-primary)" strokeWidth={2} />
             </div>
             <div>
-              <p style={{ fontFamily: 'var(--font)', fontWeight: 600, fontSize: '14px', color: 'var(--text)' }}>{t('settings.languageTitle')}</p>
-              <p style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text-secondary)', marginTop: '2px' }}>{t('settings.languageDesc')}</p>
+              <p style={{ fontFamily: 'var(--font)', fontWeight: 600, fontSize: '14px', color: 'var(--text)', margin: 0 }}>
+                {t('settings.languageTitle')}
+              </p>
+              <p style={{ fontFamily: 'var(--font)', fontSize: '12px', color: 'var(--text-secondary)', margin: '2px 0 0' }}>
+                {t('settings.languageDesc')}
+              </p>
             </div>
           </div>
-          <select
-            value={language}
-            onChange={(e) => changeLanguage(e.target.value)}
-            style={{
-              height: '42px', padding: '0 16px', borderRadius: '10px',
-              border: '1.5px solid var(--input-border)', background: 'var(--input-bg)',
-              color: 'var(--text)', fontFamily: 'var(--font)', fontSize: '14px', fontWeight: 500,
-              cursor: 'pointer',
-            }}
-          >
-            {supportedLanguages.map((lang) => (
-              <option key={lang} value={lang}>
-                {lang === 'fr' ? '🇫🇷' : '🇬🇧'} {langNames[lang]}
-              </option>
-            ))}
-          </select>
-        </div>
-      </Card>
 
-      {/* Mot de passe */}
-      <Card title={t('settings.securityTitle')}>
-        <form onSubmit={handlePasswordChange} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <Input label={t('settings.currentPasswordLabel')} type="password" value={currentPwd} onChange={(e) => setCurrentPwd(e.target.value)} required />
-          <Input label={t('settings.newPasswordLabel')} type="password" value={newPwd} onChange={(e) => setNewPwd(e.target.value)} required />
-          <Input label={t('settings.confirmPasswordLabel')} type="password" value={confirmPwd} onChange={(e) => setConfirmPwd(e.target.value)} required />
-          <Button type="submit" variant="primary" loading={pwdLoading}>{t('settings.changePasswordButton')}</Button>
-        </form>
-      </Card>
+          {/* Boutons langue */}
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {supportedLanguages.map((lang) => {
+              const isActive = language === lang;
+              const flag  = lang === 'fr' ? '🇫🇷' : '🇬🇧';
+              return (
+                <button
+                  key={lang}
+                  onClick={() => changeLanguage(lang)}
+                  style={{
+                    flex: 1,
+                    display: 'flex', flexDirection: 'column',
+                    alignItems: 'center', gap: '8px',
+                    padding: '14px 8px',
+                    borderRadius: '12px',
+                    border: isActive
+                      ? '2px solid var(--color-primary)'
+                      : '2px solid var(--border)',
+                    background: isActive
+                      ? 'var(--color-primary-alpha)'
+                      : 'var(--surface)',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) e.currentTarget.style.borderColor = 'var(--color-primary-light)';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) e.currentTarget.style.borderColor = 'var(--border)';
+                  }}
+                >
+                  <span style={{ fontSize: '22px', lineHeight: 1 }}>{flag}</span>
+                  <span style={{
+                    fontFamily: 'var(--font)',
+                    fontWeight: isActive ? 700 : 500,
+                    fontSize: '12px',
+                    color: isActive ? 'var(--color-primary)' : 'var(--text-secondary)',
+                  }}>
+                    {langNames[lang]}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </Card>
+      </div>
+
+      {/* ── Ligne 2 : Profil + Mot de passe côte à côte ── */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+        gap: '24px',
+        alignItems: 'start',
+      }}>
+
+        {/* Profil */}
+        <Card title={t('settings.profileTitle')}>
+          <form onSubmit={handleProfileSave} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <Input label={t('settings.fullNameLabel')} value={name} onChange={(e) => setName(e.target.value)} required />
+            <Input label={t('settings.emailLabel')} type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            {user?.role === 'merchant' && (
+              <Input label={t('settings.businessNameLabel')} value={businessName} onChange={(e) => setBusinessName(e.target.value)} />
+            )}
+            <Input label={t('settings.phoneLabel')} value={user?.phone || ''} disabled />
+            <Input label={t('settings.roleLabel')} value={roleLabels[user?.role] || user?.role} disabled />
+            <Button type="submit" variant="primary" loading={profileLoading} fullWidth>
+              {t('settings.saveProfile')}
+            </Button>
+          </form>
+        </Card>
+
+        {/* Mot de passe */}
+        <Card title={t('settings.securityTitle')}>
+          <form onSubmit={handlePasswordChange} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <Input label={t('settings.currentPasswordLabel')} type="password" value={currentPwd} onChange={(e) => setCurrentPwd(e.target.value)} required />
+            <Input label={t('settings.newPasswordLabel')}     type="password" value={newPwd}     onChange={(e) => setNewPwd(e.target.value)}     required />
+            <Input label={t('settings.confirmPasswordLabel')} type="password" value={confirmPwd} onChange={(e) => setConfirmPwd(e.target.value)} required />
+            <Button type="submit" variant="primary" loading={pwdLoading} fullWidth>
+              {t('settings.changePasswordButton')}
+            </Button>
+          </form>
+        </Card>
+      </div>
+
     </div>
   );
 };
