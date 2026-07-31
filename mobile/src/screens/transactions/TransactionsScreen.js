@@ -8,19 +8,21 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import Badge from '../../components/ui/Badge';
 import Icon from '../../components/ui/Icon';
+import useToast from '../../hooks/useToast';
 import api from '../../services/api';
 
 const TYPE_META = {
-  deposit:    { icon: 'arrow-bottom-left',  color: '#16A34A' },
-  withdrawal: { icon: 'arrow-top-right',    color: '#DC2626' },
-  transfer:   { icon: 'swap-horizontal',    color: '#0A66C2' },
+  deposit:    { icon: 'arrow-bottom-left',   color: '#16A34A' },
+  withdrawal: { icon: 'arrow-top-right',     color: '#DC2626' },
+  transfer:   { icon: 'swap-horizontal',     color: '#0A66C2' },
   payment:    { icon: 'credit-card-outline', color: '#7C3AED' },
-  refund:     { icon: 'refresh',            color: '#D97706' },
+  refund:     { icon: 'refresh',             color: '#D97706' },
 };
 
 const TransactionsScreen = ({ navigation }) => {
-  const { t } = useTranslation();
-  const theme = useTheme();
+  const { t }  = useTranslation();
+  const theme  = useTheme();
+  const toast  = useToast();
 
   const FILTERS = [
     { key: 'all',        label: t('transactions.filters.all') },
@@ -30,11 +32,11 @@ const TransactionsScreen = ({ navigation }) => {
   ];
 
   const [transactions, setTransactions] = useState([]);
-  const [filter, setFilter] = useState('all');
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [loading, setLoading] = useState(false);
+  const [filter, setFilter]     = useState('all');
+  const [search, setSearch]     = useState('');
+  const [page, setPage]         = useState(1);
+  const [hasMore, setHasMore]   = useState(true);
+  const [loading, setLoading]   = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
   const loadTransactions = useCallback(async (reset = false) => {
@@ -46,18 +48,23 @@ const TransactionsScreen = ({ navigation }) => {
       if (search.trim()) params.search = search.trim();
 
       const { data } = await api.get('/transactions', { params });
-      const newTxns = data.transactions;
+      const newTxns  = data.transactions;
 
       setTransactions(reset ? newTxns : (prev) => [...prev, ...newTxns]);
       setHasMore(data.pagination.page < data.pagination.pages);
       if (reset) setPage(1);
       else setPage((p) => p + 1);
+
+      if (reset && refreshing) {
+        toast.success('Actualisé', 'Liste des transactions mise à jour');
+      }
     } catch (_) {
+      toast.error(t('common.error'), 'Impossible de charger les transactions');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [filter, search, page, loading]);
+  }, [filter, search, page, loading, refreshing]);
 
   useEffect(() => { loadTransactions(true); }, [filter, search]);
 
@@ -68,30 +75,9 @@ const TransactionsScreen = ({ navigation }) => {
     return (
       <TouchableOpacity
         onPress={() => navigation.navigate('TransactionDetail', { id: txn._id })}
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: theme.backgroundCard,
-          marginHorizontal: 20,
-          marginBottom: 10,
-          borderRadius: 14,
-          borderWidth: 1,
-          borderColor: theme.border,
-          padding: 14,
-          ...theme.shadows.sm,
-        }}
+        style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: theme.backgroundCard, marginHorizontal: 20, marginBottom: 10, borderRadius: 14, borderWidth: 1, borderColor: theme.border, padding: 14, ...theme.shadows.sm }}
       >
-        <View
-          style={{
-            width: 44,
-            height: 44,
-            borderRadius: 14,
-            backgroundColor: `${meta.color}15`,
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginRight: 12,
-          }}
-        >
+        <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: `${meta.color}15`, alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
           <Icon name={meta.icon} size={20} color={meta.color} />
         </View>
         <View style={{ flex: 1 }}>
@@ -103,13 +89,7 @@ const TransactionsScreen = ({ navigation }) => {
           </Text>
         </View>
         <View style={{ alignItems: 'flex-end' }}>
-          <Text
-            style={{
-              fontFamily: theme.typography.fontFamily.bold,
-              fontSize: 14,
-              color: txn.type === 'withdrawal' ? theme.colors.error : theme.colors.success,
-            }}
-          >
+          <Text style={{ fontFamily: theme.typography.fontFamily.bold, fontSize: 14, color: txn.type === 'withdrawal' ? theme.colors.error : theme.colors.success }}>
             {txn.type === 'withdrawal' ? '-' : '+'}{formatAmount(txn.amount)}
           </Text>
           <Badge status={txn.status} style={{ marginTop: 4 }} />
@@ -123,29 +103,13 @@ const TransactionsScreen = ({ navigation }) => {
       <StatusBar barStyle={theme.isDark ? 'light-content' : 'dark-content'} />
 
       {/* Header */}
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          paddingHorizontal: 20,
-          paddingVertical: 16,
-        }}
-      >
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 16 }}>
         <Text style={{ fontFamily: theme.typography.fontFamily.extraBold, fontSize: 22, color: theme.text }}>
           {t('transactions.title')}
         </Text>
         <TouchableOpacity
           onPress={() => navigation.navigate('NewTransaction')}
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            backgroundColor: theme.colors.primary,
-            borderRadius: 12,
-            paddingVertical: 8,
-            paddingHorizontal: 14,
-            gap: 4,
-          }}
+          style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.primary, borderRadius: 12, paddingVertical: 8, paddingHorizontal: 14, gap: 4 }}
         >
           <Icon name="plus" size={16} color="#FFF" />
           <Text style={{ fontFamily: theme.typography.fontFamily.semiBold, fontSize: 13, color: '#FFF' }}>
@@ -156,30 +120,14 @@ const TransactionsScreen = ({ navigation }) => {
 
       {/* Search */}
       <View style={{ paddingHorizontal: 20, marginBottom: 12 }}>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            backgroundColor: theme.inputBackground,
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: theme.inputBorder,
-            paddingHorizontal: 12,
-            height: 46,
-          }}
-        >
+        <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: theme.inputBackground, borderRadius: 12, borderWidth: 1, borderColor: theme.inputBorder, paddingHorizontal: 12, height: 46 }}>
           <Icon name="magnify" size={18} color={theme.textSecondary} style={{ marginRight: 8 }} />
           <TextInput
             value={search}
             onChangeText={setSearch}
             placeholder={t('transactions.searchPlaceholder')}
             placeholderTextColor={theme.placeholder}
-            style={{
-              flex: 1,
-              fontFamily: theme.typography.fontFamily.regular,
-              fontSize: 14,
-              color: theme.text,
-            }}
+            style={{ flex: 1, fontFamily: theme.typography.fontFamily.regular, fontSize: 14, color: theme.text }}
           />
           {search.length > 0 && (
             <TouchableOpacity onPress={() => setSearch('')}>
@@ -195,20 +143,9 @@ const TransactionsScreen = ({ navigation }) => {
           <TouchableOpacity
             key={f.key}
             onPress={() => setFilter(f.key)}
-            style={{
-              paddingVertical: 6,
-              paddingHorizontal: 14,
-              borderRadius: 20,
-              backgroundColor: filter === f.key ? theme.colors.primary : theme.surface,
-            }}
+            style={{ paddingVertical: 6, paddingHorizontal: 14, borderRadius: 20, backgroundColor: filter === f.key ? theme.colors.primary : theme.surface }}
           >
-            <Text
-              style={{
-                fontFamily: theme.typography.fontFamily.medium,
-                fontSize: 12,
-                color: filter === f.key ? '#FFF' : theme.textSecondary,
-              }}
-            >
+            <Text style={{ fontFamily: theme.typography.fontFamily.medium, fontSize: 12, color: filter === f.key ? '#FFF' : theme.textSecondary }}>
               {f.label}
             </Text>
           </TouchableOpacity>

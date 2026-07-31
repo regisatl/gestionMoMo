@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import { connectSocket, disconnectSocket, onEvent } from '../services/socketClient';
 import api from '../services/api';
@@ -8,10 +8,13 @@ const NotificationContext = createContext(null);
 export const NotificationProvider = ({ children }) => {
   const { user, accessToken } = useAuth();
   const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [toasts, setToasts] = useState([]);
+  const [unreadCount, setUnreadCount]     = useState(0);
+  const [toasts, setToasts]               = useState([]);
 
-  // Charge les notifications initiales
+  // keep a stable ref so callbacks created once can always call the latest addToast
+  const addToastRef = useRef(null);
+
+  // ── Charger les notifications ────────────────────────────────
   const fetchNotifications = useCallback(async () => {
     if (!user) return;
     try {
@@ -21,11 +24,9 @@ export const NotificationProvider = ({ children }) => {
     } catch (_) {}
   }, [user]);
 
-  useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
+  useEffect(() => { fetchNotifications(); }, [fetchNotifications]);
 
-  // Connexion Socket.IO
+  // ── Socket.IO — notifications temps réel ────────────────────
   useEffect(() => {
     if (!accessToken) return;
     connectSocket(accessToken);
@@ -33,7 +34,12 @@ export const NotificationProvider = ({ children }) => {
     const unsubNew = onEvent('notification:new', (notif) => {
       setNotifications((prev) => [notif, ...prev]);
       setUnreadCount((c) => c + 1);
-      showToast(notif);
+      // affiche un toast pour la notification temps réel
+      addToastRef.current?.({
+        type:    notif.type || 'info',
+        title:   notif.title,
+        message: notif.message,
+      });
     });
 
     return () => {
@@ -42,35 +48,75 @@ export const NotificationProvider = ({ children }) => {
     };
   }, [accessToken]);
 
-  const showToast = (notif) => {
-    const id = Date.now().toString();
-    setToasts((prev) => [...prev, { ...notif, id }]);
+  // ── addToast — méthode principale ───────────────────────────
+  /**
+   * Affiche un toast.
+   * @param {object} opts
+   * @param {'success'|'error'|'warning'|'info'|'transaction'} opts.type
+   * @param {string}  opts.title    — ligne principale (requise)
+   * @param {string}  [opts.message] — ligne secondaire optionnelle
+   * @param {number}  [opts.duration] — ms avant auto-dismiss (défaut 3500)
+   */
+  const addToast = useCallback(({ type = 'info', title, message, duration = 3500 }) => {
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    setToasts((prev) => [...prev, { id, type, title, message }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4000);
-  };
+    }, duration);
+  }, []);
 
+  // keep ref in sync
+  useEffect(() => { addToastRef.current = addToast; }, [addToast]);
+
+  // ── showToast — rétro-compatibilité (notifications socket) ──
+  // (gardé pour ne pas casser le code existant)
+  const showToast = useCallback((notif) => {
+    addToast({
+      type:    notif.type || 'info',
+      title:   notif.title,
+      message: notif.message,
+    });
+  }, [addToast]);
+
+  // ── dismiss manuel ───────────────────────────────────────────
+  const dismissToast = useCallback((id) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
+  // ── Actions notifications ────────────────────────────────────
   const markAsRead = async (notificationId) => {
-    await api.patch(`/notifications/${notificationId}/read`);
-    setNotifications((prev) =>
-      prev.map((n) => (n._id === notificationId ? { ...n, isRead: true } : n))
-    );
-    setUnreadCount((c) => Math.max(0, c - 1));
+    try {
+      await api.patch(`/notifications/${notificationId}/read`);
+      setNotifications((prev) =>
+        prev.map((n) => (n._id === notificationId ? { ...n, isRead: true } : n))
+      );
+      setUnreadCount((c) => Math.max(0, c - 1));
+    } catch (_) {}
   };
 
   const markAllAsRead = async () => {
-    await api.patch('/notifications/read-all');
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-    setUnreadCount(0);
-  };
-
-  const dismissToast = (id) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
+    try {
+      await api.patch('/notifications/read-all');
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+      setUnreadCount(0);
+    } catch (_) {}
   };
 
   return (
     <NotificationContext.Provider
-      value={{ notifications, unreadCount, toasts, markAsRead, markAllAsRead, dismissToast, showToast, fetchNotifications }}
+      value={{
+        notifications,
+        unreadCount,
+        toasts,
+        // méthodes toast
+        addToast,
+        showToast,   // rétro-compat
+        dismissToast,
+        // méthodes notifications
+        markAsRead,
+        markAllAsRead,
+        fetchNotifications,
+      }}
     >
       {children}
     </NotificationContext.Provider>

@@ -8,6 +8,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Icon from '../../components/ui/Icon';
+import useToast from '../../hooks/useToast';
 
 const SettingRow = ({ iconName, label, value, onPress, rightElement, theme, iconColor }) => (
   <TouchableOpacity
@@ -16,40 +17,25 @@ const SettingRow = ({ iconName, label, value, onPress, rightElement, theme, icon
     activeOpacity={onPress ? 0.65 : 1}
     style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 13 }}
   >
-    <View
-      style={{
-        width: 34,
-        height: 34,
-        borderRadius: 10,
-        backgroundColor: `${iconColor || theme.colors.primary}15`,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: 12,
-      }}
-    >
+    <View style={{ width: 34, height: 34, borderRadius: 10, backgroundColor: `${iconColor || theme.colors.primary}15`, alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
       <Icon name={iconName} size={18} color={iconColor || theme.colors.primary} />
     </View>
     <Text style={{ fontFamily: theme.typography.fontFamily.medium, fontSize: 14, color: theme.text, flex: 1 }}>
       {label}
     </Text>
-    {rightElement || (
-      value
-        ? <Text style={{ fontFamily: theme.typography.fontFamily.regular, fontSize: 13, color: theme.textSecondary }}>{value}</Text>
-        : null
-    )}
-    {onPress && !rightElement && (
-      <Icon name="chevron-right" size={18} color={theme.textSecondary} style={{ marginLeft: 4 }} />
-    )}
+    {rightElement || (value ? <Text style={{ fontFamily: theme.typography.fontFamily.regular, fontSize: 13, color: theme.textSecondary }}>{value}</Text> : null)}
+    {onPress && !rightElement && <Icon name="chevron-right" size={18} color={theme.textSecondary} style={{ marginLeft: 4 }} />}
   </TouchableOpacity>
 );
 
 const Separator = ({ theme }) => <View style={{ height: 1, backgroundColor: theme.border }} />;
 
 const ProfileScreen = () => {
-  const { t } = useTranslation();
-  const theme = useTheme();
+  const { t }    = useTranslation();
+  const theme    = useTheme();
   const { user, logout } = useAuth();
   const { language, changeLanguage, supportedLanguages } = useLanguage();
+  const toast    = useToast();
 
   const [showLangModal, setShowLangModal] = React.useState(false);
 
@@ -59,9 +45,43 @@ const ProfileScreen = () => {
       t('profile.logoutMessage'),
       [
         { text: t('profile.logoutCancel'), style: 'cancel' },
-        { text: t('profile.logoutConfirm'), style: 'destructive', onPress: logout },
+        {
+          text: t('profile.logoutConfirm'),
+          style: 'destructive',
+          onPress: async () => {
+            toast.info('Déconnexion', 'À bientôt !');
+            await logout();
+          },
+        },
       ],
     );
+  };
+
+  const handleThemeToggle = (val) => {
+    theme.toggleTheme();
+    toast.info(
+      val ? 'Mode sombre activé' : 'Mode clair activé',
+      undefined,
+      2000,
+    );
+  };
+
+  const handleLanguageChange = (lang) => {
+    changeLanguage(lang);
+    setShowLangModal(false);
+    toast.info(
+      lang === 'fr' ? 'Langue : Français' : 'Language: English',
+      undefined,
+      2000,
+    );
+  };
+
+  const handleEditProfile = () => {
+    toast.info('Bientôt disponible', 'La modification du profil sera disponible prochainement');
+  };
+
+  const handleChangePin = () => {
+    toast.info('Bientôt disponible', 'Le changement de PIN sera disponible prochainement');
   };
 
   const roleLabels = {
@@ -75,8 +95,6 @@ const ProfileScreen = () => {
     en: t('profile.languageNames.en'),
   };
 
-  const flagIcon = { fr: 'flag', en: 'flag-outline' };
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={['top']}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 20 }}>
@@ -86,17 +104,7 @@ const ProfileScreen = () => {
 
         {/* Avatar card */}
         <Card style={{ alignItems: 'center', marginBottom: 16, paddingVertical: 24 }}>
-          <View
-            style={{
-              width: 76,
-              height: 76,
-              borderRadius: 24,
-              backgroundColor: theme.colors.primaryAlpha,
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: 12,
-            }}
-          >
+          <View style={{ width: 76, height: 76, borderRadius: 24, backgroundColor: theme.colors.primaryAlpha, alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
             <Text style={{ fontFamily: theme.typography.fontFamily.extraBold, fontSize: 28, color: theme.colors.primary }}>
               {user?.name?.charAt(0)?.toUpperCase() || '?'}
             </Text>
@@ -116,9 +124,9 @@ const ProfileScreen = () => {
           <Text style={{ fontFamily: theme.typography.fontFamily.bold, fontSize: 11, color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 4 }}>
             {t('profile.account')}
           </Text>
-          <SettingRow iconName="account-edit-outline" label={t('profile.editProfile')} onPress={() => {}} theme={theme} />
+          <SettingRow iconName="account-edit-outline" label={t('profile.editProfile')} onPress={handleEditProfile}  theme={theme} />
           <Separator theme={theme} />
-          <SettingRow iconName="lock-outline" label={t('profile.changePin')} onPress={() => {}} theme={theme} iconColor="#7C3AED" />
+          <SettingRow iconName="lock-outline" label={t('profile.changePin')} onPress={handleChangePin} theme={theme} iconColor="#7C3AED" />
           <Separator theme={theme} />
           <SettingRow iconName="phone-outline" label={t('profile.telephone')} value={user?.phone} theme={theme} iconColor="#16A34A" />
           {user?.email && (
@@ -134,14 +142,13 @@ const ProfileScreen = () => {
           <Text style={{ fontFamily: theme.typography.fontFamily.bold, fontSize: 11, color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 4 }}>
             {t('profile.preferences')}
           </Text>
-
           <SettingRow
             iconName={theme.isDark ? 'weather-night' : 'weather-sunny'}
             label={t('profile.darkMode')}
             rightElement={
               <Switch
                 value={theme.isDark}
-                onValueChange={theme.toggleTheme}
+                onValueChange={handleThemeToggle}
                 trackColor={{ false: theme.border, true: theme.colors.primary }}
                 thumbColor="#FFF"
               />
@@ -163,18 +170,7 @@ const ProfileScreen = () => {
         {/* Logout */}
         <TouchableOpacity
           onPress={handleLogout}
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: theme.colors.errorLight,
-            borderRadius: 14,
-            borderWidth: 1,
-            borderColor: `${theme.colors.error}40`,
-            padding: 14,
-            marginBottom: 32,
-            gap: 10,
-          }}
+          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.errorLight, borderRadius: 14, borderWidth: 1, borderColor: `${theme.colors.error}40`, padding: 14, marginBottom: 32, gap: 10 }}
         >
           <Icon name="logout" size={18} color={theme.colors.error} />
           <Text style={{ fontFamily: theme.typography.fontFamily.semiBold, fontSize: 15, color: theme.colors.error }}>
@@ -188,27 +184,9 @@ const ProfileScreen = () => {
       </ScrollView>
 
       {/* Language modal */}
-      <Modal
-        visible={showLangModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowLangModal(false)}
-      >
-        <TouchableOpacity
-          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', alignItems: 'center' }}
-          activeOpacity={1}
-          onPress={() => setShowLangModal(false)}
-        >
-          <View
-            style={{
-              width: 280,
-              backgroundColor: theme.backgroundCard,
-              borderRadius: 20,
-              overflow: 'hidden',
-              borderWidth: 1,
-              borderColor: theme.border,
-            }}
-          >
+      <Modal visible={showLangModal} transparent animationType="fade" onRequestClose={() => setShowLangModal(false)}>
+        <TouchableOpacity style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', alignItems: 'center' }} activeOpacity={1} onPress={() => setShowLangModal(false)}>
+          <View style={{ width: 280, backgroundColor: theme.backgroundCard, borderRadius: 20, overflow: 'hidden', borderWidth: 1, borderColor: theme.border }}>
             <View style={{ padding: 20, borderBottomWidth: 1, borderBottomColor: theme.border }}>
               <Text style={{ fontFamily: theme.typography.fontFamily.bold, fontSize: 16, color: theme.text, textAlign: 'center' }}>
                 {t('profile.language')}
@@ -217,26 +195,16 @@ const ProfileScreen = () => {
             {supportedLanguages.map((lang, idx) => (
               <TouchableOpacity
                 key={lang}
-                onPress={() => { changeLanguage(lang); setShowLangModal(false); }}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: 16,
-                  borderBottomWidth: idx < supportedLanguages.length - 1 ? 1 : 0,
-                  borderBottomColor: theme.border,
-                  backgroundColor: language === lang ? theme.colors.primaryAlpha : 'transparent',
-                }}
+                onPress={() => handleLanguageChange(lang)}
+                style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: idx < supportedLanguages.length - 1 ? 1 : 0, borderBottomColor: theme.border, backgroundColor: language === lang ? theme.colors.primaryAlpha : 'transparent' }}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                  <Icon name={flagIcon[lang] || 'flag'} size={18} color={theme.textSecondary} />
+                  <Icon name="flag" size={18} color={theme.textSecondary} />
                   <Text style={{ fontFamily: theme.typography.fontFamily.medium, fontSize: 15, color: theme.text }}>
                     {langNames[lang]}
                   </Text>
                 </View>
-                {language === lang && (
-                  <Icon name="check-circle" size={18} color={theme.colors.primary} />
-                )}
+                {language === lang && <Icon name="check-circle" size={18} color={theme.colors.primary} />}
               </TouchableOpacity>
             ))}
           </View>

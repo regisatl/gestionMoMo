@@ -1,108 +1,197 @@
+/**
+ * Toast system — GestionMoMo Mobile
+ *
+ * Position : bas de l'écran, centré horizontalement.
+ * Animation : slide-up + fade in, slide-down + fade out.
+ * Style     : pill avec icône vecteur, fond coloré semi-transparent.
+ *
+ * Usage : <ToastContainer /> dans App.js (déjà en place).
+ * Pour déclencher un toast depuis n'importe quel screen :
+ *   const { addToast } = useToast();
+ *   addToast({ type: 'success', title: 'Créé !', message: 'Ref: XYZ' });
+ */
 import React, { useEffect, useRef } from 'react';
-import { View, Text, Animated, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+  View, Text, Animated, TouchableOpacity,
+  StyleSheet, Platform,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { useNotifications } from '../../context/NotificationContext';
+import Icon from './Icon';
 
-const TOAST_COLORS = {
-  success: { bg: '#DCFCE7', border: '#16A34A', text: '#14532D' },
-  error: { bg: '#FEE2E2', border: '#DC2626', text: '#7F1D1D' },
-  warning: { bg: '#FEF3C7', border: '#D97706', text: '#78350F' },
-  info: { bg: '#E0F2FE', border: '#0284C7', text: '#0C4A6E' },
-  transaction: { bg: '#EFF6FF', border: '#0A66C2', text: '#1E3A5F' },
+/* ─── couleurs par type ─────────────────────────────── */
+const TYPE_CONFIG = {
+  success:     { bg: '#16A34A', icon: 'check-circle-outline',    label: 'Succès' },
+  error:       { bg: '#DC2626', icon: 'close-circle-outline',    label: 'Erreur' },
+  warning:     { bg: '#D97706', icon: 'alert-circle-outline',    label: 'Attention' },
+  info:        { bg: '#0284C7', icon: 'information-outline',     label: 'Info' },
+  transaction: { bg: '#0A66C2', icon: 'swap-horizontal',         label: 'Transaction' },
 };
 
-const TOAST_ICONS = { success: '✓', error: '✕', warning: '!', info: 'i', transaction: '↔' };
+/* ─── single toast item ─────────────────────────────── */
+const ToastItem = ({ toast, onDismiss, index, total }) => {
+  const theme  = useTheme();
+  const opacity    = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(40)).current;
+  const scale      = useRef(new Animated.Value(0.92)).current;
 
-const ToastItem = ({ toast, onDismiss }) => {
-  const theme = useTheme();
-  const opacity = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(-20)).current;
+  const config = TYPE_CONFIG[toast.type] || TYPE_CONFIG.info;
 
-  const typeColors = TOAST_COLORS[toast.type] || TOAST_COLORS.info;
-
+  /* mount — slide up */
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(opacity, { toValue: 1, duration: 200, useNativeDriver: true }),
-      Animated.spring(translateY, { toValue: 0, tension: 80, friction: 8, useNativeDriver: true }),
+      Animated.timing(opacity, {
+        toValue: 1, duration: 260, useNativeDriver: true,
+      }),
+      Animated.spring(translateY, {
+        toValue: 0, tension: 90, friction: 10, useNativeDriver: true,
+      }),
+      Animated.spring(scale, {
+        toValue: 1, tension: 90, friction: 10, useNativeDriver: true,
+      }),
     ]).start();
   }, []);
 
+  /* dismiss — slide down */
   const dismiss = () => {
     Animated.parallel([
-      Animated.timing(opacity, { toValue: 0, duration: 150, useNativeDriver: true }),
-      Animated.timing(translateY, { toValue: -20, duration: 150, useNativeDriver: true }),
+      Animated.timing(opacity,    { toValue: 0, duration: 200, useNativeDriver: true }),
+      Animated.timing(translateY, { toValue: 40, duration: 200, useNativeDriver: true }),
     ]).start(() => onDismiss(toast.id));
   };
 
+  /* stacking: les toasts plus anciens sont légèrement plus petits et remontés */
+  const stackOffset = (total - 1 - index) * 8;
+
   return (
     <Animated.View
-      style={{
-        opacity,
-        transform: [{ translateY }],
-        backgroundColor: typeColors.bg,
-        borderLeftWidth: 4,
-        borderLeftColor: typeColors.border,
-        borderRadius: theme.radius.md,
-        padding: theme.spacing.md,
-        marginBottom: theme.spacing.sm,
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        ...theme.shadows.md,
-      }}
+      style={[
+        styles.pill,
+        {
+          backgroundColor: config.bg,
+          opacity,
+          transform: [
+            { translateY: Animated.add(translateY, new Animated.Value(-stackOffset)) },
+            { scale },
+          ],
+          marginBottom: 8,
+          zIndex: index + 1,
+        },
+      ]}
     >
-      <View
-        style={{
-          width: 24, height: 24, borderRadius: 12,
-          backgroundColor: typeColors.border,
-          alignItems: 'center', justifyContent: 'center',
-          marginRight: 10,
-        }}
-      >
-        <Text style={{ color: '#FFF', fontSize: 12, fontWeight: '700' }}>
-          {TOAST_ICONS[toast.type] || 'i'}
-        </Text>
+      {/* icône */}
+      <View style={styles.iconWrap}>
+        <Icon name={config.icon} size={18} color="#FFF" />
       </View>
-      <View style={{ flex: 1 }}>
-        <Text style={{ fontFamily: theme.typography.fontFamily.semiBold, fontSize: 13, color: typeColors.text }}>
+
+      {/* texte */}
+      <View style={styles.textWrap}>
+        <Text style={styles.title} numberOfLines={1}>
           {toast.title}
         </Text>
-        {toast.message && (
-          <Text style={{ fontFamily: theme.typography.fontFamily.regular, fontSize: 12, color: typeColors.text, marginTop: 2, opacity: 0.85 }}>
+        {!!toast.message && (
+          <Text style={styles.message} numberOfLines={2}>
             {toast.message}
           </Text>
         )}
       </View>
-      <TouchableOpacity onPress={dismiss} style={{ padding: 2, marginLeft: 8 }}>
-        <Text style={{ fontSize: 16, color: typeColors.text, opacity: 0.6 }}>✕</Text>
+
+      {/* fermer */}
+      <TouchableOpacity onPress={dismiss} style={styles.closeBtn} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+        <Icon name="close" size={14} color="rgba(255,255,255,0.8)" />
       </TouchableOpacity>
     </Animated.View>
   );
 };
 
-/**
- * Conteneur de toasts — à placer dans le layout racine
- */
+/* ─── container (racine de l'app) ──────────────────── */
 const ToastContainer = () => {
   const { toasts, dismissToast } = useNotifications();
-  const theme = useTheme();
+  const insets = useSafeAreaInsets();
 
   if (!toasts.length) return null;
 
+  /* n'affiche que les 3 derniers pour éviter l'empilement excessif */
+  const visible = toasts.slice(-3);
+
   return (
     <View
-      style={{
-        position: 'absolute',
-        top: 60,
-        left: theme.spacing.base,
-        right: theme.spacing.base,
-        zIndex: 9999,
-      }}
+      style={[
+        styles.container,
+        { bottom: insets.bottom + 16 },
+      ]}
+      pointerEvents="box-none"
     >
-      {toasts.map((toast) => (
-        <ToastItem key={toast.id} toast={toast} onDismiss={dismissToast} />
+      {visible.map((toast, index) => (
+        <ToastItem
+          key={toast.id}
+          toast={toast}
+          onDismiss={dismissToast}
+          index={index}
+          total={visible.length}
+        />
       ))}
     </View>
   );
 };
+
+/* ─── styles ────────────────────────────────────────── */
+const styles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    left: 24,
+    right: 24,
+    alignItems: 'center',
+    zIndex: 9999,
+    elevation: 20,
+  },
+  pill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    width: '100%',
+    /* subtle inner shadow on Android via elevation */
+    elevation: 8,
+    /* iOS shadow */
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+  },
+  iconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+    flexShrink: 0,
+  },
+  textWrap: {
+    flex: 1,
+    marginRight: 6,
+  },
+  title: {
+    fontFamily: 'Manrope-SemiBold',
+    fontSize: 13,
+    color: '#FFF',
+    letterSpacing: 0.1,
+  },
+  message: {
+    fontFamily: 'Manrope-Regular',
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.88)',
+    marginTop: 2,
+    lineHeight: 17,
+  },
+  closeBtn: {
+    padding: 2,
+    flexShrink: 0,
+  },
+});
 
 export default ToastContainer;
