@@ -1,8 +1,10 @@
 /**
  * PinInput — composant saisie code PIN à 5 chiffres
- * Affiche 5 cercles (remplis/vides) + clavier numérique personnalisé
+ *
+ * Affiche 5 indicateurs (dots masqués ou chiffres visibles) + clavier numérique.
+ * Bouton œil en haut à droite pour basculer la visibilité du PIN.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Vibration } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import Icon from './Icon';
@@ -16,6 +18,7 @@ const KEYS = [
 
 const PinInput = ({ value = '', onChange, maxLength = 5, error }) => {
   const theme = useTheme();
+  const [showPin, setShowPin] = useState(false);
 
   const handlePress = (key) => {
     if (key === '') return;
@@ -32,52 +35,85 @@ const PinInput = ({ value = '', onChange, maxLength = 5, error }) => {
 
   return (
     <View style={styles.wrapper}>
-      {/* Dots */}
-      <View style={styles.dotsRow}>
-        {Array.from({ length: maxLength }).map((_, i) => {
-          const filled = i < value.length;
-          return (
-            <View
-              key={i}
-              style={[
-                styles.dot,
-                {
-                  backgroundColor: filled
-                    ? (error ? theme.colors.error : theme.colors.primary)
-                    : 'transparent',
-                  borderColor: error
-                    ? theme.colors.error
-                    : filled
-                    ? theme.colors.primary
-                    : theme.inputBorder,
-                  borderWidth: 2,
-                  transform: [{ scale: filled ? 1.1 : 1 }],
-                },
-              ]}
-            />
-          );
-        })}
+
+      {/* ── Indicateurs PIN + bouton œil ── */}
+      <View style={styles.dotsWrapper}>
+        {/* Rangée des indicateurs */}
+        <View style={styles.dotsRow}>
+          {Array.from({ length: maxLength }).map((_, i) => {
+            const filled = i < value.length;
+            const digit  = value[i];
+
+            return (
+              <View
+                key={i}
+                style={[
+                  styles.dot,
+                  {
+                    backgroundColor: filled
+                      ? (error ? theme.colors.error : theme.colors.primary)
+                      : 'transparent',
+                    borderColor: error
+                      ? theme.colors.error
+                      : filled
+                      ? theme.colors.primary
+                      : theme.inputBorder,
+                    borderWidth: 2,
+                    // Quand le PIN est visible, le dot s'agrandit pour afficher le chiffre
+                    width:  showPin && filled ? 32 : 18,
+                    height: showPin && filled ? 32 : 18,
+                    borderRadius: showPin && filled ? 8 : 9,
+                  },
+                ]}
+              >
+                {showPin && filled && (
+                  <Text style={{
+                    fontFamily: theme.typography.fontFamily.bold,
+                    fontSize: 14,
+                    color: '#FFFFFF',
+                    textAlign: 'center',
+                    lineHeight: 28,
+                  }}>
+                    {digit}
+                  </Text>
+                )}
+              </View>
+            );
+          })}
+        </View>
+
+        {/* Bouton œil — positionné à droite de la rangée */}
+        <TouchableOpacity
+          onPress={() => setShowPin((v) => !v)}
+          activeOpacity={0.6}
+          style={[styles.eyeBtn, { backgroundColor: theme.surface, borderColor: theme.border }]}
+          accessibilityLabel={showPin ? 'Masquer le PIN' : 'Afficher le PIN'}
+        >
+          <Icon
+            name={showPin ? 'eye-off-outline' : 'eye-outline'}
+            size={18}
+            color={showPin ? theme.colors.primary : theme.textSecondary}
+          />
+        </TouchableOpacity>
       </View>
 
-      {/* Error */}
+      {/* ── Message d'erreur ── */}
       {error ? (
-        <Text
-          style={{
-            fontFamily: theme.typography.fontFamily.regular,
-            fontSize: 12,
-            color: theme.colors.error,
-            textAlign: 'center',
-            marginTop: 8,
-            marginBottom: 4,
-          }}
-        >
+        <Text style={{
+          fontFamily: theme.typography.fontFamily.regular,
+          fontSize: 12,
+          color: theme.colors.error,
+          textAlign: 'center',
+          marginTop: 8,
+          marginBottom: 4,
+        }}>
           {error}
         </Text>
       ) : (
         <View style={{ height: 24 }} />
       )}
 
-      {/* Keypad */}
+      {/* ── Clavier numérique ── */}
       <View style={styles.keypad}>
         {KEYS.map((row, ri) => (
           <View key={ri} style={styles.row}>
@@ -103,13 +139,11 @@ const PinInput = ({ value = '', onChange, maxLength = 5, error }) => {
                   {isDel ? (
                     <Icon name="backspace-outline" size={22} color={theme.textSecondary} />
                   ) : (
-                    <Text
-                      style={{
-                        fontFamily: theme.typography.fontFamily.semiBold,
-                        fontSize: 22,
-                        color: theme.text,
-                      }}
-                    >
+                    <Text style={{
+                      fontFamily: theme.typography.fontFamily.semiBold,
+                      fontSize: 22,
+                      color: theme.text,
+                    }}>
                       {key}
                     </Text>
                   )}
@@ -128,15 +162,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
   },
-  dotsRow: {
+  dotsWrapper: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 16,
     marginBottom: 4,
   },
+  dotsRow: {
+    flexDirection: 'row',
+    gap: 14,
+    alignItems: 'center',
+  },
   dot: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  eyeBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 4,
   },
   keypad: {
     width: '100%',
