@@ -14,7 +14,11 @@ const userSchema = new mongoose.Schema(
       required: [true, 'Le numéro de téléphone est requis'],
       unique: true,
       trim: true,
-      match: [/^\+?[1-9]\d{7,14}$/, 'Numéro de téléphone invalide (ex: +22901234567)'],
+      // Format béninois : +229 01 XX XX XX XX (13 caractères)
+      match: [
+        /^\+22901\d{8}$/,
+        'Numéro invalide. Format attendu : +229 01 XX XX XX XX',
+      ],
     },
     email: {
       type: String,

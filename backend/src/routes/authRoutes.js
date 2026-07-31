@@ -11,7 +11,10 @@ router.post(
   '/register',
   [
     body('name').trim().notEmpty().withMessage('Le nom est requis'),
-    body('phone').trim().notEmpty().withMessage('Le numéro de téléphone est requis'),
+    body('phone')
+      .trim()
+      .notEmpty().withMessage('Le numéro de téléphone est requis')
+      .matches(/^\+22901\d{8}$/).withMessage('Numéro invalide. Format attendu : +229 01 XX XX XX XX'),
     body('password').isLength({ min: 5 }).withMessage('Mot de passe / PIN : minimum 5 caractères'),
   ],
   validate,
@@ -22,8 +25,11 @@ router.post(
 router.post(
   '/login',
   [
-    body('phone').trim().notEmpty().withMessage('Numéro de téléphone requis'),
-    body('password').notEmpty().withMessage('Mot de passe requis'),
+    body('phone')
+      .trim()
+      .notEmpty().withMessage('Numéro de téléphone requis')
+      .matches(/^\+22901\d{8}$/).withMessage('Numéro invalide. Format attendu : +229 01 XX XX XX XX'),
+    body('password').notEmpty().withMessage('Mot de passe / PIN requis'),
   ],
   validate,
   authController.login

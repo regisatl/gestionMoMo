@@ -9,6 +9,7 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Icon from '../../components/ui/Icon';
 import useToast from '../../hooks/useToast';
+import { validateBeninPhone } from '../../utils/validation';
 
 const ForgotPasswordScreen = ({ navigation }) => {
   const theme = useTheme();
@@ -20,9 +21,10 @@ const ForgotPasswordScreen = ({ navigation }) => {
   const [error, setError]       = useState('');
 
   const handleSubmit = async () => {
-    if (!phone.trim()) {
-      setError('Numéro de téléphone requis');
-      toast.error('Champ requis', 'Entrez votre numéro de téléphone');
+    const { valid, error: phoneError } = validateBeninPhone(phone);
+    if (!valid) {
+      setError(phoneError);
+      toast.error('Numéro invalide', phoneError);
       return;
     }
     setError('');
@@ -103,7 +105,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
                 label="Numéro de téléphone"
                 value={phone}
                 onChangeText={(v) => { setPhone(v); setError(''); }}
-                placeholder="+229 00 00 00 00 00"
+                placeholder="+2290112345678"
                 keyboardType="phone-pad"
                 error={error}
                 leftIcon={<Icon name="phone-outline" size={18} color={theme.textSecondary} />}

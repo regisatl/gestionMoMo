@@ -12,6 +12,7 @@ import Input from '../../components/ui/Input';
 import PinInput from '../../components/ui/PinInput';
 import Icon from '../../components/ui/Icon';
 import useToast from '../../hooks/useToast';
+import { validateBeninPhone } from '../../utils/validation';
 
 const LoginScreen = ({ navigation }) => {
   const { t } = useTranslation();
@@ -27,8 +28,10 @@ const LoginScreen = ({ navigation }) => {
 
   /* ── Step 1 : valider le numéro ── */
   const handlePhoneNext = () => {
-    if (!phone.trim()) {
-      setErrors({ phone: t('auth.phoneRequired') });
+    const { valid, error } = validateBeninPhone(phone);
+    if (!valid) {
+      setErrors({ phone: error });
+      toast.error('Numéro invalide', error);
       return;
     }
     setErrors({});
@@ -118,7 +121,7 @@ const LoginScreen = ({ navigation }) => {
                 label={t('auth.phoneLabel')}
                 value={phone}
                 onChangeText={(v) => { setPhone(v); setErrors({}); }}
-                placeholder={t('auth.phonePlaceholder')}
+                placeholder="+2290112345678"
                 keyboardType="phone-pad"
                 error={errors.phone}
                 leftIcon={<Icon name="phone-outline" size={18} color={theme.textSecondary} />}

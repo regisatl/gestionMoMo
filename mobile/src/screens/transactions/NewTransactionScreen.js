@@ -11,6 +11,7 @@ import Input from '../../components/ui/Input';
 import Card from '../../components/ui/Card';
 import Icon from '../../components/ui/Icon';
 import useToast from '../../hooks/useToast';
+import { validateBeninPhone } from '../../utils/validation';
 import api from '../../services/api';
 
 const TYPES = [
