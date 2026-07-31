@@ -80,12 +80,12 @@ const transactionSchema = new mongoose.Schema(
 );
 
 // Index pour filtres fréquents
+// reference a déjà un index via unique:true dans le schema
 transactionSchema.index({ merchantId: 1, createdAt: -1 });
 transactionSchema.index({ clientId: 1, createdAt: -1 });
 transactionSchema.index({ status: 1 });
 transactionSchema.index({ type: 1 });
 transactionSchema.index({ isDeleted: 1 });
-transactionSchema.index({ reference: 1 });
 
 // Filtre automatique des transactions supprimées
 transactionSchema.pre(/^find/, function (next) {

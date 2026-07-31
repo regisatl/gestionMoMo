@@ -52,7 +52,6 @@ const accountSchema = new mongoose.Schema(
   }
 );
 
-accountSchema.index({ merchantId: 1 });
-accountSchema.index({ momoAccountNumber: 1 });
+// merchantId et momoAccountNumber ont déjà un index via unique:true dans le schema
 
 module.exports = mongoose.model('Account', accountSchema);

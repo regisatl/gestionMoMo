@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema(
       required: [true, 'Le numéro de téléphone est requis'],
       unique: true,
       trim: true,
-      match: [/^\+?[1-9]\d{7,14}$/, 'Numéro de téléphone invalide'],
+      match: [/^\+?[1-9]\d{7,14}$/, 'Numéro de téléphone invalide (ex: +22901234567)'],
     },
     email: {
       type: String,
@@ -79,8 +79,7 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 };
 
 // Index pour recherche performante
-userSchema.index({ phone: 1 });
-userSchema.index({ email: 1 });
+// phone et email ont déjà un index via unique:true dans le schema
 userSchema.index({ role: 1, status: 1 });
 
 module.exports = mongoose.model('User', userSchema);
