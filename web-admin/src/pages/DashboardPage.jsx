@@ -6,6 +6,10 @@ import {
   PointElement, Title, Tooltip, Legend, ArcElement,
 } from 'chart.js';
 import { Bar, Line, Doughnut } from 'react-chartjs-2';
+import {
+  ArrowDownCircle, ArrowUpCircle, ArrowLeftRight,
+  Coins, Globe, TrendingUp,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
@@ -13,7 +17,7 @@ import api from '../services/api';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, ArcElement);
 
-const StatBox = ({ label, value, icon, color, delta, onClick }) => (
+const StatBox = ({ label, value, Icon, color, delta, onClick }) => (
   <div
     onClick={onClick}
     style={{
@@ -28,8 +32,10 @@ const StatBox = ({ label, value, icon, color, delta, onClick }) => (
       <div style={{
         width: '40px', height: '40px', borderRadius: '12px',
         background: `${color}18`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px',
-      }}>{icon}</div>
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <Icon size={20} color={color} strokeWidth={2} />
+      </div>
       {delta !== undefined && (
         <span style={{ fontFamily: 'var(--font)', fontWeight: 600, fontSize: '12px', color: delta >= 0 ? 'var(--color-success)' : 'var(--color-error)' }}>
           {delta >= 0 ? '▲' : '▼'} {Math.abs(delta)}%
@@ -122,12 +128,12 @@ const DashboardPage = () => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Stats principales */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-        <StatBox label="Dépôts du jour" value={`${fmt(report?.totalDeposits)} F`} icon="⬇" color="#16A34A" onClick={() => navigate('/transactions?type=deposit')} />
-        <StatBox label="Retraits du jour" value={`${fmt(report?.totalWithdrawals)} F`} icon="⬆" color="#DC2626" onClick={() => navigate('/transactions?type=withdrawal')} />
-        <StatBox label="Transactions" value={report?.transactionsCount || 0} icon="↔" color="#0A66C2" onClick={() => navigate('/transactions')} />
-        <StatBox label="Bénéfice du jour" value={`${fmt(report?.benefit)} F`} icon="💰" color="#7C3AED" />
+        <StatBox label="Dépôts du jour"    value={`${fmt(report?.totalDeposits)} F`}   Icon={ArrowDownCircle}  color="#16A34A" onClick={() => navigate('/transactions?type=deposit')} />
+        <StatBox label="Retraits du jour"  value={`${fmt(report?.totalWithdrawals)} F`} Icon={ArrowUpCircle}    color="#DC2626" onClick={() => navigate('/transactions?type=withdrawal')} />
+        <StatBox label="Transactions"      value={report?.transactionsCount || 0}        Icon={ArrowLeftRight}   color="#0A66C2" onClick={() => navigate('/transactions')} />
+        <StatBox label="Bénéfice du jour"  value={`${fmt(report?.benefit)} F`}          Icon={TrendingUp}       color="#7C3AED" />
         {user?.role === 'super_admin' && globalStats && (
-          <StatBox label="Revenus globaux" value={`${fmt(globalStats.totalRevenue)} F`} icon="🌍" color="#0284C7" onClick={() => navigate('/reports')} />
+          <StatBox label="Revenus globaux" value={`${fmt(globalStats.totalRevenue)} F`} Icon={Globe}            color="#0284C7" onClick={() => navigate('/reports')} />
         )}
       </div>
 

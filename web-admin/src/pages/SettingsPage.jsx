@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Sun, Moon } from 'lucide-react';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -84,9 +85,14 @@ const SettingsPage = () => {
       {/* Apparence */}
       <Card title="Apparence">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <p style={{ fontFamily: 'var(--font)', fontWeight: 600, fontSize: '14px', color: 'var(--text)' }}>Mode sombre</p>
-            <p style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text-secondary)', marginTop: '2px' }}>Basculer entre le thème clair et sombre</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--color-primary-alpha)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {isDark ? <Moon size={18} color="var(--color-primary)" strokeWidth={2} /> : <Sun size={18} color="var(--color-primary)" strokeWidth={2} />}
+            </div>
+            <div>
+              <p style={{ fontFamily: 'var(--font)', fontWeight: 600, fontSize: '14px', color: 'var(--text)' }}>Mode sombre</p>
+              <p style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text-secondary)', marginTop: '2px' }}>Basculer entre le thème clair et sombre</p>
+            </div>
           </div>
           <button
             onClick={toggleTheme}

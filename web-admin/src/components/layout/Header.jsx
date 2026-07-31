@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Menu, Sun, Moon, Bell } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useNotifications } from '../../context/NotificationContext';
-import Badge from '../ui/Badge';
 
 const Header = ({ title, sidebarCollapsed, onToggleSidebar }) => {
   const { isDark, toggleTheme } = useTheme();
@@ -11,7 +11,6 @@ const Header = ({ title, sidebarCollapsed, onToggleSidebar }) => {
   const notifRef = useRef(null);
   const navigate = useNavigate();
 
-  // Ferme le panel au clic extérieur
   useEffect(() => {
     const handler = (e) => {
       if (notifRef.current && !notifRef.current.contains(e.target)) {
@@ -21,6 +20,14 @@ const Header = ({ title, sidebarCollapsed, onToggleSidebar }) => {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  const iconBtnStyle = {
+    width: '38px', height: '38px', borderRadius: '10px',
+    background: 'var(--surface)', border: '1px solid var(--border)',
+    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+    transition: 'background 0.15s, border-color 0.15s',
+    color: 'var(--text-secondary)',
+  };
 
   return (
     <header style={{
@@ -35,31 +42,31 @@ const Header = ({ title, sidebarCollapsed, onToggleSidebar }) => {
       <button
         onClick={onToggleSidebar}
         aria-label="Toggle sidebar"
-        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '20px', color: 'var(--text-secondary)', padding: '4px', borderRadius: '8px' }}
+        style={iconBtnStyle}
+        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-primary-alpha)'; e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.color = 'var(--color-primary)'; }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--surface)'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
       >
-        {sidebarCollapsed ? '▶' : '◀'}
+        <Menu size={18} strokeWidth={2} />
       </button>
 
-      {/* Titre de la page */}
+      {/* Titre */}
       <h1 style={{ fontFamily: 'var(--font)', fontWeight: 700, fontSize: '18px', color: 'var(--text)', flex: 1 }}>
         {title}
       </h1>
 
       {/* Actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+
         {/* Toggle thème */}
         <button
           onClick={toggleTheme}
-          aria-label="Toggle dark mode"
+          aria-label={isDark ? 'Mode clair' : 'Mode sombre'}
           title={isDark ? 'Mode clair' : 'Mode sombre'}
-          style={{
-            width: '38px', height: '38px', borderRadius: '10px',
-            background: 'var(--surface)', border: '1px solid var(--border)',
-            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '18px', transition: 'background 0.15s',
-          }}
+          style={iconBtnStyle}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-primary-alpha)'; e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.color = 'var(--color-primary)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--surface)'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
         >
-          {isDark ? '☀️' : '🌙'}
+          {isDark ? <Sun size={18} strokeWidth={2} /> : <Moon size={18} strokeWidth={2} />}
         </button>
 
         {/* Notifications */}
@@ -67,14 +74,11 @@ const Header = ({ title, sidebarCollapsed, onToggleSidebar }) => {
           <button
             onClick={() => setShowNotifPanel((v) => !v)}
             aria-label="Notifications"
-            style={{
-              width: '38px', height: '38px', borderRadius: '10px',
-              background: 'var(--surface)', border: '1px solid var(--border)',
-              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '18px', position: 'relative', transition: 'background 0.15s',
-            }}
+            style={{ ...iconBtnStyle, position: 'relative' }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-primary-alpha)'; e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.color = 'var(--color-primary)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--surface)'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
           >
-            🔔
+            <Bell size={18} strokeWidth={2} />
             {unreadCount > 0 && (
               <span style={{
                 position: 'absolute', top: '4px', right: '4px',
@@ -82,6 +86,7 @@ const Header = ({ title, sidebarCollapsed, onToggleSidebar }) => {
                 background: 'var(--color-error)', color: '#fff',
                 fontSize: '9px', fontFamily: 'var(--font)', fontWeight: 700,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
+                pointerEvents: 'none',
               }}>
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
@@ -121,8 +126,7 @@ const Header = ({ title, sidebarCollapsed, onToggleSidebar }) => {
                       background: n.isRead ? 'transparent' : 'var(--color-primary-alpha)',
                       borderBottom: '1px solid var(--border)',
                       cursor: 'pointer', display: 'flex', gap: '10px',
-                      alignItems: 'flex-start',
-                      transition: 'background 0.1s',
+                      alignItems: 'flex-start', transition: 'background 0.1s',
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface)'}
                     onMouseLeave={(e) => e.currentTarget.style.background = n.isRead ? 'transparent' : 'var(--color-primary-alpha)'}
@@ -136,7 +140,10 @@ const Header = ({ title, sidebarCollapsed, onToggleSidebar }) => {
                 ))}
               </div>
               <div style={{ padding: '10px 16px', borderTop: '1px solid var(--border)' }}>
-                <button onClick={() => { setShowNotifPanel(false); navigate('/notifications'); }} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--color-primary)', fontWeight: 600, padding: '4px' }}>
+                <button
+                  onClick={() => { setShowNotifPanel(false); navigate('/notifications'); }}
+                  style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--color-primary)', fontWeight: 600, padding: '4px' }}
+                >
                   Voir toutes les notifications →
                 </button>
               </div>

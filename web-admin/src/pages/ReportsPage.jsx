@@ -4,6 +4,7 @@ import {
   LineElement, PointElement, Title, Tooltip, Legend,
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
+import { ArrowDownCircle, ArrowUpCircle, ArrowLeftRight, TrendingUp, Users, Coins } from 'lucide-react';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import api from '../services/api';
@@ -85,14 +86,19 @@ const ReportsPage = () => {
       {user?.role === 'super_admin' && globalStats && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
           {[
-            { label: 'Total dépôts', value: `${fmt(globalStats.totalDeposits)} F`, color: '#16A34A' },
-            { label: 'Total retraits', value: `${fmt(globalStats.totalWithdrawals)} F`, color: '#DC2626' },
-            { label: 'Revenu total', value: `${fmt(globalStats.totalRevenue)} F`, color: '#0A66C2' },
-            { label: 'Bénéfice total', value: `${fmt(globalStats.benefit)} F`, color: '#7C3AED' },
-            { label: 'Marchands actifs', value: globalStats.merchantsCount, color: '#0284C7' },
-            { label: 'Nb. transactions', value: globalStats.transactionsCount, color: '#D97706' },
+            { label: 'Total dépôts',     value: `${fmt(globalStats.totalDeposits)} F`,   color: '#16A34A', Icon: ArrowDownCircle },
+            { label: 'Total retraits',   value: `${fmt(globalStats.totalWithdrawals)} F`, color: '#DC2626', Icon: ArrowUpCircle   },
+            { label: 'Revenu total',     value: `${fmt(globalStats.totalRevenue)} F`,     color: '#0A66C2', Icon: TrendingUp      },
+            { label: 'Bénéfice total',   value: `${fmt(globalStats.benefit)} F`,          color: '#7C3AED', Icon: Coins           },
+            { label: 'Marchands actifs', value: globalStats.merchantsCount,               color: '#0284C7', Icon: Users           },
+            { label: 'Nb. transactions', value: globalStats.transactionsCount,            color: '#D97706', Icon: ArrowLeftRight  },
           ].map((s) => (
             <Card key={s.label} padding="16px">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: `${s.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <s.Icon size={18} color={s.color} strokeWidth={2} />
+                </div>
+              </div>
               <div style={{ fontFamily: 'var(--font)', fontWeight: 800, fontSize: '22px', color: s.color }}>{s.value}</div>
               <div style={{ fontFamily: 'var(--font)', fontWeight: 500, fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>{s.label}</div>
             </Card>

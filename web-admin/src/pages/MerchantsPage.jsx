@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Search, Store } from 'lucide-react';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
@@ -54,7 +55,7 @@ const MerchantsPage = () => {
             placeholder="Nom, téléphone..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            icon="🔍"
+            icon={<Search size={16} color="var(--text-secondary)" />}
             style={{ flex: '1 1 240px', minWidth: '180px' }}
           />
           <select
@@ -68,7 +69,7 @@ const MerchantsPage = () => {
             <option value="suspended">Suspendus</option>
           </select>
         </div>
-        <Button variant="primary" onClick={() => setShowModal(true)} icon="🏪">
+        <Button variant="primary" onClick={() => setShowModal(true)} icon={<Store size={16} strokeWidth={2} />}>
           Nouveau marchand
         </Button>
       </div>

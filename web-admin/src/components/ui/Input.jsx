@@ -18,7 +18,7 @@ const Input = ({
       )}
       <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
         {icon && (
-          <span style={{ position: 'absolute', left: '12px', color: 'var(--text-secondary)', fontSize: '16px', pointerEvents: 'none' }}>
+          <span style={{ position: 'absolute', left: '12px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', pointerEvents: 'none', lineHeight: 1 }}>
             {icon}
           </span>
         )}

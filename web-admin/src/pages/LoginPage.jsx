@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Wallet, Smartphone, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -44,9 +45,11 @@ const LoginPage = () => {
             width: '64px', height: '64px', borderRadius: '18px',
             background: 'var(--color-primary)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '28px', margin: '0 auto 14px',
+            margin: '0 auto 14px',
             boxShadow: '0 4px 16px rgba(10,102,194,0.3)',
-          }}>💸</div>
+          }}>
+            <Wallet size={30} color="#fff" strokeWidth={2} />
+          </div>
           <h1 style={{ fontFamily: 'var(--font)', fontWeight: 800, fontSize: '24px', color: 'var(--text)', letterSpacing: '-0.5px' }}>
             GestionMoMo
           </h1>
@@ -76,7 +79,7 @@ const LoginPage = () => {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="+229 00 00 00 00"
-            icon="📱"
+            icon={<Smartphone size={16} color="var(--text-secondary)" />}
             required
           />
           <Input
@@ -86,7 +89,7 @@ const LoginPage = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
-            icon="🔒"
+            icon={<Lock size={16} color="var(--text-secondary)" />}
             required
           />
           <Button type="submit" variant="primary" size="lg" fullWidth loading={loading}>

@@ -1,10 +1,22 @@
 import React from 'react';
+import { CheckCheck, AlertCircle, AlertTriangle, Info, ArrowLeftRight, Settings, Bell } from 'lucide-react';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { useNotifications } from '../context/NotificationContext';
 
-const TYPE_ICONS  = { success: '✓', error: '✕', warning: '!', info: 'ℹ', transaction: '↔', system: '⚙' };
-const TYPE_COLORS = { success: '#16A34A', error: '#DC2626', warning: '#D97706', info: '#0284C7', transaction: '#0A66C2', system: '#6B7280' };
+const TYPE_ICONS = {
+  success:     CheckCheck,
+  error:       AlertCircle,
+  warning:     AlertTriangle,
+  info:        Info,
+  transaction: ArrowLeftRight,
+  system:      Settings,
+};
+
+const TYPE_COLORS = {
+  success: '#16A34A', error: '#DC2626', warning: '#D97706',
+  info: '#0284C7', transaction: '#0A66C2', system: '#6B7280',
+};
 
 const NotificationsPage = () => {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
@@ -17,8 +29,8 @@ const NotificationsPage = () => {
           {unreadCount > 0 ? `${unreadCount} non lue${unreadCount > 1 ? 's' : ''}` : 'Tout est lu'}
         </p>
         {unreadCount > 0 && (
-          <Button size="sm" variant="outline" onClick={markAllAsRead}>
-            ✓ Tout marquer comme lu
+          <Button size="sm" variant="outline" onClick={markAllAsRead} icon={<CheckCheck size={14} strokeWidth={2} />}>
+            Tout marquer comme lu
           </Button>
         )}
       </div>
@@ -27,7 +39,9 @@ const NotificationsPage = () => {
       <Card padding="0">
         {notifications.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 24px' }}>
-            <div style={{ fontSize: '48px', marginBottom: '12px' }}>🔔</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+              <Bell size={48} color="var(--text-secondary)" strokeWidth={1.5} />
+            </div>
             <p style={{ fontFamily: 'var(--font)', color: 'var(--text-secondary)', fontSize: '15px' }}>Aucune notification</p>
           </div>
         ) : notifications.map((n, idx) => (
@@ -45,14 +59,11 @@ const NotificationsPage = () => {
             onMouseEnter={(e) => { if (!n.isRead) e.currentTarget.style.background = 'rgba(10,102,194,0.18)'; }}
             onMouseLeave={(e) => { if (!n.isRead) e.currentTarget.style.background = 'var(--color-primary-alpha)'; else e.currentTarget.style.background = 'transparent'; }}
           >
-            {/* Icône */}
-            <div style={{
-              width: '38px', height: '38px', borderRadius: '50%', flexShrink: 0,
+            <div style={{ width: '38px', height: '38px', borderRadius: '50%', flexShrink: 0,
               background: `${TYPE_COLORS[n.type] || '#6B7280'}18`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '16px', color: TYPE_COLORS[n.type] || '#6B7280', fontWeight: 700,
             }}>
-              {TYPE_ICONS[n.type] || 'ℹ'}
+              {(() => { const Icon = TYPE_ICONS[n.type] || Info; return <Icon size={18} color={TYPE_COLORS[n.type] || '#6B7280'} strokeWidth={2} />; })()}
             </div>
 
             {/* Contenu */}

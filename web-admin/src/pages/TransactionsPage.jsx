@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Search } from 'lucide-react';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
@@ -56,7 +57,7 @@ const TransactionsPage = () => {
             placeholder="Référence, téléphone, nom..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            icon="🔍"
+            icon={<Search size={16} color="var(--text-secondary)" />}
             style={{ flex: '1 1 240px', minWidth: '200px' }}
           />
           <select
