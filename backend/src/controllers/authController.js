@@ -153,3 +153,23 @@ exports.changePassword = async (req, res, next) => {
     next(err);
   }
 };
+
+// PATCH /api/auth/change-pin  — Mobile : change le PIN à 5 chiffres
+exports.changePin = async (req, res, next) => {
+  try {
+    const { currentPin, newPin } = req.body;
+    const user = await User.findById(req.user._id).select('+passwordHash');
+
+    if (!(await user.comparePassword(currentPin))) {
+      return res.status(400).json({ error: 'PIN actuel incorrect.' });
+    }
+
+    user.passwordHash = newPin;
+    await user.save();
+    await auditAction('pin_changed', req, user._id, 'User');
+
+    res.json({ message: 'PIN modifié avec succès.' });
+  } catch (err) {
+    next(err);
+  }
+};

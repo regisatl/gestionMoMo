@@ -7,27 +7,45 @@ import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
+import Icon from '../../components/ui/Icon';
 
-const SettingRow = ({ icon, label, value, onPress, rightElement, theme }) => (
+const SettingRow = ({ iconName, label, value, onPress, rightElement, theme, iconColor }) => (
   <TouchableOpacity
     onPress={onPress}
     disabled={!onPress && !rightElement}
+    activeOpacity={onPress ? 0.65 : 1}
     style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 13 }}
   >
-    <Text style={{ fontSize: 18, marginRight: 14 }}>{icon}</Text>
+    <View
+      style={{
+        width: 34,
+        height: 34,
+        borderRadius: 10,
+        backgroundColor: `${iconColor || theme.colors.primary}15`,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 12,
+      }}
+    >
+      <Icon name={iconName} size={18} color={iconColor || theme.colors.primary} />
+    </View>
     <Text style={{ fontFamily: theme.typography.fontFamily.medium, fontSize: 14, color: theme.text, flex: 1 }}>
       {label}
     </Text>
     {rightElement || (
-      value ? <Text style={{ fontFamily: theme.typography.fontFamily.regular, fontSize: 13, color: theme.textSecondary }}>{value}</Text> : null
+      value
+        ? <Text style={{ fontFamily: theme.typography.fontFamily.regular, fontSize: 13, color: theme.textSecondary }}>{value}</Text>
+        : null
     )}
-    {onPress && <Text style={{ fontSize: 16, color: theme.textSecondary, marginLeft: 4 }}>›</Text>}
+    {onPress && !rightElement && (
+      <Icon name="chevron-right" size={18} color={theme.textSecondary} style={{ marginLeft: 4 }} />
+    )}
   </TouchableOpacity>
 );
 
 const Separator = ({ theme }) => <View style={{ height: 1, backgroundColor: theme.border }} />;
 
-const ProfileScreen = ({ navigation }) => {
+const ProfileScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();
   const { user, logout } = useAuth();
@@ -57,59 +75,68 @@ const ProfileScreen = ({ navigation }) => {
     en: t('profile.languageNames.en'),
   };
 
+  const flagIcon = { fr: 'flag', en: 'flag-outline' };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={['top']}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: theme.spacing.base }}>
-        <Text style={{ fontFamily: theme.typography.fontFamily.extraBold, fontSize: theme.typography.fontSize.xl, color: theme.text, marginBottom: theme.spacing.lg }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 20 }}>
+        <Text style={{ fontFamily: theme.typography.fontFamily.extraBold, fontSize: 22, color: theme.text, marginBottom: 20 }}>
           {t('profile.title')}
         </Text>
 
-        {/* Avatar + info */}
-        <Card style={{ alignItems: 'center', marginBottom: theme.spacing.lg }}>
-          <View style={{
-            width: 72, height: 72, borderRadius: 36,
-            backgroundColor: theme.colors.primaryAlpha,
-            alignItems: 'center', justifyContent: 'center', marginBottom: 12,
-          }}>
-            <Text style={{ fontFamily: theme.typography.fontFamily.extraBold, fontSize: 26, color: theme.colors.primary }}>
+        {/* Avatar card */}
+        <Card style={{ alignItems: 'center', marginBottom: 16, paddingVertical: 24 }}>
+          <View
+            style={{
+              width: 76,
+              height: 76,
+              borderRadius: 24,
+              backgroundColor: theme.colors.primaryAlpha,
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: 12,
+            }}
+          >
+            <Text style={{ fontFamily: theme.typography.fontFamily.extraBold, fontSize: 28, color: theme.colors.primary }}>
               {user?.name?.charAt(0)?.toUpperCase() || '?'}
             </Text>
           </View>
           <Text style={{ fontFamily: theme.typography.fontFamily.bold, fontSize: 18, color: theme.text }}>{user?.name}</Text>
-          <Text style={{ fontFamily: theme.typography.fontFamily.regular, fontSize: 13, color: theme.textSecondary, marginTop: 2 }}>{user?.phone}</Text>
+          <Text style={{ fontFamily: theme.typography.fontFamily.regular, fontSize: 13, color: theme.textSecondary, marginTop: 2 }}>
+            {user?.phone}
+          </Text>
           <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
             <Badge status="active" label={roleLabels[user?.role] || user?.role} />
             <Badge status={user?.status} />
           </View>
         </Card>
 
-        {/* Paramètres compte */}
-        <Card style={{ marginBottom: theme.spacing.md }}>
-          <Text style={{ fontFamily: theme.typography.fontFamily.bold, fontSize: 12, color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>
+        {/* Account settings */}
+        <Card style={{ marginBottom: 12 }}>
+          <Text style={{ fontFamily: theme.typography.fontFamily.bold, fontSize: 11, color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 4 }}>
             {t('profile.account')}
           </Text>
-          <SettingRow icon="✏️" label={t('profile.editProfile')} onPress={() => {}} theme={theme} />
+          <SettingRow iconName="account-edit-outline" label={t('profile.editProfile')} onPress={() => {}} theme={theme} />
           <Separator theme={theme} />
-          <SettingRow icon="🔒" label={t('profile.changePassword')} onPress={() => {}} theme={theme} />
+          <SettingRow iconName="lock-outline" label={t('profile.changePin')} onPress={() => {}} theme={theme} iconColor="#7C3AED" />
           <Separator theme={theme} />
-          <SettingRow icon="📱" label={t('profile.telephone')} value={user?.phone} theme={theme} />
+          <SettingRow iconName="phone-outline" label={t('profile.telephone')} value={user?.phone} theme={theme} iconColor="#16A34A" />
           {user?.email && (
             <>
               <Separator theme={theme} />
-              <SettingRow icon="📧" label={t('profile.email')} value={user?.email} theme={theme} />
+              <SettingRow iconName="email-outline" label={t('profile.email')} value={user?.email} theme={theme} iconColor="#0284C7" />
             </>
           )}
         </Card>
 
-        {/* Préférences */}
-        <Card style={{ marginBottom: theme.spacing.md }}>
-          <Text style={{ fontFamily: theme.typography.fontFamily.bold, fontSize: 12, color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>
+        {/* Preferences */}
+        <Card style={{ marginBottom: 16 }}>
+          <Text style={{ fontFamily: theme.typography.fontFamily.bold, fontSize: 11, color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 4 }}>
             {t('profile.preferences')}
           </Text>
 
-          {/* Mode sombre */}
           <SettingRow
-            icon={theme.isDark ? '🌙' : '☀️'}
+            iconName={theme.isDark ? 'weather-night' : 'weather-sunny'}
             label={t('profile.darkMode')}
             rightElement={
               <Switch
@@ -120,31 +147,36 @@ const ProfileScreen = ({ navigation }) => {
               />
             }
             theme={theme}
+            iconColor={theme.isDark ? '#7C3AED' : '#D97706'}
           />
           <Separator theme={theme} />
-
-          {/* Sélecteur de langue */}
           <SettingRow
-            icon="🌐"
+            iconName="translate"
             label={t('profile.language')}
             value={langNames[language] || language}
             onPress={() => setShowLangModal(true)}
             theme={theme}
+            iconColor="#0284C7"
           />
         </Card>
 
-        {/* Déconnexion */}
+        {/* Logout */}
         <TouchableOpacity
           onPress={handleLogout}
           style={{
-            backgroundColor: theme.colors.errorLight,
-            borderRadius: theme.radius.lg,
-            borderWidth: 1, borderColor: theme.colors.error,
-            padding: theme.spacing.md,
+            flexDirection: 'row',
             alignItems: 'center',
-            marginBottom: theme.spacing['2xl'],
+            justifyContent: 'center',
+            backgroundColor: theme.colors.errorLight,
+            borderRadius: 14,
+            borderWidth: 1,
+            borderColor: `${theme.colors.error}40`,
+            padding: 14,
+            marginBottom: 32,
+            gap: 10,
           }}
         >
+          <Icon name="logout" size={18} color={theme.colors.error} />
           <Text style={{ fontFamily: theme.typography.fontFamily.semiBold, fontSize: 15, color: theme.colors.error }}>
             {t('profile.logout')}
           </Text>
@@ -155,7 +187,7 @@ const ProfileScreen = ({ navigation }) => {
         </Text>
       </ScrollView>
 
-      {/* Modal sélecteur de langue */}
+      {/* Language modal */}
       <Modal
         visible={showLangModal}
         transparent
@@ -167,13 +199,16 @@ const ProfileScreen = ({ navigation }) => {
           activeOpacity={1}
           onPress={() => setShowLangModal(false)}
         >
-          <View style={{
-            width: 280,
-            backgroundColor: theme.backgroundCard,
-            borderRadius: theme.radius.xl,
-            overflow: 'hidden',
-            borderWidth: 1, borderColor: theme.border,
-          }}>
+          <View
+            style={{
+              width: 280,
+              backgroundColor: theme.backgroundCard,
+              borderRadius: 20,
+              overflow: 'hidden',
+              borderWidth: 1,
+              borderColor: theme.border,
+            }}
+          >
             <View style={{ padding: 20, borderBottomWidth: 1, borderBottomColor: theme.border }}>
               <Text style={{ fontFamily: theme.typography.fontFamily.bold, fontSize: 16, color: theme.text, textAlign: 'center' }}>
                 {t('profile.language')}
@@ -184,18 +219,23 @@ const ProfileScreen = ({ navigation }) => {
                 key={lang}
                 onPress={() => { changeLanguage(lang); setShowLangModal(false); }}
                 style={{
-                  flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
                   padding: 16,
                   borderBottomWidth: idx < supportedLanguages.length - 1 ? 1 : 0,
                   borderBottomColor: theme.border,
                   backgroundColor: language === lang ? theme.colors.primaryAlpha : 'transparent',
                 }}
               >
-                <Text style={{ fontFamily: theme.typography.fontFamily.medium, fontSize: 15, color: theme.text }}>
-                  {lang === 'fr' ? '🇫🇷' : '🇬🇧'} {langNames[lang]}
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <Icon name={flagIcon[lang] || 'flag'} size={18} color={theme.textSecondary} />
+                  <Text style={{ fontFamily: theme.typography.fontFamily.medium, fontSize: 15, color: theme.text }}>
+                    {langNames[lang]}
+                  </Text>
+                </View>
                 {language === lang && (
-                  <Text style={{ color: theme.colors.primary, fontSize: 18 }}>✓</Text>
+                  <Icon name="check-circle" size={18} color={theme.colors.primary} />
                 )}
               </TouchableOpacity>
             ))}

@@ -5,16 +5,23 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
+import Icon from '../../components/ui/Icon';
 import api from '../../services/api';
 
+const TYPE_META = {
+  deposit:    { icon: 'arrow-bottom-left',  color: '#16A34A' },
+  withdrawal: { icon: 'arrow-top-right',    color: '#DC2626' },
+  transfer:   { icon: 'swap-horizontal',    color: '#0A66C2' },
+  payment:    { icon: 'credit-card-outline', color: '#7C3AED' },
+  refund:     { icon: 'refresh',            color: '#D97706' },
+};
+
 const DetailRow = ({ label, value, theme }) => (
-  <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: theme.border }}>
+  <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 11, borderBottomWidth: 1, borderBottomColor: theme.border }}>
     <Text style={{ fontFamily: theme.typography.fontFamily.regular, fontSize: 13, color: theme.textSecondary, flex: 1 }}>{label}</Text>
     <Text style={{ fontFamily: theme.typography.fontFamily.medium, fontSize: 13, color: theme.text, flex: 1.5, textAlign: 'right' }}>{value || '—'}</Text>
   </View>
 );
-
-const TYPE_COLORS = { deposit: '#16A34A', withdrawal: '#DC2626', transfer: '#0A66C2', payment: '#7C3AED', refund: '#D97706' };
 
 const TransactionDetailScreen = ({ navigation, route }) => {
   const { t } = useTranslation();
@@ -31,7 +38,8 @@ const TransactionDetailScreen = ({ navigation, route }) => {
   }, [id]);
 
   const formatAmount = (amount) => new Intl.NumberFormat('fr-FR').format(amount) + ' XOF';
-  const formatDate = (d) => new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const formatDate = (d) =>
+    new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
   if (loading) {
     return (
@@ -43,7 +51,8 @@ const TransactionDetailScreen = ({ navigation, route }) => {
 
   if (!transaction) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.background, justifyContent: 'center', alignItems: 'center' }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: theme.background, justifyContent: 'center', alignItems: 'center', gap: 12 }}>
+        <Icon name="alert-circle-outline" size={40} color={theme.border} />
         <Text style={{ fontFamily: theme.typography.fontFamily.medium, color: theme.textSecondary }}>
           {t('common.noData')}
         </Text>
@@ -51,31 +60,48 @@ const TransactionDetailScreen = ({ navigation, route }) => {
     );
   }
 
+  const meta = TYPE_META[transaction.type] || TYPE_META.transfer;
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={['top']}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', padding: theme.spacing.base, marginBottom: theme.spacing.sm }}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 12 }}>
-            <Text style={{ fontSize: 22, color: theme.text }}>←</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', padding: 20, marginBottom: 4 }}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 12,
+              backgroundColor: theme.surface,
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: 12,
+            }}
+          >
+            <Icon name="arrow-left" size={20} color={theme.text} />
           </TouchableOpacity>
           <Text style={{ fontFamily: theme.typography.fontFamily.extraBold, fontSize: 20, color: theme.text }}>
             {t('transactions.detail')}
           </Text>
         </View>
 
-        {/* Montant hero */}
-        <View style={{ alignItems: 'center', paddingVertical: theme.spacing.xl, paddingHorizontal: theme.spacing.base }}>
-          <View style={{
-            width: 72, height: 72, borderRadius: 36,
-            backgroundColor: `${TYPE_COLORS[transaction.type] || theme.colors.primary}18`,
-            alignItems: 'center', justifyContent: 'center', marginBottom: 12,
-          }}>
-            <Text style={{ fontSize: 28, color: TYPE_COLORS[transaction.type] }}>
-              {transaction.type === 'deposit' ? '⬇' : transaction.type === 'withdrawal' ? '⬆' : '↔'}
-            </Text>
+        {/* Hero amount */}
+        <View style={{ alignItems: 'center', paddingVertical: 24, paddingHorizontal: 20 }}>
+          <View
+            style={{
+              width: 80,
+              height: 80,
+              borderRadius: 24,
+              backgroundColor: `${meta.color}15`,
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: 14,
+            }}
+          >
+            <Icon name={meta.icon} size={36} color={meta.color} />
           </View>
-          <Text style={{ fontFamily: theme.typography.fontFamily.extraBold, fontSize: 34, color: TYPE_COLORS[transaction.type], letterSpacing: -1 }}>
+          <Text style={{ fontFamily: theme.typography.fontFamily.extraBold, fontSize: 34, color: meta.color, letterSpacing: -1 }}>
             {formatAmount(transaction.amount)}
           </Text>
           <Text style={{ fontFamily: theme.typography.fontFamily.medium, fontSize: 15, color: theme.textSecondary, marginTop: 4 }}>
@@ -84,8 +110,8 @@ const TransactionDetailScreen = ({ navigation, route }) => {
           <Badge status={transaction.status} style={{ marginTop: 10 }} />
         </View>
 
-        {/* Détails */}
-        <View style={{ paddingHorizontal: theme.spacing.base, paddingBottom: theme.spacing['2xl'] }}>
+        {/* Details */}
+        <View style={{ paddingHorizontal: 20, paddingBottom: 32 }}>
           <Card>
             <DetailRow label={t('transactions.reference')} value={transaction.reference} theme={theme} />
             <DetailRow label={t('transactions.client')} value={transaction.clientName || transaction.clientPhone} theme={theme} />
@@ -99,16 +125,31 @@ const TransactionDetailScreen = ({ navigation, route }) => {
           </Card>
 
           {transaction.isDeleted && (
-            <Card style={{ backgroundColor: theme.colors.errorLight, borderColor: theme.colors.error, marginTop: theme.spacing.md }}>
-              <Text style={{ fontFamily: theme.typography.fontFamily.semiBold, color: theme.colors.error, fontSize: 13 }}>
-                ⚠ {t('transactions.deletedOn', { date: formatDate(transaction.deletedAt) })}
-              </Text>
-              {transaction.deleteReason && (
-                <Text style={{ fontFamily: theme.typography.fontFamily.regular, color: theme.colors.error, fontSize: 12, marginTop: 4 }}>
-                  {t('transactions.deleteReason', { reason: transaction.deleteReason })}
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'flex-start',
+                backgroundColor: theme.colors.errorLight,
+                borderRadius: 12,
+                borderWidth: 1,
+                borderColor: theme.colors.error,
+                padding: 14,
+                marginTop: 12,
+                gap: 10,
+              }}
+            >
+              <Icon name="alert" size={18} color={theme.colors.error} style={{ marginTop: 1 }} />
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontFamily: theme.typography.fontFamily.semiBold, color: theme.colors.error, fontSize: 13 }}>
+                  {t('transactions.deletedOn', { date: formatDate(transaction.deletedAt) })}
                 </Text>
-              )}
-            </Card>
+                {transaction.deleteReason && (
+                  <Text style={{ fontFamily: theme.typography.fontFamily.regular, color: theme.colors.error, fontSize: 12, marginTop: 4 }}>
+                    {t('transactions.deleteReason', { reason: transaction.deleteReason })}
+                  </Text>
+                )}
+              </View>
+            </View>
           )}
         </View>
       </ScrollView>

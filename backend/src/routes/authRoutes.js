@@ -6,12 +6,13 @@ const { protect } = require('../middleware/auth');
 const validate = require('../middleware/validate');
 
 // POST /api/auth/register
+// Le mot de passe peut être un PIN à 5 chiffres (mobile) ou un mot de passe (web)
 router.post(
   '/register',
   [
     body('name').trim().notEmpty().withMessage('Le nom est requis'),
     body('phone').trim().notEmpty().withMessage('Le numéro de téléphone est requis'),
-    body('password').isLength({ min: 8 }).withMessage('Mot de passe : minimum 8 caractères'),
+    body('password').isLength({ min: 5 }).withMessage('Mot de passe / PIN : minimum 5 caractères'),
   ],
   validate,
   authController.register
@@ -37,7 +38,7 @@ router.post('/logout', protect, authController.logout);
 // GET /api/auth/me
 router.get('/me', protect, authController.getMe);
 
-// PATCH /api/auth/change-password
+// PATCH /api/auth/change-password (web-admin, min 8 chars)
 router.patch(
   '/change-password',
   protect,
@@ -47,6 +48,24 @@ router.patch(
   ],
   validate,
   authController.changePassword
+);
+
+// PATCH /api/auth/change-pin (mobile, PIN à 5 chiffres)
+router.patch(
+  '/change-pin',
+  protect,
+  [
+    body('currentPin')
+      .notEmpty().withMessage('PIN actuel requis')
+      .isLength({ min: 5, max: 5 }).withMessage('PIN actuel : exactement 5 chiffres')
+      .isNumeric().withMessage('Le PIN doit contenir uniquement des chiffres'),
+    body('newPin')
+      .notEmpty().withMessage('Nouveau PIN requis')
+      .isLength({ min: 5, max: 5 }).withMessage('Nouveau PIN : exactement 5 chiffres')
+      .isNumeric().withMessage('Le PIN doit contenir uniquement des chiffres'),
+  ],
+  validate,
+  authController.changePin
 );
 
 module.exports = router;
