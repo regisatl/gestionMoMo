@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import ToastContainer from '../ui/Toast';
+import PlexusBackground from '../ui/PlexusBackground';
 
 const PAGE_TITLE_KEYS = {
   '/':              'nav.dashboard',
@@ -26,7 +27,9 @@ const DashboardLayout = ({ children }) => {
   const title = t(titleKey);
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)', position: 'relative', overflow: 'hidden' }}>
+      {/* Plexus derrière tout le contenu */}
+      <PlexusBackground fixed />
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((v) => !v)} />
       <div style={{
         flex: 1,
@@ -35,6 +38,8 @@ const DashboardLayout = ({ children }) => {
         minWidth: 0,
         marginLeft: collapsed ? '64px' : '240px',
         transition: 'margin-left 0.25s ease',
+        position: 'relative',
+        zIndex: 1,
       }}>
         <Header title={title} sidebarCollapsed={collapsed} onToggleSidebar={() => setCollapsed((v) => !v)} />
         <main style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>

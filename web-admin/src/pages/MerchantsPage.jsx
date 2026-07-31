@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, Store } from 'lucide-react';
+import { Search, Store, Phone, User, Mail, Building2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import Modal from '../components/ui/Modal';
 import { useNotifications } from '../context/NotificationContext';
 import api from '../services/api';
 
@@ -21,6 +22,53 @@ const MerchantsPage = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
+
+  /* ── New merchant form state ── */
+  const [form, setForm] = useState({ name: '', phone: '', email: '', businessName: '', password: '' });
+  const [formErrors, setFormErrors] = useState({});
+  const [createLoading, setCreateLoading] = useState(false);
+
+  const setField = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
+
+  const validateForm = () => {
+    const errs = {};
+    if (!form.name.trim())     errs.name     = t('merchants.form.nameRequired');
+    if (!form.phone.trim())    errs.phone    = t('merchants.form.phoneRequired');
+    if (!form.password.trim()) errs.password = t('merchants.form.passwordRequired');
+    setFormErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const handleCreateMerchant = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+    setCreateLoading(true);
+    try {
+      await api.post('/users/merchants', {
+        name:         form.name,
+        phone:        form.phone,
+        email:        form.email || undefined,
+        businessName: form.businessName || undefined,
+        password:     form.password,
+        role:         'merchant',
+      });
+      addToast({ type: 'success', title: t('toast.merchantCreated'), message: form.businessName || form.name });
+      setShowModal(false);
+      setForm({ name: '', phone: '', email: '', businessName: '', password: '' });
+      setFormErrors({});
+      loadMerchants();
+    } catch (err) {
+      addToast({ type: 'error', title: t('toast.merchantCreateError'), message: err.response?.data?.error });
+    } finally {
+      setCreateLoading(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setForm({ name: '', phone: '', email: '', businessName: '', password: '' });
+    setFormErrors({});
+  };
 
   const loadMerchants = useCallback(async () => {
     setLoading(true);
@@ -173,6 +221,79 @@ const MerchantsPage = () => {
           </div>
         </div>
       </Card>
+
+      {/* ── Create merchant modal ── */}
+      <Modal
+        open={showModal}
+        onClose={handleCloseModal}
+        title={t('merchants.newMerchant')}
+        width={480}
+      >
+        <form onSubmit={handleCreateMerchant} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <Input
+                label={t('merchants.form.fullName')}
+                value={form.name}
+                onChange={setField('name')}
+                placeholder="Jean Dupont"
+                icon={<User size={15} color="var(--text-secondary)" />}
+                error={formErrors.name}
+                required
+              />
+            </div>
+            <Input
+              label={t('merchants.form.phone')}
+              value={form.phone}
+              onChange={setField('phone')}
+              placeholder="+2290112345678"
+              icon={<Phone size={15} color="var(--text-secondary)" />}
+              error={formErrors.phone}
+              required
+            />
+            <Input
+              label={t('merchants.form.email')}
+              type="email"
+              value={form.email}
+              onChange={setField('email')}
+              placeholder="jean@example.com"
+              icon={<Mail size={15} color="var(--text-secondary)" />}
+            />
+            <div style={{ gridColumn: '1 / -1' }}>
+              <Input
+                label={t('merchants.form.businessName')}
+                value={form.businessName}
+                onChange={setField('businessName')}
+                placeholder={t('merchants.form.businessNamePlaceholder')}
+                icon={<Building2 size={15} color="var(--text-secondary)" />}
+              />
+            </div>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <Input
+                label={t('merchants.form.password')}
+                type="password"
+                value={form.password}
+                onChange={setField('password')}
+                placeholder="••••••••"
+                error={formErrors.password}
+                required
+              />
+            </div>
+          </div>
+          <p style={{ fontFamily: 'var(--font)', fontSize: '12px', color: 'var(--text-secondary)', margin: 0 }}>
+            {t('merchants.form.hint')}
+          </p>
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '4px' }}>
+            <Button type="button" variant="secondary" onClick={handleCloseModal}>
+              {t('common.cancel')}
+            </Button>
+            <Button type="submit" variant="primary" loading={createLoading} icon={<Store size={15} strokeWidth={2} />}>
+              {t('merchants.form.create')}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
     </div>
   );
 };

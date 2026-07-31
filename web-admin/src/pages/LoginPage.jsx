@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import PlexusBackground from '../components/ui/PlexusBackground';
 
 const LoginPage = () => {
   const { t } = useTranslation();
@@ -34,12 +35,18 @@ const LoginPage = () => {
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
       background: 'var(--bg-secondary)', padding: '24px',
+      position: 'relative', overflow: 'hidden',
     }}>
+      {/* Plexus en arrière-plan */}
+      <PlexusBackground />
+
+      {/* Card de login — zIndex 1 pour passer au-dessus du plexus */}
       <div style={{
         width: '100%', maxWidth: '400px',
         background: 'var(--bg-card)', borderRadius: '20px',
         border: '1px solid var(--border)',
         padding: '40px', boxShadow: '0 4px 24px var(--shadow)',
+        position: 'relative', zIndex: 1,
       }}>
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>

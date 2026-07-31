@@ -34,7 +34,7 @@ const NotificationsPage = () => {
       : t('notifications.allRead');
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '800px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '680px', margin: '0 auto', width: '100%' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <p style={{ fontFamily: 'var(--font)', fontSize: '14px', color: 'var(--text-secondary)' }}>
