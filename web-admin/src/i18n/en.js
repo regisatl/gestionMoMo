@@ -28,7 +28,7 @@ const en = {
   auth: {
     subtitle: 'Sign in to the admin panel',
     phoneLabel: 'Phone number',
-    phonePlaceholder: '+229 00 00 00 00 00 00',
+    phonePlaceholder: '+229 01 00 00 00 00 00',
     passwordLabel: 'Password',
     passwordPlaceholder: '••••••••',
     loginButton: 'Sign in',

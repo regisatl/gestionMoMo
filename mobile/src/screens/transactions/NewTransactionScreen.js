@@ -37,8 +37,13 @@ const NewTransactionScreen = ({ navigation, route }) => {
 
   const validate = () => {
     const errs = {};
-    if (!amount || isNaN(amount) || parseFloat(amount) < 1) errs.amount = t('transactions.invalidAmount');
-    if (!clientPhone.trim()) errs.clientPhone = t('transactions.clientPhoneRequired');
+    if (!amount || isNaN(amount) || parseFloat(amount) < 1) {
+      errs.amount = t('transactions.invalidAmount');
+    }
+    const { valid: phoneValid, error: phoneError } = validateBeninPhone(clientPhone);
+    if (!phoneValid) {
+      errs.clientPhone = phoneError;
+    }
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -149,7 +154,7 @@ const NewTransactionScreen = ({ navigation, route }) => {
 
           {/* Form */}
           <Input label={t('transactions.amountLabel')}     value={amount}       onChangeText={setAmount}       placeholder={t('transactions.amountPlaceholder')}     keyboardType="numeric"   error={errors.amount}      leftIcon={<Icon name="cash"            size={18} color={theme.textSecondary} />} />
-          <Input label={t('transactions.clientPhoneLabel')} value={clientPhone}  onChangeText={setClientPhone}  placeholder={t('auth.phonePlaceholder')}              keyboardType="phone-pad" error={errors.clientPhone} leftIcon={<Icon name="phone-outline"   size={18} color={theme.textSecondary} />} />
+          <Input label={t('transactions.clientPhoneLabel')} value={clientPhone}  onChangeText={setClientPhone}  placeholder="+2290112345678"              keyboardType="phone-pad" error={errors.clientPhone} leftIcon={<Icon name="phone-outline"   size={18} color={theme.textSecondary} />} />
           <Input label={t('transactions.clientNameLabel')}  value={clientName}   onChangeText={setClientName}   placeholder={t('transactions.clientNameLabel')}                                              leftIcon={<Icon name="account-outline" size={18} color={theme.textSecondary} />} />
           <Input label={t('transactions.descriptionLabel')} value={description}  onChangeText={setDescription}  placeholder={t('transactions.descriptionPlaceholder')} multiline numberOfLines={3} />
 

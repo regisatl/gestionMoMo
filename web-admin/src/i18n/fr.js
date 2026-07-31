@@ -28,7 +28,7 @@ const fr = {
   auth: {
     subtitle: "Connectez-vous à l'administration",
     phoneLabel: 'Numéro de téléphone',
-    phonePlaceholder: '+229 00 00 00 00 00 00',
+    phonePlaceholder: '+229 01 00 00 00 00 00',
     passwordLabel: 'Mot de passe',
     passwordPlaceholder: '••••••••',
     loginButton: 'Se connecter',

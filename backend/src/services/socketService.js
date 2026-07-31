@@ -47,7 +47,7 @@ const initSocket = (server) => {
     if (socket.userRole) socket.join(`role:${socket.userRole}`);
 
     socket.on('disconnect', () => {
-      logger.info(`❌ Socket déconnecté : ${userId} (socket: ${socket.id})`);
+      logger.info(`  Socket déconnecté : ${userId} (socket: ${socket.id})`);
       const sockets = userSockets.get(userId);
       if (sockets) {
         sockets.delete(socket.id);

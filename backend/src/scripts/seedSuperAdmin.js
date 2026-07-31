@@ -5,7 +5,7 @@
  * Appelé automatiquement au démarrage du serveur.
  *
  * Identifiants par défaut (surchargés par les variables d'env) :
- *   Téléphone : SUPER_ADMIN_PHONE  (défaut: +2290190919096)
+ *   Téléphone : SUPER_ADMIN_PHONE  (défaut: +2290100000000)
  *   PIN       : SUPER_ADMIN_PIN    (défaut: 12345)
  *   Nom       : SUPER_ADMIN_NAME   (défaut: Super Admin)
  *
@@ -41,7 +41,7 @@ const seedSuperAdmin = async () => {
     logger.info('    ⚠️  Changez le PIN dès la première connexion !');
     logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   } catch (err) {
-    logger.error(`❌ Erreur seedSuperAdmin : ${err.message}`);
+    logger.error(`  Erreur seedSuperAdmin : ${err.message}`);
   }
 };
 
