@@ -13,6 +13,7 @@ const Sidebar = ({ collapsed, onToggle }) => {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [showConfirm, setShowConfirm] = React.useState(false);
 
   const NAV_ITEMS = [
     { path: '/',              labelKey: 'nav.dashboard',     Icon: LayoutDashboard, roles: ['super_admin', 'merchant'] },
@@ -28,22 +29,28 @@ const Sidebar = ({ collapsed, onToggle }) => {
 
   const visibleItems = NAV_ITEMS.filter((item) => item.roles.includes(user?.role));
 
-  const handleLogout = async () => {
+  const handleLogoutConfirmed = async () => {
+    setShowConfirm(false);
     await logout();
     navigate('/login');
   };
 
   return (
-    <aside style={{
-      width: collapsed ? '64px' : '240px',
-      minHeight: '100vh',
-      background: 'var(--sidebar-bg)',
-      borderRight: '1px solid var(--border)',
-      display: 'flex', flexDirection: 'column',
-      transition: 'width 0.25s ease',
-      overflow: 'hidden',
-      flexShrink: 0,
-    }}>
+    <>
+      <aside style={{
+        width: collapsed ? '64px' : '240px',
+        height: '100vh',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        background: 'var(--sidebar-bg)',
+        borderRight: '1px solid var(--border)',
+        display: 'flex', flexDirection: 'column',
+        transition: 'width 0.25s ease',
+        overflow: 'hidden',
+        flexShrink: 0,
+        zIndex: 100,
+      }}>
       {/* Logo */}
       <div
         onClick={onToggle}
@@ -105,8 +112,8 @@ const Sidebar = ({ collapsed, onToggle }) => {
         })}
       </nav>
 
-      {/* Utilisateur connecté */}
-      <div style={{ borderTop: '1px solid var(--border)', padding: '12px 8px' }}>
+      {/* Utilisateur connecté — fixé en bas */}
+      <div style={{ borderTop: '1px solid var(--border)', padding: '12px 8px', marginTop: 'auto' }}>
         {!collapsed && (
           <div style={{
             display: 'flex', alignItems: 'center', gap: '10px',
@@ -142,7 +149,7 @@ const Sidebar = ({ collapsed, onToggle }) => {
 
         {/* Bouton déconnexion */}
         <button
-          onClick={handleLogout}
+          onClick={() => setShowConfirm(true)}
           title={collapsed ? t('nav.logout') : undefined}
           style={{
             width: '100%', display: 'flex', alignItems: 'center',
@@ -163,6 +170,81 @@ const Sidebar = ({ collapsed, onToggle }) => {
         </button>
       </div>
     </aside>
+
+      {/* Modale de confirmation de déconnexion */}
+      {showConfirm && (
+        <div style={{
+          position: 'fixed', inset: 0,
+          background: 'rgba(0,0,0,0.45)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 999,
+        }}>
+          <div style={{
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            borderRadius: '16px',
+            padding: '32px',
+            width: '360px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+            display: 'flex', flexDirection: 'column', gap: '20px',
+          }}>
+            {/* Icône */}
+            <div style={{
+              width: '48px', height: '48px', borderRadius: '50%',
+              background: 'var(--color-error-light, #fee2e2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto',
+            }}>
+              <LogOut size={22} color="var(--color-error)" strokeWidth={2} />
+            </div>
+
+            {/* Texte */}
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                fontFamily: 'var(--font)', fontWeight: 700, fontSize: '16px',
+                color: 'var(--text)', marginBottom: '8px',
+              }}>
+                {t('auth.logoutConfirmTitle')}
+              </div>
+              <div style={{
+                fontFamily: 'var(--font)', fontWeight: 400, fontSize: '13px',
+                color: 'var(--text-secondary)',
+              }}>
+                {t('auth.logoutConfirmMessage')}
+              </div>
+            </div>
+
+            {/* Boutons */}
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={() => setShowConfirm(false)}
+                style={{
+                  flex: 1, padding: '10px',
+                  borderRadius: '10px', border: '1px solid var(--border)',
+                  background: 'transparent', cursor: 'pointer',
+                  fontFamily: 'var(--font)', fontWeight: 500, fontSize: '13px',
+                  color: 'var(--text)',
+                }}
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                onClick={handleLogoutConfirmed}
+                style={{
+                  flex: 1, padding: '10px',
+                  borderRadius: '10px', border: 'none',
+                  background: 'var(--color-error)', cursor: 'pointer',
+                  fontFamily: 'var(--font)', fontWeight: 600, fontSize: '13px',
+                  color: '#fff',
+                }}
+              >
+                {t('nav.logout')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

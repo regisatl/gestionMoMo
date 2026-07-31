@@ -33,6 +33,8 @@ const en = {
     passwordPlaceholder: '••••••••',
     loginButton: 'Sign in',
     invalidCredentials: 'Invalid credentials.',
+    logoutConfirmTitle: 'Sign out',
+    logoutConfirmMessage: 'Are you sure you want to sign out?',
   },
 
   // ─── Sidebar / Navigation ─────────────────────────────────────

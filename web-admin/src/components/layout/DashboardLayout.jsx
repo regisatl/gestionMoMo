@@ -28,7 +28,14 @@ const DashboardLayout = ({ children }) => {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)' }}>
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((v) => !v)} />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        minWidth: 0,
+        marginLeft: collapsed ? '64px' : '240px',
+        transition: 'margin-left 0.25s ease',
+      }}>
         <Header title={title} sidebarCollapsed={collapsed} onToggleSidebar={() => setCollapsed((v) => !v)} />
         <main style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
           {children}

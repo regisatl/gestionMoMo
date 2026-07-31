@@ -33,6 +33,8 @@ const fr = {
     passwordPlaceholder: '••••••••',
     loginButton: 'Se connecter',
     invalidCredentials: 'Identifiants incorrects.',
+    logoutConfirmTitle: 'Déconnexion',
+    logoutConfirmMessage: 'Voulez-vous vraiment vous déconnecter ?',
   },
 
   // ─── Sidebar / Navigation ─────────────────────────────────────
