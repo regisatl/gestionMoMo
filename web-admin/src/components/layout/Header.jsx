@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Menu, Sun, Moon, Bell } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useNotifications } from '../../context/NotificationContext';
 
 const Header = ({ title, sidebarCollapsed, onToggleSidebar }) => {
+  const { t } = useTranslation();
   const { isDark, toggleTheme } = useTheme();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [showNotifPanel, setShowNotifPanel] = useState(false);
@@ -60,8 +62,8 @@ const Header = ({ title, sidebarCollapsed, onToggleSidebar }) => {
         {/* Toggle thème */}
         <button
           onClick={toggleTheme}
-          aria-label={isDark ? 'Mode clair' : 'Mode sombre'}
-          title={isDark ? 'Mode clair' : 'Mode sombre'}
+          aria-label={isDark ? t('header.lightMode') : t('header.darkMode')}
+          title={isDark ? t('header.lightMode') : t('header.darkMode')}
           style={iconBtnStyle}
           onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-primary-alpha)'; e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.color = 'var(--color-primary)'; }}
           onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--surface)'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
@@ -73,7 +75,7 @@ const Header = ({ title, sidebarCollapsed, onToggleSidebar }) => {
         <div ref={notifRef} style={{ position: 'relative' }}>
           <button
             onClick={() => setShowNotifPanel((v) => !v)}
-            aria-label="Notifications"
+            aria-label={t('header.notifications')}
             style={{ ...iconBtnStyle, position: 'relative' }}
             onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-primary-alpha)'; e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.color = 'var(--color-primary)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--surface)'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
@@ -104,18 +106,18 @@ const Header = ({ title, sidebarCollapsed, onToggleSidebar }) => {
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderBottom: '1px solid var(--border)' }}>
                 <span style={{ fontFamily: 'var(--font)', fontWeight: 700, fontSize: '14px', color: 'var(--text)' }}>
-                  Notifications {unreadCount > 0 && `(${unreadCount})`}
+                  {t('header.notifications')} {unreadCount > 0 && t('header.notifCount', { count: unreadCount })}
                 </span>
                 {unreadCount > 0 && (
                   <button onClick={markAllAsRead} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font)', fontSize: '12px', color: 'var(--color-primary)', fontWeight: 600 }}>
-                    Tout lire
+                    {t('header.markAllRead')}
                   </button>
                 )}
               </div>
               <div style={{ overflowY: 'auto', maxHeight: '380px' }}>
                 {notifications.length === 0 ? (
                   <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)', fontFamily: 'var(--font)', fontSize: '13px' }}>
-                    Aucune notification
+                    {t('header.noNotifications')}
                   </div>
                 ) : notifications.slice(0, 15).map((n) => (
                   <div
@@ -144,7 +146,7 @@ const Header = ({ title, sidebarCollapsed, onToggleSidebar }) => {
                   onClick={() => { setShowNotifPanel(false); navigate('/notifications'); }}
                   style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--color-primary)', fontWeight: 600, padding: '4px' }}
                 >
-                  Voir toutes les notifications →
+                  {t('header.seeAllNotifications')}
                 </button>
               </div>
             </div>

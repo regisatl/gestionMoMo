@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  KeyboardAvoidingView, Platform, StyleSheet,
+  KeyboardAvoidingView, Platform,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 
 const LoginScreen = ({ navigation }) => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const { login } = useAuth();
 
@@ -19,9 +21,9 @@ const LoginScreen = ({ navigation }) => {
 
   const validate = () => {
     const errs = {};
-    if (!phone.trim()) errs.phone = 'Numéro de téléphone requis';
-    if (!password) errs.password = 'Mot de passe requis';
-    if (password && password.length < 8) errs.password = 'Minimum 8 caractères';
+    if (!phone.trim()) errs.phone = t('auth.phoneRequired');
+    if (!password) errs.password = t('auth.passwordRequired');
+    if (password && password.length < 8) errs.password = t('auth.passwordMinLength');
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -32,7 +34,7 @@ const LoginScreen = ({ navigation }) => {
     try {
       await login(phone.trim(), password);
     } catch (err) {
-      const msg = err.response?.data?.error || 'Erreur de connexion. Réessayez.';
+      const msg = err.response?.data?.error || t('auth.loginError');
       setErrors({ general: msg });
     } finally {
       setLoading(false);
@@ -69,7 +71,7 @@ const LoginScreen = ({ navigation }) => {
               letterSpacing: -0.5,
             }}
           >
-            GestionMoMo
+            {t('common.appName')}
           </Text>
           <Text
             style={{
@@ -79,7 +81,7 @@ const LoginScreen = ({ navigation }) => {
               marginTop: 6,
             }}
           >
-            Connectez-vous à votre compte
+            {t('auth.loginTitle')}
           </Text>
         </View>
 
@@ -101,18 +103,18 @@ const LoginScreen = ({ navigation }) => {
 
         {/* Formulaire */}
         <Input
-          label="Numéro de téléphone"
+          label={t('auth.phoneLabel')}
           value={phone}
           onChangeText={setPhone}
-          placeholder="+229 00 00 00 00"
+          placeholder={t('auth.phonePlaceholder')}
           keyboardType="phone-pad"
           error={errors.phone}
         />
         <Input
-          label="Mot de passe"
+          label={t('auth.passwordLabel')}
           value={password}
           onChangeText={setPassword}
-          placeholder="Votre mot de passe"
+          placeholder={t('auth.passwordPlaceholder')}
           secureTextEntry
           error={errors.password}
         />
@@ -122,11 +124,11 @@ const LoginScreen = ({ navigation }) => {
           style={{ alignSelf: 'flex-end', marginTop: -theme.spacing.sm, marginBottom: theme.spacing.lg }}
         >
           <Text style={{ fontFamily: theme.typography.fontFamily.medium, fontSize: 13, color: theme.colors.primary }}>
-            Mot de passe oublié ?
+            {t('auth.forgotPassword')}
           </Text>
         </TouchableOpacity>
 
-        <Button title="Se connecter" onPress={handleLogin} loading={loading} fullWidth size="lg" />
+        <Button title={t('auth.loginButton')} onPress={handleLogin} loading={loading} fullWidth size="lg" />
 
         {/* Footer */}
         <Text
@@ -138,7 +140,7 @@ const LoginScreen = ({ navigation }) => {
             color: theme.textSecondary,
           }}
         >
-          © 2025 GestionMoMo — v1.0.0
+          {t('common.copyright')}
         </Text>
       </ScrollView>
     </KeyboardAvoidingView>

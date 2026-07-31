@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { useNotifications } from '../context/NotificationContext';
 
@@ -34,6 +35,7 @@ const TabIcon = ({ label, focused, color }) => (
 );
 
 const MainNavigator = () => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const { unreadCount } = useNotifications();
 
@@ -61,23 +63,23 @@ const MainNavigator = () => {
       <Tab.Screen
         name="Home"
         component={HomeScreen}
-        options={{ tabBarLabel: 'Accueil', tabBarIcon: ({ color, focused }) => <TabIcon label="🏠" focused={focused} color={color} /> }}
+        options={{ tabBarLabel: t('nav.home'), tabBarIcon: ({ color, focused }) => <TabIcon label="🏠" focused={focused} color={color} /> }}
       />
       <Tab.Screen
         name="Transactions"
         component={TransactionsStack}
-        options={{ tabBarLabel: 'Transactions', tabBarIcon: ({ color, focused }) => <TabIcon label="↔" focused={focused} color={color} /> }}
+        options={{ tabBarLabel: t('nav.transactions'), tabBarIcon: ({ color, focused }) => <TabIcon label="↔" focused={focused} color={color} /> }}
       />
       <Tab.Screen
         name="Reports"
         component={ReportsScreen}
-        options={{ tabBarLabel: 'Rapports', tabBarIcon: ({ color, focused }) => <TabIcon label="📊" focused={focused} color={color} /> }}
+        options={{ tabBarLabel: t('nav.reports'), tabBarIcon: ({ color, focused }) => <TabIcon label="📊" focused={focused} color={color} /> }}
       />
       <Tab.Screen
         name="Notifications"
         component={NotificationsScreen}
         options={{
-          tabBarLabel: 'Alertes',
+          tabBarLabel: t('nav.notifications'),
           tabBarIcon: ({ color, focused }) => <TabIcon label="🔔" focused={focused} color={color} />,
           tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
           tabBarBadgeStyle: { backgroundColor: theme.colors.error, fontSize: 10 },
@@ -86,7 +88,7 @@ const MainNavigator = () => {
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
-        options={{ tabBarLabel: 'Profil', tabBarIcon: ({ color, focused }) => <TabIcon label="👤" focused={focused} color={color} /> }}
+        options={{ tabBarLabel: t('nav.profile'), tabBarIcon: ({ color, focused }) => <TabIcon label="👤" focused={focused} color={color} /> }}
       />
     </Tab.Navigator>
   );

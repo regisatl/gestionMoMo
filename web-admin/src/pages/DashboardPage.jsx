@@ -10,6 +10,7 @@ import {
   ArrowDownCircle, ArrowUpCircle, ArrowLeftRight,
   Coins, Globe, TrendingUp,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
@@ -54,6 +55,7 @@ const StatBox = ({ label, value, Icon, color, delta, onClick }) => (
 const fmt = (n = 0) => new Intl.NumberFormat('fr-FR').format(n);
 
 const DashboardPage = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [report, setReport] = useState(null);
@@ -89,22 +91,27 @@ const DashboardPage = () => {
   const barChartData = {
     labels: chartLabels,
     datasets: [
-      { label: 'Dépôts', data: depositData, backgroundColor: 'rgba(22,163,74,0.75)', borderRadius: 6 },
-      { label: 'Retraits', data: withdrawalData, backgroundColor: 'rgba(220,38,38,0.65)', borderRadius: 6 },
+      { label: t('dashboard.chartLabels.deposits'),    data: depositData,    backgroundColor: 'rgba(22,163,74,0.75)',  borderRadius: 6 },
+      { label: t('dashboard.chartLabels.withdrawals'), data: withdrawalData, backgroundColor: 'rgba(220,38,38,0.65)', borderRadius: 6 },
     ],
   };
 
   const lineChartData = {
     labels: chartLabels,
     datasets: [{
-      label: 'Bénéfice', data: chartData.map((d) => d.benefit || 0),
+      label: t('dashboard.chartLabels.benefit'),
+      data: chartData.map((d) => d.benefit || 0),
       borderColor: '#0A66C2', backgroundColor: 'rgba(10,102,194,0.1)',
       tension: 0.4, fill: true, pointRadius: 3,
     }],
   };
 
   const doughnutData = {
-    labels: ['Complétées', 'En attente', 'Échouées'],
+    labels: [
+      t('dashboard.chartLabels.completed'),
+      t('dashboard.chartLabels.pending'),
+      t('dashboard.chartLabels.failed'),
+    ],
     datasets: [{
       data: [report?.completedCount || 0, report?.pendingCount || 0, report?.failedCount || 0],
       backgroundColor: ['#16A34A', '#D97706', '#DC2626'],
@@ -122,67 +129,69 @@ const DashboardPage = () => {
   };
 
   const TYPE_COLORS = { deposit: '#16A34A', withdrawal: '#DC2626', transfer: '#0A66C2', payment: '#7C3AED', refund: '#D97706' };
-  const TYPE_LABELS = { deposit: 'Dépôt', withdrawal: 'Retrait', transfer: 'Transfert', payment: 'Paiement', refund: 'Remboursement' };
+
+  const noDataEl = (
+    <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>
+      {t('common.noData')}
+    </div>
+  );
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Stats principales */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-        <StatBox label="Dépôts du jour"    value={`${fmt(report?.totalDeposits)} F`}   Icon={ArrowDownCircle}  color="#16A34A" onClick={() => navigate('/transactions?type=deposit')} />
-        <StatBox label="Retraits du jour"  value={`${fmt(report?.totalWithdrawals)} F`} Icon={ArrowUpCircle}    color="#DC2626" onClick={() => navigate('/transactions?type=withdrawal')} />
-        <StatBox label="Transactions"      value={report?.transactionsCount || 0}        Icon={ArrowLeftRight}   color="#0A66C2" onClick={() => navigate('/transactions')} />
-        <StatBox label="Bénéfice du jour"  value={`${fmt(report?.benefit)} F`}          Icon={TrendingUp}       color="#7C3AED" />
+        <StatBox label={t('dashboard.todayDeposits')}    value={`${fmt(report?.totalDeposits)} F`}   Icon={ArrowDownCircle}  color="#16A34A" onClick={() => navigate('/transactions?type=deposit')} />
+        <StatBox label={t('dashboard.todayWithdrawals')} value={`${fmt(report?.totalWithdrawals)} F`} Icon={ArrowUpCircle}   color="#DC2626" onClick={() => navigate('/transactions?type=withdrawal')} />
+        <StatBox label={t('dashboard.transactions')}     value={report?.transactionsCount || 0}        Icon={ArrowLeftRight}  color="#0A66C2" onClick={() => navigate('/transactions')} />
+        <StatBox label={t('dashboard.todayBenefit')}     value={`${fmt(report?.benefit)} F`}          Icon={TrendingUp}      color="#7C3AED" />
         {user?.role === 'super_admin' && globalStats && (
-          <StatBox label="Revenus globaux" value={`${fmt(globalStats.totalRevenue)} F`} Icon={Globe}            color="#0284C7" onClick={() => navigate('/reports')} />
+          <StatBox label={t('dashboard.globalRevenue')} value={`${fmt(globalStats.totalRevenue)} F`} Icon={Globe} color="#0284C7" onClick={() => navigate('/reports')} />
         )}
       </div>
 
       {/* Graphiques */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-        <Card title="Dépôts & Retraits (30 jours)" style={{ gridColumn: '1 / -1' }}>
+        <Card title={t('dashboard.depositsWithdrawals30')} style={{ gridColumn: '1 / -1' }}>
           <div style={{ height: '260px' }}>
-            {chartData.length > 0 ? <Bar data={barChartData} options={chartOptions} /> : (
-              <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>
-                Pas encore de données
-              </div>
-            )}
+            {chartData.length > 0 ? <Bar data={barChartData} options={chartOptions} /> : noDataEl}
           </div>
         </Card>
 
-        <Card title="Évolution bénéfice">
+        <Card title={t('dashboard.benefitEvolution')}>
           <div style={{ height: '220px' }}>
-            {chartData.length > 0 ? <Line data={lineChartData} options={chartOptions} /> : (
-              <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>
-                Pas encore de données
-              </div>
-            )}
+            {chartData.length > 0 ? <Line data={lineChartData} options={chartOptions} /> : noDataEl}
           </div>
         </Card>
 
-        <Card title="Statut transactions du jour">
+        <Card title={t('dashboard.transactionStatusToday')}>
           <div style={{ height: '220px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {(report?.completedCount || report?.pendingCount || report?.failedCount) ? (
               <Doughnut data={doughnutData} options={{ ...chartOptions, scales: undefined, cutout: '60%' }} />
-            ) : (
-              <div style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>Pas encore de données</div>
-            )}
+            ) : noDataEl}
           </div>
         </Card>
       </div>
 
       {/* Transactions récentes */}
       <Card
-        title="Transactions récentes"
+        title={t('dashboard.recentTransactions')}
         action={
           <button onClick={() => navigate('/transactions')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--color-primary)', fontWeight: 600 }}>
-            Voir tout →
+            {t('common.seeAll')}
           </button>
         }
       >
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
-              {['Référence', 'Client', 'Type', 'Montant', 'Statut', 'Date'].map((h) => (
+              {[
+                t('dashboard.tableHeaders.reference'),
+                t('dashboard.tableHeaders.client'),
+                t('dashboard.tableHeaders.type'),
+                t('dashboard.tableHeaders.amount'),
+                t('dashboard.tableHeaders.status'),
+                t('dashboard.tableHeaders.date'),
+              ].map((h) => (
                 <th key={h} style={{ fontFamily: 'var(--font)', fontWeight: 600, fontSize: '12px', color: 'var(--text-secondary)', textAlign: 'left', padding: '8px 12px', borderBottom: '1px solid var(--border)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
                   {h}
                 </th>
@@ -191,7 +200,9 @@ const DashboardPage = () => {
           </thead>
           <tbody>
             {recentTxns.length === 0 ? (
-              <tr><td colSpan={6} style={{ textAlign: 'center', padding: '32px', color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>Aucune transaction</td></tr>
+              <tr><td colSpan={6} style={{ textAlign: 'center', padding: '32px', color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>
+                {t('dashboard.noTransactions')}
+              </td></tr>
             ) : recentTxns.map((txn) => (
               <tr
                 key={txn._id}
@@ -204,7 +215,7 @@ const DashboardPage = () => {
                 <td style={{ padding: '12px', fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text)' }}>{txn.clientName || txn.clientPhone || '—'}</td>
                 <td style={{ padding: '12px' }}>
                   <span style={{ fontFamily: 'var(--font)', fontSize: '12px', fontWeight: 600, color: TYPE_COLORS[txn.type] }}>
-                    {TYPE_LABELS[txn.type]}
+                    {t(`transactions.types.${txn.type}`, { defaultValue: txn.type })}
                   </span>
                 </td>
                 <td style={{ padding: '12px', fontFamily: 'var(--font)', fontSize: '13px', fontWeight: 700, color: txn.type === 'withdrawal' ? 'var(--color-error)' : 'var(--color-success)' }}>

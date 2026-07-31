@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, Globe } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import api from '../services/api';
 
 const SettingsPage = () => {
+  const { t } = useTranslation();
   const { user, updateUser } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const { language, changeLanguage, supportedLanguages } = useLanguage();
 
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
@@ -23,15 +27,26 @@ const SettingsPage = () => {
   const [pwdLoading, setPwdLoading] = useState(false);
   const [pwdMsg, setPwdMsg] = useState({ text: '', type: '' });
 
+  const roleLabels = {
+    super_admin: t('settings.roles.super_admin'),
+    merchant:    t('settings.roles.merchant'),
+    client:      t('settings.roles.client'),
+  };
+
+  const langNames = {
+    fr: t('settings.languageNames.fr'),
+    en: t('settings.languageNames.en'),
+  };
+
   const handleProfileSave = async (e) => {
     e.preventDefault();
     setProfileLoading(true);
     try {
       const { data } = await api.patch(`/users/${user._id}`, { name, email, businessName });
       updateUser(data.user);
-      setProfileMsg('Profil mis à jour avec succès.');
+      setProfileMsg(t('settings.profileSuccess'));
     } catch (err) {
-      setProfileMsg(err.response?.data?.error || 'Erreur lors de la sauvegarde.');
+      setProfileMsg(err.response?.data?.error || t('settings.profileError'));
     } finally {
       setProfileLoading(false);
       setTimeout(() => setProfileMsg(''), 3000);
@@ -41,20 +56,20 @@ const SettingsPage = () => {
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (newPwd !== confirmPwd) {
-      setPwdMsg({ text: 'Les mots de passe ne correspondent pas.', type: 'error' });
+      setPwdMsg({ text: t('settings.passwordMismatch'), type: 'error' });
       return;
     }
     if (newPwd.length < 8) {
-      setPwdMsg({ text: 'Minimum 8 caractères requis.', type: 'error' });
+      setPwdMsg({ text: t('settings.passwordTooShort'), type: 'error' });
       return;
     }
     setPwdLoading(true);
     try {
       await api.patch('/auth/change-password', { currentPassword: currentPwd, newPassword: newPwd });
-      setPwdMsg({ text: 'Mot de passe modifié avec succès.', type: 'success' });
+      setPwdMsg({ text: t('settings.passwordSuccess'), type: 'success' });
       setCurrentPwd(''); setNewPwd(''); setConfirmPwd('');
     } catch (err) {
-      setPwdMsg({ text: err.response?.data?.error || 'Erreur.', type: 'error' });
+      setPwdMsg({ text: err.response?.data?.error || t('settings.passwordError'), type: 'error' });
     } finally {
       setPwdLoading(false);
       setTimeout(() => setPwdMsg({ text: '', type: '' }), 3000);
@@ -64,34 +79,34 @@ const SettingsPage = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '640px' }}>
       {/* Profil */}
-      <Card title="Informations du profil">
+      <Card title={t('settings.profileTitle')}>
         <form onSubmit={handleProfileSave} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <Input label="Nom complet" value={name} onChange={(e) => setName(e.target.value)} required />
-          <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <Input label={t('settings.fullNameLabel')} value={name} onChange={(e) => setName(e.target.value)} required />
+          <Input label={t('settings.emailLabel')} type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
           {user?.role === 'merchant' && (
-            <Input label="Nom de l'entreprise" value={businessName} onChange={(e) => setBusinessName(e.target.value)} />
+            <Input label={t('settings.businessNameLabel')} value={businessName} onChange={(e) => setBusinessName(e.target.value)} />
           )}
-          <Input label="Téléphone" value={user?.phone || ''} disabled />
-          <Input label="Rôle" value={user?.role === 'super_admin' ? 'Super Administrateur' : user?.role === 'merchant' ? 'Marchand' : 'Client'} disabled />
+          <Input label={t('settings.phoneLabel')} value={user?.phone || ''} disabled />
+          <Input label={t('settings.roleLabel')} value={roleLabels[user?.role] || user?.role} disabled />
           {profileMsg && (
-            <p style={{ fontFamily: 'var(--font)', fontSize: '13px', color: profileMsg.includes('succès') ? 'var(--color-success)' : 'var(--color-error)' }}>
+            <p style={{ fontFamily: 'var(--font)', fontSize: '13px', color: profileMsg.includes(t('settings.profileSuccess')) ? 'var(--color-success)' : 'var(--color-error)' }}>
               {profileMsg}
             </p>
           )}
-          <Button type="submit" variant="primary" loading={profileLoading}>Enregistrer</Button>
+          <Button type="submit" variant="primary" loading={profileLoading}>{t('settings.saveProfile')}</Button>
         </form>
       </Card>
 
       {/* Apparence */}
-      <Card title="Apparence">
+      <Card title={t('settings.appearanceTitle')}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--color-primary-alpha)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {isDark ? <Moon size={18} color="var(--color-primary)" strokeWidth={2} /> : <Sun size={18} color="var(--color-primary)" strokeWidth={2} />}
             </div>
             <div>
-              <p style={{ fontFamily: 'var(--font)', fontWeight: 600, fontSize: '14px', color: 'var(--text)' }}>Mode sombre</p>
-              <p style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text-secondary)', marginTop: '2px' }}>Basculer entre le thème clair et sombre</p>
+              <p style={{ fontFamily: 'var(--font)', fontWeight: 600, fontSize: '14px', color: 'var(--text)' }}>{t('settings.darkModeLabel')}</p>
+              <p style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text-secondary)', marginTop: '2px' }}>{t('settings.darkModeDesc')}</p>
             </div>
           </div>
           <button
@@ -116,18 +131,49 @@ const SettingsPage = () => {
         </div>
       </Card>
 
+      {/* Langue */}
+      <Card title={t('settings.languageTitle')}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--color-primary-alpha)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Globe size={18} color="var(--color-primary)" strokeWidth={2} />
+            </div>
+            <div>
+              <p style={{ fontFamily: 'var(--font)', fontWeight: 600, fontSize: '14px', color: 'var(--text)' }}>{t('settings.languageTitle')}</p>
+              <p style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text-secondary)', marginTop: '2px' }}>{t('settings.languageDesc')}</p>
+            </div>
+          </div>
+          <select
+            value={language}
+            onChange={(e) => changeLanguage(e.target.value)}
+            style={{
+              height: '42px', padding: '0 16px', borderRadius: '10px',
+              border: '1.5px solid var(--input-border)', background: 'var(--input-bg)',
+              color: 'var(--text)', fontFamily: 'var(--font)', fontSize: '14px', fontWeight: 500,
+              cursor: 'pointer',
+            }}
+          >
+            {supportedLanguages.map((lang) => (
+              <option key={lang} value={lang}>
+                {lang === 'fr' ? '🇫🇷' : '🇬🇧'} {langNames[lang]}
+              </option>
+            ))}
+          </select>
+        </div>
+      </Card>
+
       {/* Mot de passe */}
-      <Card title="Sécurité — Modifier le mot de passe">
+      <Card title={t('settings.securityTitle')}>
         <form onSubmit={handlePasswordChange} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <Input label="Mot de passe actuel" type="password" value={currentPwd} onChange={(e) => setCurrentPwd(e.target.value)} required />
-          <Input label="Nouveau mot de passe" type="password" value={newPwd} onChange={(e) => setNewPwd(e.target.value)} required />
-          <Input label="Confirmer le nouveau mot de passe" type="password" value={confirmPwd} onChange={(e) => setConfirmPwd(e.target.value)} required />
+          <Input label={t('settings.currentPasswordLabel')} type="password" value={currentPwd} onChange={(e) => setCurrentPwd(e.target.value)} required />
+          <Input label={t('settings.newPasswordLabel')} type="password" value={newPwd} onChange={(e) => setNewPwd(e.target.value)} required />
+          <Input label={t('settings.confirmPasswordLabel')} type="password" value={confirmPwd} onChange={(e) => setConfirmPwd(e.target.value)} required />
           {pwdMsg.text && (
             <p style={{ fontFamily: 'var(--font)', fontSize: '13px', color: pwdMsg.type === 'success' ? 'var(--color-success)' : 'var(--color-error)' }}>
               {pwdMsg.text}
             </p>
           )}
-          <Button type="submit" variant="primary" loading={pwdLoading}>Modifier le mot de passe</Button>
+          <Button type="submit" variant="primary" loading={pwdLoading}>{t('settings.changePasswordButton')}</Button>
         </form>
       </Card>
     </div>

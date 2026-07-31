@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import api from '../services/api';
@@ -11,6 +12,7 @@ const ACTION_COLORS = {
 };
 
 const AuditPage = () => {
+  const { t } = useTranslation();
   const [logs, setLogs] = useState([]);
   const [pagination, setPagination] = useState({ total: 0, pages: 1 });
   const [page, setPage] = useState(1);
@@ -33,6 +35,10 @@ const AuditPage = () => {
 
   useEffect(() => { loadLogs(); }, [loadLogs]);
 
+  const entryLabel = pagination.total <= 1
+    ? t('audit.entryCount', { count: pagination.total })
+    : t('audit.entryCountPlural', { count: pagination.total });
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Filtre */}
@@ -43,18 +49,18 @@ const AuditPage = () => {
             onChange={(e) => { setActionFilter(e.target.value); setPage(1); }}
             style={{ height: '42px', padding: '0 14px', borderRadius: '10px', border: '1.5px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)', fontFamily: 'var(--font)', fontSize: '14px' }}
           >
-            <option value="">Toutes les actions</option>
-            <option value="user_login">Connexion</option>
-            <option value="user_login_failed">Échec connexion</option>
-            <option value="user_created">Création utilisateur</option>
-            <option value="user_suspended">Suspension</option>
-            <option value="transaction_created">Transaction créée</option>
-            <option value="transaction_deleted">Transaction supprimée</option>
-            <option value="password_changed">Mot de passe modifié</option>
-            <option value="momo_callback_received">Callback MoMo</option>
+            <option value="">{t('audit.allActions')}</option>
+            <option value="user_login">{t('audit.actions.user_login')}</option>
+            <option value="user_login_failed">{t('audit.actions.user_login_failed')}</option>
+            <option value="user_created">{t('audit.actions.user_created')}</option>
+            <option value="user_suspended">{t('audit.actions.user_suspended')}</option>
+            <option value="transaction_created">{t('audit.actions.transaction_created')}</option>
+            <option value="transaction_deleted">{t('audit.actions.transaction_deleted')}</option>
+            <option value="password_changed">{t('audit.actions.password_changed')}</option>
+            <option value="momo_callback_received">{t('audit.actions.momo_callback_received')}</option>
           </select>
           <span style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text-secondary)' }}>
-            {pagination.total} entrée{pagination.total !== 1 ? 's' : ''}
+            {entryLabel}
           </span>
         </div>
       </Card>
@@ -65,7 +71,14 @@ const AuditPage = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                {['Horodatage', 'Action', 'Effectué par', 'Cible', 'IP', 'Détails'].map((h) => (
+                {[
+                  t('audit.tableHeaders.timestamp'),
+                  t('audit.tableHeaders.action'),
+                  t('audit.tableHeaders.performedBy'),
+                  t('audit.tableHeaders.target'),
+                  t('audit.tableHeaders.ip'),
+                  t('audit.tableHeaders.details'),
+                ].map((h) => (
                   <th key={h} style={{ fontFamily: 'var(--font)', fontWeight: 600, fontSize: '11px', color: 'var(--text-secondary)', textAlign: 'left', padding: '12px 16px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
                     {h}
                   </th>
@@ -74,9 +87,9 @@ const AuditPage = () => {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={6} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>Chargement...</td></tr>
+                <tr><td colSpan={6} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>{t('audit.loading')}</td></tr>
               ) : logs.length === 0 ? (
-                <tr><td colSpan={6} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>Aucun log d'audit</td></tr>
+                <tr><td colSpan={6} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>{t('audit.noLogs')}</td></tr>
               ) : logs.map((log) => (
                 <tr key={log._id} style={{ borderBottom: '1px solid var(--border)' }}
                   onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface)'}
@@ -112,11 +125,11 @@ const AuditPage = () => {
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderTop: '1px solid var(--border)' }}>
           <span style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text-secondary)' }}>
-            Page {page} sur {pagination.pages || 1}
+            {t('common.page', { current: page, total: pagination.pages || 1 })}
           </span>
           <div style={{ display: 'flex', gap: '6px' }}>
-            <Button size="sm" variant="secondary" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>← Préc.</Button>
-            <Button size="sm" variant="secondary" disabled={page >= pagination.pages} onClick={() => setPage((p) => p + 1)}>Suiv. →</Button>
+            <Button size="sm" variant="secondary" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>{t('common.previous')}</Button>
+            <Button size="sm" variant="secondary" disabled={page >= pagination.pages} onClick={() => setPage((p) => p + 1)}>{t('common.next')}</Button>
           </div>
         </div>
       </Card>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { CheckCheck, AlertCircle, AlertTriangle, Info, ArrowLeftRight, Settings, Bell } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { useNotifications } from '../context/NotificationContext';
@@ -19,18 +20,25 @@ const TYPE_COLORS = {
 };
 
 const NotificationsPage = () => {
+  const { t } = useTranslation();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+
+  const unreadLabel = unreadCount > 1
+    ? t('notifications.unreadPlural', { count: unreadCount })
+    : unreadCount === 1
+      ? t('notifications.unread', { count: unreadCount })
+      : t('notifications.allRead');
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '800px' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <p style={{ fontFamily: 'var(--font)', fontSize: '14px', color: 'var(--text-secondary)' }}>
-          {unreadCount > 0 ? `${unreadCount} non lue${unreadCount > 1 ? 's' : ''}` : 'Tout est lu'}
+          {unreadLabel}
         </p>
         {unreadCount > 0 && (
           <Button size="sm" variant="outline" onClick={markAllAsRead} icon={<CheckCheck size={14} strokeWidth={2} />}>
-            Tout marquer comme lu
+            {t('notifications.markAllRead')}
           </Button>
         )}
       </div>
@@ -42,7 +50,9 @@ const NotificationsPage = () => {
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
               <Bell size={48} color="var(--text-secondary)" strokeWidth={1.5} />
             </div>
-            <p style={{ fontFamily: 'var(--font)', color: 'var(--text-secondary)', fontSize: '15px' }}>Aucune notification</p>
+            <p style={{ fontFamily: 'var(--font)', color: 'var(--text-secondary)', fontSize: '15px' }}>
+              {t('notifications.noNotifications')}
+            </p>
           </div>
         ) : notifications.map((n, idx) => (
           <div
@@ -66,7 +76,6 @@ const NotificationsPage = () => {
               {(() => { const Icon = TYPE_ICONS[n.type] || Info; return <Icon size={18} color={TYPE_COLORS[n.type] || '#6B7280'} strokeWidth={2} />; })()}
             </div>
 
-            {/* Contenu */}
             <div style={{ flex: 1 }}>
               <div style={{ fontFamily: 'var(--font)', fontWeight: n.isRead ? 500 : 700, fontSize: '14px', color: 'var(--text)' }}>
                 {n.title}
@@ -79,7 +88,6 @@ const NotificationsPage = () => {
               </div>
             </div>
 
-            {/* Indicateur non lu */}
             {!n.isRead && (
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-primary)', flexShrink: 0, marginTop: '6px' }} />
             )}

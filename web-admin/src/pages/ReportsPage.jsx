@@ -5,8 +5,8 @@ import {
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
 import { ArrowDownCircle, ArrowUpCircle, ArrowLeftRight, TrendingUp, Users, Coins } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import Card from '../components/ui/Card';
-import Button from '../components/ui/Button';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -15,10 +15,10 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointEleme
 const fmt = (n = 0) => new Intl.NumberFormat('fr-FR').format(n);
 
 const ReportsPage = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [chartData, setChartData] = useState([]);
   const [globalStats, setGlobalStats] = useState(null);
-  const [rangeReports, setRangeReports] = useState([]);
   const [days, setDays] = useState(30);
   const [loading, setLoading] = useState(false);
 
@@ -39,16 +39,16 @@ const ReportsPage = () => {
   const barData = {
     labels,
     datasets: [
-      { label: 'Dépôts', data: chartData.map((d) => d.totalDeposits || 0), backgroundColor: 'rgba(22,163,74,0.75)', borderRadius: 6 },
-      { label: 'Retraits', data: chartData.map((d) => d.totalWithdrawals || 0), backgroundColor: 'rgba(220,38,38,0.65)', borderRadius: 6 },
+      { label: t('reports.chartLabels.deposits'),    data: chartData.map((d) => d.totalDeposits || 0),    backgroundColor: 'rgba(22,163,74,0.75)',  borderRadius: 6 },
+      { label: t('reports.chartLabels.withdrawals'), data: chartData.map((d) => d.totalWithdrawals || 0), backgroundColor: 'rgba(220,38,38,0.65)', borderRadius: 6 },
     ],
   };
 
   const lineData = {
     labels,
     datasets: [
-      { label: 'Bénéfice', data: chartData.map((d) => d.benefit || 0), borderColor: '#0A66C2', backgroundColor: 'rgba(10,102,194,0.08)', tension: 0.4, fill: true, pointRadius: 3 },
-      { label: 'Transactions', data: chartData.map((d) => d.transactionsCount || 0), borderColor: '#7C3AED', backgroundColor: 'rgba(124,58,237,0.08)', tension: 0.4, fill: false, yAxisID: 'y2', pointRadius: 3 },
+      { label: t('reports.chartLabels.benefit'),      data: chartData.map((d) => d.benefit || 0),            borderColor: '#0A66C2', backgroundColor: 'rgba(10,102,194,0.08)', tension: 0.4, fill: true,  pointRadius: 3 },
+      { label: t('reports.chartLabels.transactions'), data: chartData.map((d) => d.transactionsCount || 0), borderColor: '#7C3AED', backgroundColor: 'rgba(124,58,237,0.08)',  tension: 0.4, fill: false, yAxisID: 'y2', pointRadius: 3 },
     ],
   };
 
@@ -61,9 +61,15 @@ const ReportsPage = () => {
     },
   };
 
+  const noDataEl = (
+    <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>
+      {loading ? t('common.loading') : t('reports.noData')}
+    </div>
+  );
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      {/* Période */}
+      {/* Sélecteur période */}
       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
         {[7, 14, 30, 90].map((d) => (
           <button
@@ -77,7 +83,7 @@ const ReportsPage = () => {
               transition: 'background 0.15s',
             }}
           >
-            {d}j
+            {t('reports.periodDays', { days: d })}
           </button>
         ))}
       </div>
@@ -86,45 +92,35 @@ const ReportsPage = () => {
       {user?.role === 'super_admin' && globalStats && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
           {[
-            { label: 'Total dépôts',     value: `${fmt(globalStats.totalDeposits)} F`,   color: '#16A34A', Icon: ArrowDownCircle },
-            { label: 'Total retraits',   value: `${fmt(globalStats.totalWithdrawals)} F`, color: '#DC2626', Icon: ArrowUpCircle   },
-            { label: 'Revenu total',     value: `${fmt(globalStats.totalRevenue)} F`,     color: '#0A66C2', Icon: TrendingUp      },
-            { label: 'Bénéfice total',   value: `${fmt(globalStats.benefit)} F`,          color: '#7C3AED', Icon: Coins           },
-            { label: 'Marchands actifs', value: globalStats.merchantsCount,               color: '#0284C7', Icon: Users           },
-            { label: 'Nb. transactions', value: globalStats.transactionsCount,            color: '#D97706', Icon: ArrowLeftRight  },
+            { labelKey: 'reports.totalDeposits',     value: `${fmt(globalStats.totalDeposits)} F`,   color: '#16A34A', Icon: ArrowDownCircle },
+            { labelKey: 'reports.totalWithdrawals',  value: `${fmt(globalStats.totalWithdrawals)} F`, color: '#DC2626', Icon: ArrowUpCircle   },
+            { labelKey: 'reports.totalRevenue',      value: `${fmt(globalStats.totalRevenue)} F`,     color: '#0A66C2', Icon: TrendingUp      },
+            { labelKey: 'reports.totalBenefit',      value: `${fmt(globalStats.benefit)} F`,          color: '#7C3AED', Icon: Coins           },
+            { labelKey: 'reports.activeMerchants',   value: globalStats.merchantsCount,               color: '#0284C7', Icon: Users           },
+            { labelKey: 'reports.transactionsCount', value: globalStats.transactionsCount,             color: '#D97706', Icon: ArrowLeftRight  },
           ].map((s) => (
-            <Card key={s.label} padding="16px">
+            <Card key={s.labelKey} padding="16px">
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                 <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: `${s.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <s.Icon size={18} color={s.color} strokeWidth={2} />
                 </div>
               </div>
               <div style={{ fontFamily: 'var(--font)', fontWeight: 800, fontSize: '22px', color: s.color }}>{s.value}</div>
-              <div style={{ fontFamily: 'var(--font)', fontWeight: 500, fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>{s.label}</div>
+              <div style={{ fontFamily: 'var(--font)', fontWeight: 500, fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>{t(s.labelKey)}</div>
             </Card>
           ))}
         </div>
       )}
 
       {/* Graphique barres */}
-      <Card title={`Dépôts & Retraits — ${days} derniers jours`}>
+      <Card title={t('reports.depositsWithdrawals', { days })}>
         <div style={{ height: '300px' }}>
-          {loading ? (
-            <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>
-              Chargement...
-            </div>
-          ) : chartData.length > 0 ? (
-            <Bar data={barData} options={opts} />
-          ) : (
-            <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>
-              Pas encore de données
-            </div>
-          )}
+          {chartData.length > 0 && !loading ? <Bar data={barData} options={opts} /> : noDataEl}
         </div>
       </Card>
 
       {/* Graphique ligne */}
-      <Card title="Bénéfice & Volume de transactions">
+      <Card title={t('reports.benefitVolume')}>
         <div style={{ height: '280px' }}>
           {chartData.length > 0 ? (
             <Line data={lineData} options={{
@@ -134,21 +130,23 @@ const ReportsPage = () => {
                 y2: { position: 'right', ticks: { font: { family: 'Manrope', size: 11 }, color: '#7C3AED' }, grid: { display: false } },
               },
             }} />
-          ) : (
-            <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>
-              Pas encore de données
-            </div>
-          )}
+          ) : noDataEl}
         </div>
       </Card>
 
       {/* Tableau récapitulatif */}
-      <Card title="Détail journalier" padding="0">
+      <Card title={t('reports.dailyDetail')} padding="0">
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                {['Date', 'Dépôts', 'Retraits', 'Transactions', 'Bénéfice'].map((h) => (
+                {[
+                  t('reports.tableHeaders.date'),
+                  t('reports.tableHeaders.deposits'),
+                  t('reports.tableHeaders.withdrawals'),
+                  t('reports.tableHeaders.transactions'),
+                  t('reports.tableHeaders.benefit'),
+                ].map((h) => (
                   <th key={h} style={{ fontFamily: 'var(--font)', fontWeight: 600, fontSize: '11px', color: 'var(--text-secondary)', textAlign: 'left', padding: '12px 16px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
                     {h}
                   </th>

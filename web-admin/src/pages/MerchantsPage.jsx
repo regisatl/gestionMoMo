@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Store } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
@@ -9,6 +10,7 @@ import api from '../services/api';
 const fmt = (n = 0) => new Intl.NumberFormat('fr-FR').format(n);
 
 const MerchantsPage = () => {
+  const { t } = useTranslation();
   const [merchants, setMerchants] = useState([]);
   const [pagination, setPagination] = useState({ total: 0, pages: 1 });
   const [loading, setLoading] = useState(false);
@@ -46,13 +48,17 @@ const MerchantsPage = () => {
     }
   };
 
+  const merchantLabel = pagination.total <= 1
+    ? t('merchants.merchantCount', { count: pagination.total })
+    : t('merchants.merchantCountPlural', { count: pagination.total });
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Header actions */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', flex: 1 }}>
           <Input
-            placeholder="Nom, téléphone..."
+            placeholder={t('merchants.searchPlaceholder')}
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             icon={<Search size={16} color="var(--text-secondary)" />}
@@ -63,14 +69,14 @@ const MerchantsPage = () => {
             onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
             style={{ height: '42px', padding: '0 12px', borderRadius: '10px', border: '1.5px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)', fontFamily: 'var(--font)', fontSize: '14px' }}
           >
-            <option value="">Tous les statuts</option>
-            <option value="active">Actifs</option>
-            <option value="inactive">Inactifs</option>
-            <option value="suspended">Suspendus</option>
+            <option value="">{t('merchants.filters.allStatuses')}</option>
+            <option value="active">{t('merchants.filters.active')}</option>
+            <option value="inactive">{t('merchants.filters.inactive')}</option>
+            <option value="suspended">{t('merchants.filters.suspended')}</option>
           </select>
         </div>
         <Button variant="primary" onClick={() => setShowModal(true)} icon={<Store size={16} strokeWidth={2} />}>
-          Nouveau marchand
+          {t('merchants.newMerchant')}
         </Button>
       </div>
 
@@ -80,7 +86,15 @@ const MerchantsPage = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                {['Marchand', 'Téléphone', 'Compte MoMo', 'Solde', 'Statut', 'Créé le', 'Actions'].map((h) => (
+                {[
+                  t('merchants.tableHeaders.merchant'),
+                  t('merchants.tableHeaders.phone'),
+                  t('merchants.tableHeaders.momoAccount'),
+                  t('merchants.tableHeaders.balance'),
+                  t('merchants.tableHeaders.status'),
+                  t('merchants.tableHeaders.createdAt'),
+                  t('merchants.tableHeaders.actions'),
+                ].map((h) => (
                   <th key={h} style={{ fontFamily: 'var(--font)', fontWeight: 600, fontSize: '11px', color: 'var(--text-secondary)', textAlign: 'left', padding: '12px 16px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
                     {h}
                   </th>
@@ -89,9 +103,9 @@ const MerchantsPage = () => {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>Chargement...</td></tr>
+                <tr><td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>{t('merchants.loading')}</td></tr>
               ) : merchants.length === 0 ? (
-                <tr><td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>Aucun marchand</td></tr>
+                <tr><td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>{t('merchants.noMerchants')}</td></tr>
               ) : merchants.map((m) => (
                 <tr key={m._id} style={{ borderBottom: '1px solid var(--border)', transition: 'background 0.1s' }}
                   onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface)'}
@@ -121,11 +135,11 @@ const MerchantsPage = () => {
                     <div style={{ display: 'flex', gap: '6px' }}>
                       {m.status === 'active' ? (
                         <Button size="sm" variant="secondary" loading={actionLoading === m._id} onClick={() => handleStatusChange(m._id, 'suspended')}>
-                          Suspendre
+                          {t('merchants.suspend')}
                         </Button>
                       ) : (
                         <Button size="sm" variant="success" loading={actionLoading === m._id} onClick={() => handleStatusChange(m._id, 'active')}>
-                          Activer
+                          {t('merchants.activate')}
                         </Button>
                       )}
                     </div>
@@ -137,14 +151,14 @@ const MerchantsPage = () => {
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderTop: '1px solid var(--border)' }}>
           <span style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text-secondary)' }}>
-            {pagination.total} marchand{pagination.total !== 1 ? 's' : ''}
+            {merchantLabel}
           </span>
           <div style={{ display: 'flex', gap: '6px' }}>
-            <Button size="sm" variant="secondary" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>← Préc.</Button>
+            <Button size="sm" variant="secondary" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>{t('common.previous')}</Button>
             <span style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text)', padding: '6px 12px', background: 'var(--surface)', borderRadius: '8px' }}>
-              {page} / {pagination.pages || 1}
+              {page} {t('common.of')} {pagination.pages || 1}
             </span>
-            <Button size="sm" variant="secondary" disabled={page >= pagination.pages} onClick={() => setPage((p) => p + 1)}>Suiv. →</Button>
+            <Button size="sm" variant="secondary" disabled={page >= pagination.pages} onClick={() => setPage((p) => p + 1)}>{t('common.next')}</Button>
           </div>
         </div>
       </Card>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import Card from '../../components/ui/Card';
 import api from '../../services/api';
@@ -18,14 +19,13 @@ const StatCard = ({ label, value, icon, color, theme }) => (
 );
 
 const ReportsScreen = () => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const [report, setReport] = useState(null);
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [period, setPeriod] = useState('today');
 
   const today = new Date().toISOString().slice(0, 10);
-
   const formatAmount = (n = 0) => new Intl.NumberFormat('fr-FR').format(n);
 
   useEffect(() => {
@@ -39,14 +39,13 @@ const ReportsScreen = () => {
     }).finally(() => setLoading(false));
   }, []);
 
-  // Mini bar chart
   const maxVal = Math.max(...chartData.map((d) => d.totalDeposits || 0), 1);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={['top']}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: theme.spacing.base }}>
         <Text style={{ fontFamily: theme.typography.fontFamily.extraBold, fontSize: theme.typography.fontSize.xl, color: theme.text, marginBottom: theme.spacing.lg }}>
-          Rapports
+          {t('reports.title')}
         </Text>
 
         {loading ? (
@@ -55,25 +54,25 @@ const ReportsScreen = () => {
           <>
             {/* Stats du jour */}
             <Text style={{ fontFamily: theme.typography.fontFamily.bold, fontSize: 14, color: theme.textSecondary, marginBottom: theme.spacing.sm, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-              Aujourd'hui
+              {t('reports.today')}
             </Text>
             <View style={{ flexDirection: 'row', gap: 10, marginBottom: theme.spacing.lg }}>
-              <StatCard label="Dépôts" value={`${formatAmount(report?.totalDeposits)} F`} icon="⬇" color="#16A34A" theme={theme} />
-              <StatCard label="Retraits" value={`${formatAmount(report?.totalWithdrawals)} F`} icon="⬆" color="#DC2626" theme={theme} />
+              <StatCard label={t('reports.deposits')} value={`${formatAmount(report?.totalDeposits)} F`} icon="⬇" color="#16A34A" theme={theme} />
+              <StatCard label={t('reports.withdrawals')} value={`${formatAmount(report?.totalWithdrawals)} F`} icon="⬆" color="#DC2626" theme={theme} />
             </View>
             <View style={{ flexDirection: 'row', gap: 10, marginBottom: theme.spacing.xl }}>
-              <StatCard label="Transactions" value={report?.transactionsCount || 0} icon="↔" color="#0A66C2" theme={theme} />
-              <StatCard label="Bénéfice" value={`${formatAmount(report?.benefit)} F`} icon="💰" color="#7C3AED" theme={theme} />
+              <StatCard label={t('reports.transactionsCount')} value={report?.transactionsCount || 0} icon="↔" color="#0A66C2" theme={theme} />
+              <StatCard label={t('reports.benefit')} value={`${formatAmount(report?.benefit)} F`} icon="💰" color="#7C3AED" theme={theme} />
             </View>
 
             {/* Graphique 7 jours */}
             <Text style={{ fontFamily: theme.typography.fontFamily.bold, fontSize: 14, color: theme.textSecondary, marginBottom: theme.spacing.md, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-              Évolution 7 jours
+              {t('reports.evolution7Days')}
             </Text>
             <Card style={{ marginBottom: theme.spacing.xl }}>
               {chartData.length === 0 ? (
                 <Text style={{ fontFamily: theme.typography.fontFamily.regular, color: theme.textSecondary, textAlign: 'center', paddingVertical: theme.spacing.lg }}>
-                  Pas encore de données.
+                  {t('reports.noData')}
                 </Text>
               ) : (
                 <View>
@@ -101,17 +100,19 @@ const ReportsScreen = () => {
             {/* Résumé */}
             <Card>
               <Text style={{ fontFamily: theme.typography.fontFamily.bold, fontSize: 14, color: theme.text, marginBottom: theme.spacing.md }}>
-                Résumé du jour
+                {t('reports.summary')}
               </Text>
               {[
-                { label: 'Complétées', value: report?.completedCount || 0, color: '#16A34A' },
-                { label: 'En attente', value: report?.pendingCount || 0, color: '#D97706' },
-                { label: 'Échouées', value: report?.failedCount || 0, color: '#DC2626' },
+                { labelKey: 'reports.completed', value: report?.completedCount || 0, color: '#16A34A' },
+                { labelKey: 'reports.pending',   value: report?.pendingCount || 0,   color: '#D97706' },
+                { labelKey: 'reports.failed',    value: report?.failedCount || 0,    color: '#DC2626' },
               ].map((row) => (
-                <View key={row.label} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: theme.border }}>
+                <View key={row.labelKey} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: theme.border }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: row.color, marginRight: 8 }} />
-                    <Text style={{ fontFamily: theme.typography.fontFamily.regular, fontSize: 13, color: theme.textSecondary }}>{row.label}</Text>
+                    <Text style={{ fontFamily: theme.typography.fontFamily.regular, fontSize: 13, color: theme.textSecondary }}>
+                      {t(row.labelKey)}
+                    </Text>
                   </View>
                   <Text style={{ fontFamily: theme.typography.fontFamily.bold, fontSize: 14, color: row.color }}>{row.value}</Text>
                 </View>

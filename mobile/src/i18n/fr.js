@@ -1,0 +1,184 @@
+const fr = {
+  // ─── Commun ───────────────────────────────────────────────────
+  common: {
+    appName: 'GestionMoMo',
+    loading: 'Chargement...',
+    save: 'Enregistrer',
+    cancel: 'Annuler',
+    confirm: 'Confirmer',
+    delete: 'Supprimer',
+    edit: 'Modifier',
+    back: 'Retour',
+    next: 'Suivant',
+    previous: 'Précédent',
+    seeAll: 'Voir tout',
+    noData: 'Aucune donnée',
+    error: 'Une erreur est survenue',
+    retry: 'Réessayer',
+    yes: 'Oui',
+    no: 'Non',
+    ok: 'OK',
+    close: 'Fermer',
+    search: 'Rechercher',
+    filter: 'Filtrer',
+    all: 'Tout',
+    version: 'v1.0.0',
+    copyright: '© 2025 GestionMoMo — v1.0.0',
+  },
+
+  // ─── Authentification ─────────────────────────────────────────
+  auth: {
+    loginTitle: 'Connectez-vous à votre compte',
+    phoneLabel: 'Numéro de téléphone',
+    phonePlaceholder: '+229 00 00 00 00 00 00',
+    passwordLabel: 'Mot de passe',
+    passwordPlaceholder: 'Votre mot de passe',
+    loginButton: 'Se connecter',
+    forgotPassword: 'Mot de passe oublié ?',
+    phoneRequired: 'Numéro de téléphone requis',
+    passwordRequired: 'Mot de passe requis',
+    passwordMinLength: 'Minimum 8 caractères',
+    loginError: 'Erreur de connexion. Réessayez.',
+    forgotPasswordTitle: 'Mot de passe oublié',
+    resetPasswordButton: 'Réinitialiser',
+  },
+
+  // ─── Navigation (tabs) ────────────────────────────────────────
+  nav: {
+    home: 'Accueil',
+    transactions: 'Transactions',
+    reports: 'Rapports',
+    notifications: 'Alertes',
+    profile: 'Profil',
+  },
+
+  // ─── Accueil ──────────────────────────────────────────────────
+  home: {
+    greeting: 'Bonjour',
+    availableBalance: 'Solde disponible',
+    momoAccount: 'Compte MoMo',
+    recentTransactions: 'Transactions récentes',
+    noTransactions: 'Aucune transaction récente',
+    todayDeposits: 'Dépôts du jour',
+    todayWithdrawals: 'Retraits du jour',
+    todayTransactions: 'Transactions du jour',
+    todayBenefit: 'Bénéfice du jour',
+  },
+
+  // ─── Transactions ─────────────────────────────────────────────
+  transactions: {
+    title: 'Transactions',
+    newTransaction: '+ Nouveau',
+    searchPlaceholder: 'Référence, téléphone, nom...',
+    noTransactions: 'Aucune transaction trouvée',
+    detail: 'Détail transaction',
+    reference: 'Référence',
+    client: 'Client',
+    phone: 'Téléphone',
+    merchant: 'Marchand',
+    date: 'Date',
+    description: 'Description',
+    fees: 'Frais',
+    momoRef: 'Ref. MoMo',
+    momoStatus: 'Statut MoMo',
+    deletedOn: 'Transaction supprimée le {{date}}',
+    deleteReason: 'Motif : {{reason}}',
+    // Nouveau
+    newTitle: 'Nouvelle transaction',
+    transactionType: 'Type de transaction',
+    amountLabel: 'Montant (XOF)',
+    amountPlaceholder: 'Ex: 5000',
+    clientPhoneLabel: 'Numéro de téléphone client',
+    clientNameLabel: 'Nom du client (optionnel)',
+    descriptionLabel: 'Description (optionnel)',
+    descriptionPlaceholder: 'Motif de la transaction',
+    confirmButton: 'Confirmer la transaction',
+    invalidAmount: 'Montant invalide (minimum 1)',
+    clientPhoneRequired: 'Numéro client requis',
+    creationError: 'Erreur lors de la création.',
+    successTitle: 'Transaction créée',
+    successRef: 'Référence : {{ref}}',
+    seeTransactions: 'Voir les transactions',
+    newTransactionButton: 'Nouvelle transaction',
+    // Types
+    types: {
+      deposit: 'Dépôt',
+      withdrawal: 'Retrait',
+      transfer: 'Transfert',
+      payment: 'Paiement',
+      refund: 'Remboursement',
+    },
+    typeDescriptions: {
+      deposit: "Recevoir de l'argent",
+      withdrawal: "Retirer de l'argent",
+      transfer: 'Envoyer à un autre compte',
+    },
+    // Filtres
+    filters: {
+      all: 'Tout',
+      deposit: 'Dépôts',
+      withdrawal: 'Retraits',
+      transfer: 'Transferts',
+    },
+    // Statuts
+    status: {
+      pending: 'En attente',
+      completed: 'Complétée',
+      failed: 'Échouée',
+      cancelled: 'Annulée',
+    },
+  },
+
+  // ─── Rapports ─────────────────────────────────────────────────
+  reports: {
+    title: 'Rapports',
+    today: "Aujourd'hui",
+    deposits: 'Dépôts',
+    withdrawals: 'Retraits',
+    transactionsCount: 'Transactions',
+    benefit: 'Bénéfice',
+    evolution7Days: 'Évolution 7 jours',
+    noData: 'Pas encore de données.',
+    summary: 'Résumé du jour',
+    completed: 'Complétées',
+    pending: 'En attente',
+    failed: 'Échouées',
+  },
+
+  // ─── Notifications ────────────────────────────────────────────
+  notifications: {
+    title: 'Notifications',
+    titleWithCount: 'Notifications ({{count}})',
+    markAllRead: 'Tout lire',
+    noNotifications: 'Aucune notification',
+  },
+
+  // ─── Profil ───────────────────────────────────────────────────
+  profile: {
+    title: 'Profil',
+    account: 'Compte',
+    editProfile: 'Modifier le profil',
+    changePassword: 'Changer le mot de passe',
+    telephone: 'Téléphone',
+    email: 'Email',
+    preferences: 'Préférences',
+    darkMode: 'Mode sombre',
+    language: 'Langue',
+    logout: 'Se déconnecter',
+    logoutTitle: 'Déconnexion',
+    logoutMessage: 'Voulez-vous vous déconnecter ?',
+    logoutConfirm: 'Déconnecter',
+    logoutCancel: 'Annuler',
+    roles: {
+      super_admin: 'Super Admin',
+      merchant: 'Marchand',
+      client: 'Client',
+    },
+    languageNames: {
+      fr: 'Français',
+      en: 'English',
+    },
+  },
+};
+
+export default fr;

@@ -51,7 +51,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
               label="Numéro de téléphone"
               value={phone}
               onChangeText={setPhone}
-              placeholder="+229 00 00 00 00"
+              placeholder="+229 00 00 00 00 00"
               keyboardType="phone-pad"
             />
             <Button title="Envoyer le code" onPress={handleSubmit} loading={loading} fullWidth size="lg" style={{ marginTop: theme.spacing.md }} />

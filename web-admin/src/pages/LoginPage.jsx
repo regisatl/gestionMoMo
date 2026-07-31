@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Wallet, Smartphone, Lock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 
 const LoginPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { login } = useAuth();
   const [phone, setPhone] = useState('');
@@ -22,7 +24,7 @@ const LoginPage = () => {
       const user = await login(phone.trim(), password);
       navigate(user.role === 'client' ? '/' : '/');
     } catch (err) {
-      setError(err.response?.data?.error || 'Identifiants incorrects.');
+      setError(err.response?.data?.error || t('auth.invalidCredentials'));
     } finally {
       setLoading(false);
     }
@@ -51,10 +53,10 @@ const LoginPage = () => {
             <Wallet size={30} color="#fff" strokeWidth={2} />
           </div>
           <h1 style={{ fontFamily: 'var(--font)', fontWeight: 800, fontSize: '24px', color: 'var(--text)', letterSpacing: '-0.5px' }}>
-            GestionMoMo
+            {t('common.appName')}
           </h1>
           <p style={{ fontFamily: 'var(--font)', fontWeight: 400, fontSize: '14px', color: 'var(--text-secondary)', marginTop: '6px' }}>
-            Connectez-vous à l'administration
+            {t('auth.subtitle')}
           </p>
         </div>
 
@@ -73,32 +75,32 @@ const LoginPage = () => {
         {/* Formulaire */}
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <Input
-            label="Numéro de téléphone"
+            label={t('auth.phoneLabel')}
             name="phone"
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            placeholder="+229 00 00 00 00"
+            placeholder={t('auth.phonePlaceholder')}
             icon={<Smartphone size={16} color="var(--text-secondary)" />}
             required
           />
           <Input
-            label="Mot de passe"
+            label={t('auth.passwordLabel')}
             name="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
+            placeholder={t('auth.passwordPlaceholder')}
             icon={<Lock size={16} color="var(--text-secondary)" />}
             required
           />
           <Button type="submit" variant="primary" size="lg" fullWidth loading={loading}>
-            Se connecter
+            {t('auth.loginButton')}
           </Button>
         </form>
 
         <p style={{ fontFamily: 'var(--font)', fontSize: '12px', color: 'var(--text-secondary)', textAlign: 'center', marginTop: '24px' }}>
-          © 2025 GestionMoMo — v1.0.0
+          {t('common.version')}
         </p>
       </div>
     </div>

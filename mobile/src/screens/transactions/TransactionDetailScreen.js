@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
@@ -13,7 +14,10 @@ const DetailRow = ({ label, value, theme }) => (
   </View>
 );
 
+const TYPE_COLORS = { deposit: '#16A34A', withdrawal: '#DC2626', transfer: '#0A66C2', payment: '#7C3AED', refund: '#D97706' };
+
 const TransactionDetailScreen = ({ navigation, route }) => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const { id } = route.params;
   const [transaction, setTransaction] = useState(null);
@@ -29,9 +33,6 @@ const TransactionDetailScreen = ({ navigation, route }) => {
   const formatAmount = (amount) => new Intl.NumberFormat('fr-FR').format(amount) + ' XOF';
   const formatDate = (d) => new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-  const TYPE_LABELS = { deposit: 'Dépôt', withdrawal: 'Retrait', transfer: 'Transfert', payment: 'Paiement', refund: 'Remboursement' };
-  const TYPE_COLORS = { deposit: '#16A34A', withdrawal: '#DC2626', transfer: '#0A66C2', payment: '#7C3AED', refund: '#D97706' };
-
   if (loading) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: theme.background, justifyContent: 'center', alignItems: 'center' }}>
@@ -43,7 +44,9 @@ const TransactionDetailScreen = ({ navigation, route }) => {
   if (!transaction) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: theme.background, justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{ fontFamily: theme.typography.fontFamily.medium, color: theme.textSecondary }}>Transaction introuvable.</Text>
+        <Text style={{ fontFamily: theme.typography.fontFamily.medium, color: theme.textSecondary }}>
+          {t('common.noData')}
+        </Text>
       </SafeAreaView>
     );
   }
@@ -57,7 +60,7 @@ const TransactionDetailScreen = ({ navigation, route }) => {
             <Text style={{ fontSize: 22, color: theme.text }}>←</Text>
           </TouchableOpacity>
           <Text style={{ fontFamily: theme.typography.fontFamily.extraBold, fontSize: 20, color: theme.text }}>
-            Détail transaction
+            {t('transactions.detail')}
           </Text>
         </View>
 
@@ -76,7 +79,7 @@ const TransactionDetailScreen = ({ navigation, route }) => {
             {formatAmount(transaction.amount)}
           </Text>
           <Text style={{ fontFamily: theme.typography.fontFamily.medium, fontSize: 15, color: theme.textSecondary, marginTop: 4 }}>
-            {TYPE_LABELS[transaction.type]}
+            {t(`transactions.types.${transaction.type}`, { defaultValue: transaction.type })}
           </Text>
           <Badge status={transaction.status} style={{ marginTop: 10 }} />
         </View>
@@ -84,26 +87,25 @@ const TransactionDetailScreen = ({ navigation, route }) => {
         {/* Détails */}
         <View style={{ paddingHorizontal: theme.spacing.base, paddingBottom: theme.spacing['2xl'] }}>
           <Card>
-            <DetailRow label="Référence" value={transaction.reference} theme={theme} />
-            <DetailRow label="Client" value={transaction.clientName || transaction.clientPhone} theme={theme} />
-            <DetailRow label="Téléphone" value={transaction.clientPhone} theme={theme} />
-            <DetailRow label="Marchand" value={transaction.merchantId?.businessName || transaction.merchantId?.name} theme={theme} />
-            <DetailRow label="Date" value={formatDate(transaction.createdAt)} theme={theme} />
-            <DetailRow label="Description" value={transaction.description} theme={theme} />
-            {transaction.fee > 0 && <DetailRow label="Frais" value={formatAmount(transaction.fee)} theme={theme} />}
-            {transaction.momoReferenceId && <DetailRow label="Ref. MoMo" value={transaction.momoReferenceId} theme={theme} />}
-            {transaction.momoStatus && <DetailRow label="Statut MoMo" value={transaction.momoStatus} theme={theme} />}
+            <DetailRow label={t('transactions.reference')} value={transaction.reference} theme={theme} />
+            <DetailRow label={t('transactions.client')} value={transaction.clientName || transaction.clientPhone} theme={theme} />
+            <DetailRow label={t('transactions.phone')} value={transaction.clientPhone} theme={theme} />
+            <DetailRow label={t('transactions.merchant')} value={transaction.merchantId?.businessName || transaction.merchantId?.name} theme={theme} />
+            <DetailRow label={t('transactions.date')} value={formatDate(transaction.createdAt)} theme={theme} />
+            <DetailRow label={t('transactions.description')} value={transaction.description} theme={theme} />
+            {transaction.fee > 0 && <DetailRow label={t('transactions.fees')} value={formatAmount(transaction.fee)} theme={theme} />}
+            {transaction.momoReferenceId && <DetailRow label={t('transactions.momoRef')} value={transaction.momoReferenceId} theme={theme} />}
+            {transaction.momoStatus && <DetailRow label={t('transactions.momoStatus')} value={transaction.momoStatus} theme={theme} />}
           </Card>
 
-          {/* Suppression/restauration si applicable */}
           {transaction.isDeleted && (
             <Card style={{ backgroundColor: theme.colors.errorLight, borderColor: theme.colors.error, marginTop: theme.spacing.md }}>
               <Text style={{ fontFamily: theme.typography.fontFamily.semiBold, color: theme.colors.error, fontSize: 13 }}>
-                ⚠ Transaction supprimée le {formatDate(transaction.deletedAt)}
+                ⚠ {t('transactions.deletedOn', { date: formatDate(transaction.deletedAt) })}
               </Text>
               {transaction.deleteReason && (
                 <Text style={{ fontFamily: theme.typography.fontFamily.regular, color: theme.colors.error, fontSize: 12, marginTop: 4 }}>
-                  Motif : {transaction.deleteReason}
+                  {t('transactions.deleteReason', { reason: transaction.deleteReason })}
                 </Text>
               )}
             </Card>

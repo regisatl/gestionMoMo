@@ -4,19 +4,22 @@ import {
   TextInput, RefreshControl, StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import Badge from '../../components/ui/Badge';
 import api from '../../services/api';
 
-const FILTERS = [
-  { key: 'all', label: 'Tout' },
-  { key: 'deposit', label: 'Dépôts' },
-  { key: 'withdrawal', label: 'Retraits' },
-  { key: 'transfer', label: 'Transferts' },
-];
-
 const TransactionsScreen = ({ navigation }) => {
+  const { t } = useTranslation();
   const theme = useTheme();
+
+  const FILTERS = [
+    { key: 'all',        label: t('transactions.filters.all') },
+    { key: 'deposit',    label: t('transactions.filters.deposit') },
+    { key: 'withdrawal', label: t('transactions.filters.withdrawal') },
+    { key: 'transfer',   label: t('transactions.filters.transfer') },
+  ];
+
   const [transactions, setTransactions] = useState([]);
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -98,13 +101,15 @@ const TransactionsScreen = ({ navigation }) => {
       {/* Header */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: theme.spacing.base, paddingVertical: theme.spacing.md }}>
         <Text style={{ fontFamily: theme.typography.fontFamily.extraBold, fontSize: theme.typography.fontSize.xl, color: theme.text }}>
-          Transactions
+          {t('transactions.title')}
         </Text>
         <TouchableOpacity
           onPress={() => navigation.navigate('NewTransaction')}
           style={{ backgroundColor: theme.colors.primary, borderRadius: theme.radius.md, paddingVertical: 8, paddingHorizontal: 14 }}
         >
-          <Text style={{ fontFamily: theme.typography.fontFamily.semiBold, fontSize: 13, color: '#FFF' }}>+ Nouveau</Text>
+          <Text style={{ fontFamily: theme.typography.fontFamily.semiBold, fontSize: 13, color: '#FFF' }}>
+            {t('transactions.newTransaction')}
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -115,7 +120,7 @@ const TransactionsScreen = ({ navigation }) => {
           <TextInput
             value={search}
             onChangeText={setSearch}
-            placeholder="Référence, téléphone, nom..."
+            placeholder={t('transactions.searchPlaceholder')}
             placeholderTextColor={theme.placeholder}
             style={{ flex: 1, height: 44, fontFamily: theme.typography.fontFamily.regular, fontSize: 14, color: theme.text }}
           />
@@ -160,7 +165,7 @@ const TransactionsScreen = ({ navigation }) => {
             <View style={{ alignItems: 'center', paddingTop: 60 }}>
               <Text style={{ fontSize: 40, marginBottom: 12 }}>📭</Text>
               <Text style={{ fontFamily: theme.typography.fontFamily.medium, color: theme.textSecondary, fontSize: 15 }}>
-                Aucune transaction trouvée
+                {t('transactions.noTransactions')}
               </Text>
             </View>
           )

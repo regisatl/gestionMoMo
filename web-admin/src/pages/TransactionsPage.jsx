@@ -1,24 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import api from '../services/api';
 
-const TYPE_LABELS = { deposit: 'Dépôt', withdrawal: 'Retrait', transfer: 'Transfert', payment: 'Paiement', refund: 'Remboursement' };
 const TYPE_COLORS = { deposit: '#16A34A', withdrawal: '#DC2626', transfer: '#0A66C2', payment: '#7C3AED', refund: '#D97706' };
 const fmt = (n = 0) => new Intl.NumberFormat('fr-FR').format(n);
 
-const FILTERS = [
-  { key: '', label: 'Toutes' },
-  { key: 'deposit', label: 'Dépôts' },
-  { key: 'withdrawal', label: 'Retraits' },
-  { key: 'transfer', label: 'Transferts' },
-];
-
 const TransactionsPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -29,6 +23,13 @@ const TransactionsPage = () => {
   const [typeFilter, setTypeFilter] = useState(searchParams.get('type') || '');
   const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(1);
+
+  const TYPE_FILTERS = [
+    { key: '',           label: t('transactions.filters.all') },
+    { key: 'deposit',    label: t('transactions.filters.deposits') },
+    { key: 'withdrawal', label: t('transactions.filters.withdrawals') },
+    { key: 'transfer',   label: t('transactions.filters.transfers') },
+  ];
 
   const loadTransactions = useCallback(async () => {
     setLoading(true);
@@ -48,13 +49,17 @@ const TransactionsPage = () => {
 
   useEffect(() => { loadTransactions(); }, [loadTransactions]);
 
+  const totalLabel = pagination.total <= 1
+    ? t('transactions.transactionCount', { count: pagination.total })
+    : t('transactions.transactionCountPlural', { count: pagination.total });
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Barre de filtres */}
       <Card padding="16px">
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
           <Input
-            placeholder="Référence, téléphone, nom..."
+            placeholder={t('transactions.searchPlaceholder')}
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             icon={<Search size={16} color="var(--text-secondary)" />}
@@ -65,14 +70,14 @@ const TransactionsPage = () => {
             onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
             style={{ height: '42px', padding: '0 12px', borderRadius: '10px', border: '1.5px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text)', fontFamily: 'var(--font)', fontSize: '14px', cursor: 'pointer' }}
           >
-            <option value="">Tous les statuts</option>
-            <option value="pending">En attente</option>
-            <option value="completed">Complétées</option>
-            <option value="failed">Échouées</option>
-            <option value="cancelled">Annulées</option>
+            <option value="">{t('transactions.filters.allStatuses')}</option>
+            <option value="pending">{t('transactions.filters.pending')}</option>
+            <option value="completed">{t('transactions.filters.completed')}</option>
+            <option value="failed">{t('transactions.filters.failed')}</option>
+            <option value="cancelled">{t('transactions.filters.cancelled')}</option>
           </select>
           <div style={{ display: 'flex', gap: '6px' }}>
-            {FILTERS.map((f) => (
+            {TYPE_FILTERS.map((f) => (
               <button
                 key={f.key}
                 onClick={() => { setTypeFilter(f.key); setPage(1); }}
@@ -97,8 +102,18 @@ const TransactionsPage = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                {['Référence', 'Marchand', 'Client', 'Type', 'Montant', 'Frais', 'Statut', 'Date', ''].map((h) => (
-                  <th key={h} style={{ fontFamily: 'var(--font)', fontWeight: 600, fontSize: '11px', color: 'var(--text-secondary)', textAlign: 'left', padding: '12px 16px', textTransform: 'uppercase', letterSpacing: '0.4px', whiteSpace: 'nowrap' }}>
+                {[
+                  t('transactions.tableHeaders.reference'),
+                  t('transactions.tableHeaders.merchant'),
+                  t('transactions.tableHeaders.client'),
+                  t('transactions.tableHeaders.type'),
+                  t('transactions.tableHeaders.amount'),
+                  t('transactions.tableHeaders.fees'),
+                  t('transactions.tableHeaders.status'),
+                  t('transactions.tableHeaders.date'),
+                  '',
+                ].map((h, i) => (
+                  <th key={i} style={{ fontFamily: 'var(--font)', fontWeight: 600, fontSize: '11px', color: 'var(--text-secondary)', textAlign: 'left', padding: '12px 16px', textTransform: 'uppercase', letterSpacing: '0.4px', whiteSpace: 'nowrap' }}>
                     {h}
                   </th>
                 ))}
@@ -106,9 +121,9 @@ const TransactionsPage = () => {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={9} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>Chargement...</td></tr>
+                <tr><td colSpan={9} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>{t('transactions.loadingText')}</td></tr>
               ) : transactions.length === 0 ? (
-                <tr><td colSpan={9} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>Aucune transaction</td></tr>
+                <tr><td colSpan={9} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>{t('transactions.noTransactions')}</td></tr>
               ) : transactions.map((txn) => (
                 <tr
                   key={txn._id}
@@ -121,7 +136,7 @@ const TransactionsPage = () => {
                   <td style={{ padding: '13px 16px', fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text)' }}>{txn.clientName || txn.clientPhone || '—'}</td>
                   <td style={{ padding: '13px 16px' }}>
                     <span style={{ fontFamily: 'var(--font)', fontWeight: 600, fontSize: '12px', color: TYPE_COLORS[txn.type] }}>
-                      {TYPE_LABELS[txn.type]}
+                      {t(`transactions.types.${txn.type}`, { defaultValue: txn.type })}
                     </span>
                   </td>
                   <td style={{ padding: '13px 16px', fontFamily: 'var(--font)', fontSize: '13px', fontWeight: 700, color: txn.type === 'withdrawal' ? 'var(--color-error)' : 'var(--color-success)' }}>
@@ -133,7 +148,7 @@ const TransactionsPage = () => {
                     {new Date(txn.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                   </td>
                   <td style={{ padding: '13px 16px' }}>
-                    <Button size="sm" variant="ghost" onClick={() => navigate(`/transactions/${txn._id}`)}>Voir</Button>
+                    <Button size="sm" variant="ghost" onClick={() => navigate(`/transactions/${txn._id}`)}>{t('transactions.view')}</Button>
                   </td>
                 </tr>
               ))}
@@ -144,14 +159,14 @@ const TransactionsPage = () => {
         {/* Pagination */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderTop: '1px solid var(--border)' }}>
           <span style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text-secondary)' }}>
-            {pagination.total} transaction{pagination.total !== 1 ? 's' : ''}
+            {totalLabel}
           </span>
           <div style={{ display: 'flex', gap: '6px' }}>
-            <Button size="sm" variant="secondary" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>← Préc.</Button>
+            <Button size="sm" variant="secondary" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>{t('common.previous')}</Button>
             <span style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text)', padding: '6px 12px', background: 'var(--surface)', borderRadius: '8px' }}>
-              {page} / {pagination.pages || 1}
+              {page} {t('common.of')} {pagination.pages || 1}
             </span>
-            <Button size="sm" variant="secondary" disabled={page >= pagination.pages} onClick={() => setPage((p) => p + 1)}>Suiv. →</Button>
+            <Button size="sm" variant="secondary" disabled={page >= pagination.pages} onClick={() => setPage((p) => p + 1)}>{t('common.next')}</Button>
           </div>
         </div>
       </Card>

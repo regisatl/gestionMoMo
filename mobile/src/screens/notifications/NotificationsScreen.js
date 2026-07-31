@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useNotifications } from '../../context/NotificationContext';
 
@@ -11,6 +12,7 @@ const NOTIF_COLORS = {
 };
 
 const NotificationsScreen = () => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
 
@@ -54,16 +56,20 @@ const NotificationsScreen = () => {
     </TouchableOpacity>
   );
 
+  const title = unreadCount > 0
+    ? t('notifications.titleWithCount', { count: unreadCount })
+    : t('notifications.title');
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={['top']}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: theme.spacing.base }}>
         <Text style={{ fontFamily: theme.typography.fontFamily.extraBold, fontSize: theme.typography.fontSize.xl, color: theme.text }}>
-          Notifications {unreadCount > 0 && `(${unreadCount})`}
+          {title}
         </Text>
         {unreadCount > 0 && (
           <TouchableOpacity onPress={markAllAsRead}>
             <Text style={{ fontFamily: theme.typography.fontFamily.medium, fontSize: 13, color: theme.colors.primary }}>
-              Tout lire
+              {t('notifications.markAllRead')}
             </Text>
           </TouchableOpacity>
         )}
@@ -78,7 +84,7 @@ const NotificationsScreen = () => {
           <View style={{ alignItems: 'center', paddingTop: 80 }}>
             <Text style={{ fontSize: 48, marginBottom: 12 }}>🔔</Text>
             <Text style={{ fontFamily: theme.typography.fontFamily.medium, color: theme.textSecondary, fontSize: 15 }}>
-              Aucune notification
+              {t('notifications.noNotifications')}
             </Text>
           </View>
         }

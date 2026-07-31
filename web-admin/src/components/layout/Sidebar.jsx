@@ -5,24 +5,26 @@ import {
   Store, Users, Bell, ClipboardList, Settings, LogOut,
   Wallet, ChevronLeft,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import styles from './Sidebar.module.css';
 
-const NAV_ITEMS = [
-  { path: '/',              label: 'Tableau de bord', Icon: LayoutDashboard, roles: ['super_admin', 'merchant'] },
-  { path: '/transactions',  label: 'Transactions',    Icon: ArrowLeftRight,  roles: ['super_admin', 'merchant'] },
-  { path: '/accounts',      label: 'Comptes',         Icon: CreditCard,      roles: ['super_admin', 'merchant'] },
-  { path: '/reports',       label: 'Rapports',        Icon: BarChart2,       roles: ['super_admin', 'merchant'] },
-  { path: '/merchants',     label: 'Marchands',       Icon: Store,           roles: ['super_admin'] },
-  { path: '/users',         label: 'Utilisateurs',    Icon: Users,           roles: ['super_admin'] },
-  { path: '/notifications', label: 'Notifications',   Icon: Bell,            roles: ['super_admin', 'merchant'] },
-  { path: '/audit',         label: 'Audit',           Icon: ClipboardList,   roles: ['super_admin'] },
-  { path: '/settings',      label: 'Paramètres',      Icon: Settings,        roles: ['super_admin', 'merchant'] },
-];
-
 const Sidebar = ({ collapsed, onToggle }) => {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  const NAV_ITEMS = [
+    { path: '/',              labelKey: 'nav.dashboard',     Icon: LayoutDashboard, roles: ['super_admin', 'merchant'] },
+    { path: '/transactions',  labelKey: 'nav.transactions',  Icon: ArrowLeftRight,  roles: ['super_admin', 'merchant'] },
+    { path: '/accounts',      labelKey: 'nav.accounts',      Icon: CreditCard,      roles: ['super_admin', 'merchant'] },
+    { path: '/reports',       labelKey: 'nav.reports',       Icon: BarChart2,       roles: ['super_admin', 'merchant'] },
+    { path: '/merchants',     labelKey: 'nav.merchants',     Icon: Store,           roles: ['super_admin'] },
+    { path: '/users',         labelKey: 'nav.users',         Icon: Users,           roles: ['super_admin'] },
+    { path: '/notifications', labelKey: 'nav.notifications', Icon: Bell,            roles: ['super_admin', 'merchant'] },
+    { path: '/audit',         labelKey: 'nav.audit',         Icon: ClipboardList,   roles: ['super_admin'] },
+    { path: '/settings',      labelKey: 'nav.settings',      Icon: Settings,        roles: ['super_admin', 'merchant'] },
+  ];
 
   const visibleItems = NAV_ITEMS.filter((item) => item.roles.includes(user?.role));
 
@@ -67,7 +69,7 @@ const Sidebar = ({ collapsed, onToggle }) => {
               fontFamily: 'var(--font)', fontWeight: 800, fontSize: '16px',
               color: 'var(--text)', whiteSpace: 'nowrap',
             }}>
-              GestionMoMo
+              {t('common.appName')}
             </span>
           )}
         </div>
@@ -83,7 +85,7 @@ const Sidebar = ({ collapsed, onToggle }) => {
               key={item.path}
               to={item.path}
               end={item.path === '/'}
-              title={collapsed ? item.label : undefined}
+              title={collapsed ? t(item.labelKey) : undefined}
               className={({ isActive }) =>
                 [
                   styles.navLink,
@@ -95,7 +97,7 @@ const Sidebar = ({ collapsed, onToggle }) => {
               {({ isActive }) => (
                 <>
                   <Icon size={18} strokeWidth={isActive ? 2.5 : 2} style={{ flexShrink: 0 }} />
-                  {!collapsed && item.label}
+                  {!collapsed && t(item.labelKey)}
                 </>
               )}
             </NavLink>
@@ -127,9 +129,12 @@ const Sidebar = ({ collapsed, onToggle }) => {
               }}>
                 {user?.name}
               </div>
-              <div style={{ fontFamily: 'var(--font)', fontSize: '11px', color: 'var(--text-secondary)' }}>
-                {user?.role === 'super_admin' ? 'Super Admin'
-                  : user?.role === 'merchant' ? 'Marchand' : 'Client'}
+              <div style={{
+                fontFamily: 'var(--font)', fontWeight: 400, fontSize: '11px',
+                color: 'var(--text-secondary)', overflow: 'hidden',
+                textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              }}>
+                {user?.phone}
               </div>
             </div>
           </div>
@@ -138,21 +143,23 @@ const Sidebar = ({ collapsed, onToggle }) => {
         {/* Bouton déconnexion */}
         <button
           onClick={handleLogout}
-          title="Déconnexion"
+          title={collapsed ? t('nav.logout') : undefined}
           style={{
-            display: 'flex', alignItems: 'center', gap: '10px',
-            width: '100%', padding: '10px 12px', borderRadius: '10px',
-            background: 'transparent', border: 'none', cursor: 'pointer',
-            color: 'var(--color-error)',
-            fontFamily: 'var(--font)', fontWeight: 500, fontSize: '14px',
-            transition: 'background 0.15s',
+            width: '100%', display: 'flex', alignItems: 'center',
+            gap: collapsed ? '0' : '10px',
             justifyContent: collapsed ? 'center' : 'flex-start',
+            padding: collapsed ? '10px' : '10px 12px',
+            borderRadius: '10px', border: 'none',
+            background: 'transparent', cursor: 'pointer',
+            fontFamily: 'var(--font)', fontWeight: 500, fontSize: '13px',
+            color: 'var(--color-error)',
+            transition: 'background 0.15s',
           }}
-          onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-error-light)'}
-          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-error-light)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
         >
-          <LogOut size={18} strokeWidth={2} style={{ flexShrink: 0 }} />
-          {!collapsed && 'Déconnexion'}
+          <LogOut size={16} strokeWidth={2} />
+          {!collapsed && t('nav.logout')}
         </button>
       </div>
     </aside>

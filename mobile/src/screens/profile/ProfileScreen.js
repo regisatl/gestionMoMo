@@ -1,12 +1,12 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Switch, Alert, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
-
-const ROLE_LABELS = { super_admin: 'Super Admin', merchant: 'Marchand', client: 'Client' };
 
 const SettingRow = ({ icon, label, value, onPress, rightElement, theme }) => (
   <TouchableOpacity
@@ -28,21 +28,40 @@ const SettingRow = ({ icon, label, value, onPress, rightElement, theme }) => (
 const Separator = ({ theme }) => <View style={{ height: 1, backgroundColor: theme.border }} />;
 
 const ProfileScreen = ({ navigation }) => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const { user, logout } = useAuth();
+  const { language, changeLanguage, supportedLanguages } = useLanguage();
+
+  const [showLangModal, setShowLangModal] = React.useState(false);
 
   const handleLogout = () => {
-    Alert.alert('Déconnexion', 'Voulez-vous vous déconnecter ?', [
-      { text: 'Annuler', style: 'cancel' },
-      { text: 'Déconnecter', style: 'destructive', onPress: logout },
-    ]);
+    Alert.alert(
+      t('profile.logoutTitle'),
+      t('profile.logoutMessage'),
+      [
+        { text: t('profile.logoutCancel'), style: 'cancel' },
+        { text: t('profile.logoutConfirm'), style: 'destructive', onPress: logout },
+      ],
+    );
+  };
+
+  const roleLabels = {
+    super_admin: t('profile.roles.super_admin'),
+    merchant:    t('profile.roles.merchant'),
+    client:      t('profile.roles.client'),
+  };
+
+  const langNames = {
+    fr: t('profile.languageNames.fr'),
+    en: t('profile.languageNames.en'),
   };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={['top']}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: theme.spacing.base }}>
         <Text style={{ fontFamily: theme.typography.fontFamily.extraBold, fontSize: theme.typography.fontSize.xl, color: theme.text, marginBottom: theme.spacing.lg }}>
-          Profil
+          {t('profile.title')}
         </Text>
 
         {/* Avatar + info */}
@@ -59,7 +78,7 @@ const ProfileScreen = ({ navigation }) => {
           <Text style={{ fontFamily: theme.typography.fontFamily.bold, fontSize: 18, color: theme.text }}>{user?.name}</Text>
           <Text style={{ fontFamily: theme.typography.fontFamily.regular, fontSize: 13, color: theme.textSecondary, marginTop: 2 }}>{user?.phone}</Text>
           <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
-            <Badge status="active" label={ROLE_LABELS[user?.role] || user?.role} />
+            <Badge status="active" label={roleLabels[user?.role] || user?.role} />
             <Badge status={user?.status} />
           </View>
         </Card>
@@ -67,17 +86,17 @@ const ProfileScreen = ({ navigation }) => {
         {/* Paramètres compte */}
         <Card style={{ marginBottom: theme.spacing.md }}>
           <Text style={{ fontFamily: theme.typography.fontFamily.bold, fontSize: 12, color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>
-            Compte
+            {t('profile.account')}
           </Text>
-          <SettingRow icon="✏️" label="Modifier le profil" onPress={() => {}} theme={theme} />
+          <SettingRow icon="✏️" label={t('profile.editProfile')} onPress={() => {}} theme={theme} />
           <Separator theme={theme} />
-          <SettingRow icon="🔒" label="Changer le mot de passe" onPress={() => {}} theme={theme} />
+          <SettingRow icon="🔒" label={t('profile.changePassword')} onPress={() => {}} theme={theme} />
           <Separator theme={theme} />
-          <SettingRow icon="📱" label="Téléphone" value={user?.phone} theme={theme} />
+          <SettingRow icon="📱" label={t('profile.telephone')} value={user?.phone} theme={theme} />
           {user?.email && (
             <>
               <Separator theme={theme} />
-              <SettingRow icon="📧" label="Email" value={user?.email} theme={theme} />
+              <SettingRow icon="📧" label={t('profile.email')} value={user?.email} theme={theme} />
             </>
           )}
         </Card>
@@ -85,11 +104,13 @@ const ProfileScreen = ({ navigation }) => {
         {/* Préférences */}
         <Card style={{ marginBottom: theme.spacing.md }}>
           <Text style={{ fontFamily: theme.typography.fontFamily.bold, fontSize: 12, color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>
-            Préférences
+            {t('profile.preferences')}
           </Text>
+
+          {/* Mode sombre */}
           <SettingRow
             icon={theme.isDark ? '🌙' : '☀️'}
-            label="Mode sombre"
+            label={t('profile.darkMode')}
             rightElement={
               <Switch
                 value={theme.isDark}
@@ -101,7 +122,15 @@ const ProfileScreen = ({ navigation }) => {
             theme={theme}
           />
           <Separator theme={theme} />
-          <SettingRow icon="🌐" label="Langue" value={user?.language === 'fr' ? 'Français' : 'English'} onPress={() => {}} theme={theme} />
+
+          {/* Sélecteur de langue */}
+          <SettingRow
+            icon="🌐"
+            label={t('profile.language')}
+            value={langNames[language] || language}
+            onPress={() => setShowLangModal(true)}
+            theme={theme}
+          />
         </Card>
 
         {/* Déconnexion */}
@@ -117,14 +146,62 @@ const ProfileScreen = ({ navigation }) => {
           }}
         >
           <Text style={{ fontFamily: theme.typography.fontFamily.semiBold, fontSize: 15, color: theme.colors.error }}>
-            Se déconnecter
+            {t('profile.logout')}
           </Text>
         </TouchableOpacity>
 
         <Text style={{ textAlign: 'center', fontFamily: theme.typography.fontFamily.regular, fontSize: 11, color: theme.textSecondary }}>
-          GestionMoMo v1.0.0
+          {t('common.copyright')}
         </Text>
       </ScrollView>
+
+      {/* Modal sélecteur de langue */}
+      <Modal
+        visible={showLangModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowLangModal(false)}
+      >
+        <TouchableOpacity
+          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', alignItems: 'center' }}
+          activeOpacity={1}
+          onPress={() => setShowLangModal(false)}
+        >
+          <View style={{
+            width: 280,
+            backgroundColor: theme.backgroundCard,
+            borderRadius: theme.radius.xl,
+            overflow: 'hidden',
+            borderWidth: 1, borderColor: theme.border,
+          }}>
+            <View style={{ padding: 20, borderBottomWidth: 1, borderBottomColor: theme.border }}>
+              <Text style={{ fontFamily: theme.typography.fontFamily.bold, fontSize: 16, color: theme.text, textAlign: 'center' }}>
+                {t('profile.language')}
+              </Text>
+            </View>
+            {supportedLanguages.map((lang, idx) => (
+              <TouchableOpacity
+                key={lang}
+                onPress={() => { changeLanguage(lang); setShowLangModal(false); }}
+                style={{
+                  flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+                  padding: 16,
+                  borderBottomWidth: idx < supportedLanguages.length - 1 ? 1 : 0,
+                  borderBottomColor: theme.border,
+                  backgroundColor: language === lang ? theme.colors.primaryAlpha : 'transparent',
+                }}
+              >
+                <Text style={{ fontFamily: theme.typography.fontFamily.medium, fontSize: 15, color: theme.text }}>
+                  {lang === 'fr' ? '🇫🇷' : '🇬🇧'} {langNames[lang]}
+                </Text>
+                {language === lang && (
+                  <Text style={{ color: theme.colors.primary, fontSize: 18 }}>✓</Text>
+                )}
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 };
