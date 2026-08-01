@@ -429,6 +429,7 @@ const en = {
     sync:     'Sync',
     disable:  'Disable',
     enable:   'Enable',
+    resetPasswordHint: 'The new password will be applied to the merchant linked to this account.',
     tableHeaders: {
       merchant:    'Merchant',
       momoAccount: 'MoMo Number',

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Search, CreditCard, RefreshCw, Pencil,
-  PowerOff, Power, Plus,
+  PowerOff, Power, Plus, KeyRound, Hash,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Card from '../components/ui/Card';
@@ -9,19 +9,22 @@ import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Modal from '../components/ui/Modal';
+import Tooltip from '../components/ui/Tooltip';
 import { useNotifications } from '../context/NotificationContext';
 import api from '../services/api';
 
 const fmt = (n = 0) => new Intl.NumberFormat('fr-FR').format(n);
 
-const IconBtn = ({ icon: Icon, color, title, onClick, disabled }) => (
-  <button title={title} onClick={onClick} disabled={disabled}
-    style={{ width: '30px', height: '30px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1.5px solid ${color}30`, background: `${color}12`, color, cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.5 : 1, transition: 'background 0.15s, transform 0.1s', flexShrink: 0 }}
-    onMouseEnter={(e) => { if (!disabled) { e.currentTarget.style.background = `${color}25`; e.currentTarget.style.transform = 'scale(1.1)'; } }}
-    onMouseLeave={(e) => { e.currentTarget.style.background = `${color}12`; e.currentTarget.style.transform = 'scale(1)'; }}
-  >
-    <Icon size={14} strokeWidth={2.2} />
-  </button>
+const IconBtn = ({ icon: Icon, color, tooltip, onClick, disabled }) => (
+  <Tooltip content={tooltip} placement="top" delay={200}>
+    <button onClick={onClick} disabled={disabled}
+      style={{ width: '30px', height: '30px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1.5px solid ${color}30`, background: `${color}12`, color, cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.5 : 1, transition: 'background 0.15s, transform 0.1s', flexShrink: 0 }}
+      onMouseEnter={(e) => { if (!disabled) { e.currentTarget.style.background = `${color}25`; e.currentTarget.style.transform = 'scale(1.1)'; } }}
+      onMouseLeave={(e) => { e.currentTarget.style.background = `${color}12`; e.currentTarget.style.transform = 'scale(1)'; }}
+    >
+      <Icon size={14} strokeWidth={2.2} />
+    </button>
+  </Tooltip>
 );
 
 const Th = ({ children }) => (
@@ -47,13 +50,16 @@ const AccountsPage = () => {
   /* merchants without an account — for create dropdown */
   const [freeMerchants, setFreeMerchants] = useState([]);
 
-  const [createOpen, setCreateOpen]   = useState(false);
-  const [editTarget, setEditTarget]   = useState(null);
+  const [createOpen, setCreateOpen]       = useState(false);
+  const [editTarget, setEditTarget]       = useState(null);
+  const [resetPwdTarget, setResetPwdTarget] = useState(null);
+  const [resetPinTarget, setResetPinTarget] = useState(null);
 
   const [form, setForm]               = useState(EMPTY_FORM);
   const [formErrors, setFormErrors]   = useState({});
   const [formLoading, setFormLoading] = useState(false);
   const [actionId, setActionId]       = useState(null);
+  const [resetResult, setResetResult] = useState(null); // { type: 'password'|'pin', value, userName }
 
   const setField = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
@@ -183,8 +189,43 @@ const AccountsPage = () => {
     }
   };
 
-  const closeCreate = () => { setCreateOpen(false); setForm(EMPTY_FORM); setFormErrors({}); };
-  const closeEdit   = () => { setEditTarget(null); setForm(EMPTY_FORM); setFormErrors({}); };
+  /* ── Reset password du marchand lié — aléatoire côté serveur ── */
+  const handleResetPassword = async () => {
+    setFormLoading(true);
+    try {
+      const merchantId = resetPwdTarget.merchantId?._id || resetPwdTarget.merchantId;
+      const merchant   = resetPwdTarget.merchantId;
+      const { data }   = await api.patch(`/users/${merchantId}/reset-password`);
+      setResetPwdTarget(null);
+      setResetResult({ type: 'password', value: data.newPassword, userName: merchant?.businessName || merchant?.name || '—' });
+    } catch (err) {
+      addToast({ type: 'error', title: t('toast.passwordError'), message: err.response?.data?.error });
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  /* ── Reset PIN du marchand lié — aléatoire côté serveur ── */
+  const handleResetPin = async () => {
+    setFormLoading(true);
+    try {
+      const merchantId = resetPinTarget.merchantId?._id || resetPinTarget.merchantId;
+      const merchant   = resetPinTarget.merchantId;
+      const { data }   = await api.patch(`/users/${merchantId}/reset-pin`);
+      setResetPinTarget(null);
+      setResetResult({ type: 'pin', value: data.newPin, userName: merchant?.businessName || merchant?.name || '—' });
+    } catch (err) {
+      addToast({ type: 'error', title: t('toast.pinError'), message: err.response?.data?.error });
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const closeCreate   = () => { setCreateOpen(false); setForm(EMPTY_FORM); setFormErrors({}); };
+  const closeEdit     = () => { setEditTarget(null); setForm(EMPTY_FORM); setFormErrors({}); };
+  const closeResetPwd = () => { setResetPwdTarget(null); };
+  const closeResetPin = () => { setResetPinTarget(null); };
+  const closeResult   = () => { setResetResult(null); };
 
   const countLabel = pagination.total <= 1
     ? t('accounts.accountCount', { count: pagination.total })
@@ -264,12 +305,14 @@ const AccountsPage = () => {
                     </td>
                     <td style={{ padding: '12px 14px' }}>
                       <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
-                        <IconBtn icon={Pencil}     color="#0A66C2" title={t('common.edit')}              onClick={() => openEdit(a)} />
-                        <IconBtn icon={RefreshCw}  color="#16A34A" title={t('accounts.sync')}            onClick={() => handleSync(a)} disabled={actionId === a._id + '_sync'} />
+                        <IconBtn icon={Pencil}     color="#0A66C2" tooltip={t('common.edit')}              onClick={() => openEdit(a)} />
+                        <IconBtn icon={KeyRound}   color="#7C3AED" tooltip={t('common.resetPassword')}     onClick={() => { setResetPwdTarget(a); setNewPassword(''); }} />
+                        <IconBtn icon={Hash}       color="#0284C7" tooltip={t('common.resetPin')}          onClick={() => { setResetPinTarget(a); setNewPin(''); }} />
+                        <IconBtn icon={RefreshCw}  color="#16A34A" tooltip={t('accounts.sync')}            onClick={() => handleSync(a)} disabled={actionId === a._id + '_sync'} />
                         <IconBtn
                           icon={a.isActive ? PowerOff : Power}
                           color={a.isActive ? '#D97706' : '#16A34A'}
-                          title={a.isActive ? t('accounts.disable') : t('accounts.enable')}
+                          tooltip={a.isActive ? t('accounts.disable') : t('accounts.enable')}
                           onClick={() => handleToggleActive(a)}
                           disabled={actionId === a._id + '_toggle'}
                         />
@@ -374,6 +417,47 @@ const AccountsPage = () => {
           <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '4px' }}>
             <Button type="button" variant="secondary" onClick={closeEdit}>{t('common.cancel')}</Button>
             <Button type="submit" variant="primary" loading={formLoading}>{t('common.save')}</Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* ── RESET PASSWORD modal ── */}
+      <Modal open={!!resetPwdTarget} onClose={closeResetPwd} title={t('common.resetPassword') + ' — ' + (resetPwdTarget?.merchantId?.businessName || resetPwdTarget?.merchantId?.name || '')} width={420}>
+        <form onSubmit={handleResetPassword} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          <p style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>
+            {t('accounts.resetPasswordHint')}
+          </p>
+          <Input
+            label={t('merchants.form.newPassword')}
+            type="password" value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="Minimum 6 caractères"
+            required
+          />
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '4px' }}>
+            <Button type="button" variant="secondary" onClick={closeResetPwd}>{t('common.cancel')}</Button>
+            <Button type="submit" variant="primary" loading={formLoading} icon={<KeyRound size={14} />}>{t('common.resetPassword')}</Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* ── RESET PIN modal ── */}
+      <Modal open={!!resetPinTarget} onClose={closeResetPin} title={t('common.resetPin') + ' — ' + (resetPinTarget?.merchantId?.businessName || resetPinTarget?.merchantId?.name || '')} width={420}>
+        <form onSubmit={handleResetPin} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          <p style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>
+            {t('users.resetPinHint')}
+          </p>
+          <Input
+            label={t('users.form.newPin')}
+            value={newPin}
+            onChange={(e) => setNewPin(e.target.value.replace(/\D/g, '').slice(0, 5))}
+            placeholder="12345"
+            maxLength={5}
+            icon={<Hash size={15} color="var(--text-secondary)" />}
+          />
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '4px' }}>
+            <Button type="button" variant="secondary" onClick={closeResetPin}>{t('common.cancel')}</Button>
+            <Button type="submit" variant="primary" loading={formLoading} icon={<Hash size={14} />}>{t('common.resetPin')}</Button>
           </div>
         </form>
       </Modal>

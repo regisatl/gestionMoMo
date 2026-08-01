@@ -3,6 +3,7 @@ const http = require('http');
 const app = require('./app');
 const connectDB = require('./config/database');
 const { initSocket } = require('./services/socketService');
+const whatsappService = require('./services/whatsappService');
 const logger = require('./config/logger');
 const seedSuperAdmin = require('./scripts/seedSuperAdmin');
 
@@ -22,7 +23,10 @@ const start = async () => {
   // 2. Seed super admin si absent
   await seedSuperAdmin();
 
-  // 3. Écoute
+  // 3. Initialisation WhatsApp
+  whatsappService.init();
+
+  // 4. Écoute
   server.listen(PORT, () => {
     logger.info(`  Serveur démarré sur le port ${PORT} [${process.env.NODE_ENV}]`);
   });

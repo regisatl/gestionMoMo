@@ -62,6 +62,12 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Statut WhatsApp (super_admin uniquement — pas de middleware ici car utilisé au démarrage)
+app.get('/api/whatsapp/status', (req, res) => {
+  const whatsappService = require('./services/whatsappService');
+  res.json(whatsappService.getStatus());
+});
+
 // 404
 app.use((req, res) => {
   res.status(404).json({ error: 'Route introuvable' });

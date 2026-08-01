@@ -4,7 +4,7 @@ const Account             = require('../models/Account');
 const { auditAction }     = require('../middleware/auditMiddleware');
 const notificationService = require('../services/notificationService');
 const emailService        = require('../services/emailService');
-const smsService          = require('../services/smsService');
+const whatsappService     = require('../services/whatsappService');
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -112,11 +112,11 @@ exports.createUser = async (req, res, next) => {
       resourceId: user._id,
     });
 
-    // Email + SMS (silencieux si non configuré)
+    // Email + WhatsApp (silencieux si non configuré)
     if (email) {
       emailService.sendWelcome({ to: email, name, phone, password: plainPassword, pin: plainPin });
     }
-    smsService.sendWelcome({ to: phone, name, phone, password: plainPassword, pin: plainPin });
+    whatsappService.sendWelcome({ to: phone, name, phone, password: plainPassword, pin: plainPin });
 
     await auditAction('user_created', req, user._id, 'User', { role, phone });
     res.status(201).json({ user, credentials: { password: plainPassword, pin: plainPin } });
@@ -207,11 +207,11 @@ exports.resetPassword = async (req, res, next) => {
       resourceId: user._id,
     });
 
-    // Email + SMS
+    // Email + WhatsApp
     if (user.email) {
       emailService.sendPasswordReset({ to: user.email, name: user.name, newPassword });
     }
-    smsService.sendPasswordReset({ to: user.phone, name: user.name, newPassword });
+    whatsappService.sendPasswordReset({ to: user.phone, name: user.name, newPassword });
 
     await auditAction('password_reset_admin', req, user._id, 'User', { resetBy: req.user._id });
     res.json({ message: 'Mot de passe réinitialisé avec succès.', newPassword });
@@ -239,11 +239,11 @@ exports.resetPin = async (req, res, next) => {
       resourceId: user._id,
     });
 
-    // Email + SMS
+    // Email + WhatsApp
     if (user.email) {
       emailService.sendPinReset({ to: user.email, name: user.name, newPin });
     }
-    smsService.sendPinReset({ to: user.phone, name: user.name, newPin });
+    whatsappService.sendPinReset({ to: user.phone, name: user.name, newPin });
 
     await auditAction('pin_reset_admin', req, user._id, 'User', { resetBy: req.user._id });
     res.json({ message: 'PIN réinitialisé avec succès.', newPin });

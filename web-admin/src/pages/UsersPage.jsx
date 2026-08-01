@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Search, UserPlus, Phone, User, Mail,
-  Pencil, Hash, PowerOff, Power, Trash2, RotateCcw,
+  Pencil, Hash, KeyRound, PowerOff, Power, Trash2, RotateCcw,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Card from '../components/ui/Card';
@@ -9,27 +9,29 @@ import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Modal from '../components/ui/Modal';
+import Tooltip from '../components/ui/Tooltip';
 import { useNotifications } from '../context/NotificationContext';
 import api from '../services/api';
 
-/* ── Shared icon-button ── */
-const IconBtn = ({ icon: Icon, color, title, onClick, disabled }) => (
-  <button
-    title={title}
-    onClick={onClick}
-    disabled={disabled}
-    style={{
-      width: '30px', height: '30px', borderRadius: '8px',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      border: `1.5px solid ${color}30`, background: `${color}12`,
-      color, cursor: disabled ? 'not-allowed' : 'pointer',
-      opacity: disabled ? 0.5 : 1, transition: 'background 0.15s, transform 0.1s', flexShrink: 0,
-    }}
-    onMouseEnter={(e) => { if (!disabled) { e.currentTarget.style.background = `${color}25`; e.currentTarget.style.transform = 'scale(1.1)'; } }}
-    onMouseLeave={(e) => { e.currentTarget.style.background = `${color}12`; e.currentTarget.style.transform = 'scale(1)'; }}
-  >
-    <Icon size={14} strokeWidth={2.2} />
-  </button>
+/* ── Shared icon-button — Tooltip custom, pas de title= natif ── */
+const IconBtn = ({ icon: Icon, color, tooltip, onClick, disabled }) => (
+  <Tooltip content={tooltip} placement="top" delay={200}>
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        width: '30px', height: '30px', borderRadius: '8px',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        border: `1.5px solid ${color}30`, background: `${color}12`,
+        color, cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.5 : 1, transition: 'background 0.15s, transform 0.1s', flexShrink: 0,
+      }}
+      onMouseEnter={(e) => { if (!disabled) { e.currentTarget.style.background = `${color}25`; e.currentTarget.style.transform = 'scale(1.1)'; } }}
+      onMouseLeave={(e) => { e.currentTarget.style.background = `${color}12`; e.currentTarget.style.transform = 'scale(1)'; }}
+    >
+      <Icon size={14} strokeWidth={2.2} />
+    </button>
+  </Tooltip>
 );
 
 const Th = ({ children }) => (
@@ -54,16 +56,17 @@ const UsersPage = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [showDeleted, setShowDeleted]   = useState(false);
 
-  const [createOpen, setCreateOpen]     = useState(false);
-  const [editTarget, setEditTarget]     = useState(null);
-  const [resetTarget, setResetTarget]   = useState(null);
-  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [createOpen, setCreateOpen]       = useState(false);
+  const [editTarget, setEditTarget]       = useState(null);
+  const [resetPinTarget, setResetPinTarget]   = useState(null);
+  const [resetPwdTarget, setResetPwdTarget]   = useState(null);
+  const [deleteTarget, setDeleteTarget]   = useState(null);
 
-  const [form, setForm]             = useState(EMPTY_FORM);
-  const [formErrors, setFormErrors] = useState({});
+  const [form, setForm]               = useState(EMPTY_FORM);
+  const [formErrors, setFormErrors]   = useState({});
   const [formLoading, setFormLoading] = useState(false);
-  const [actionId, setActionId]     = useState(null);
-  const [newPin, setNewPin]         = useState('');
+  const [actionId, setActionId]       = useState(null);
+  const [resetResult, setResetResult] = useState(null); // { type: 'password'|'pin', value, userName }
   const [deleteReason, setDeleteReason] = useState('');
 
   const setField = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
@@ -144,21 +147,29 @@ const UsersPage = () => {
     }
   };
 
-  /* ── Reset PIN ── */
-  const handleResetPin = async (e) => {
-    e.preventDefault();
-    if (!/^\d{5}$/.test(newPin)) {
-      addToast({ type: 'error', title: t('toast.pinError'), message: t('toast.pinInvalid') });
-      return;
-    }
+  /* ── Reset PIN — aléatoire côté serveur ── */
+  const handleResetPin = async () => {
     setFormLoading(true);
     try {
-      await api.patch(`/users/${resetTarget._id}/reset-pin`, { newPin });
-      addToast({ type: 'success', title: t('toast.pinReset') });
-      setResetTarget(null);
-      setNewPin('');
+      const { data } = await api.patch(`/users/${resetPinTarget._id}/reset-pin`);
+      setResetPinTarget(null);
+      setResetResult({ type: 'pin', value: data.newPin, userName: resetPinTarget.name });
     } catch (err) {
       addToast({ type: 'error', title: t('toast.pinError'), message: err.response?.data?.error });
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  /* ── Reset Password — aléatoire côté serveur ── */
+  const handleResetPassword = async () => {
+    setFormLoading(true);
+    try {
+      const { data } = await api.patch(`/users/${resetPwdTarget._id}/reset-password`);
+      setResetPwdTarget(null);
+      setResetResult({ type: 'password', value: data.newPassword, userName: resetPwdTarget.name });
+    } catch (err) {
+      addToast({ type: 'error', title: t('toast.passwordError'), message: err.response?.data?.error });
     } finally {
       setFormLoading(false);
     }
@@ -210,10 +221,12 @@ const UsersPage = () => {
     }
   };
 
-  const closeCreate = () => { setCreateOpen(false); setForm(EMPTY_FORM); setFormErrors({}); };
-  const closeEdit   = () => { setEditTarget(null); setForm(EMPTY_FORM); setFormErrors({}); };
-  const closeReset  = () => { setResetTarget(null); setNewPin(''); };
-  const closeDelete = () => { setDeleteTarget(null); setDeleteReason(''); };
+  const closeCreate   = () => { setCreateOpen(false); setForm(EMPTY_FORM); setFormErrors({}); };
+  const closeEdit     = () => { setEditTarget(null); setForm(EMPTY_FORM); setFormErrors({}); };
+  const closeResetPin = () => { setResetPinTarget(null); };
+  const closeResetPwd = () => { setResetPwdTarget(null); };
+  const closeDelete   = () => { setDeleteTarget(null); setDeleteReason(''); };
+  const closeResult   = () => { setResetResult(null); };
 
   const roleLabel = (r) => ({ super_admin: t('users.roles.super_admin'), merchant: t('users.roles.merchant'), client: t('users.roles.client') }[r] || r);
   const roleColor = (r) => ({ super_admin: '#7C3AED', merchant: '#0A66C2', client: '#16A34A' }[r] || '#6B7280');
@@ -315,19 +328,20 @@ const UsersPage = () => {
                   <td style={{ padding: '12px 14px' }}>
                     <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
                       {u.isDeleted ? (
-                        <IconBtn icon={RotateCcw} color="#16A34A" title={t('common.restore')} onClick={() => handleRestore(u)} disabled={actionId === u._id + '_restore'} />
+                        <IconBtn icon={RotateCcw} color="#16A34A" tooltip={t('common.restore')} onClick={() => handleRestore(u)} disabled={actionId === u._id + '_restore'} />
                       ) : (
                         <>
-                          <IconBtn icon={Pencil}   color="#0A66C2" title={t('common.edit')}       onClick={() => openEdit(u)} />
-                          <IconBtn icon={Hash}     color="#7C3AED" title={t('common.resetPin')}   onClick={() => { setResetTarget(u); setNewPin(''); }} />
+                          <IconBtn icon={Pencil}   color="#0A66C2" tooltip={t('common.edit')}           onClick={() => openEdit(u)} />
+                          <IconBtn icon={KeyRound} color="#7C3AED" tooltip={t('common.resetPassword')}  onClick={() => { setResetPwdTarget(u); setNewPassword(''); }} />
+                          <IconBtn icon={Hash}     color="#0284C7" tooltip={t('common.resetPin')}       onClick={() => { setResetPinTarget(u); setNewPin(''); }} />
                           <IconBtn
                             icon={u.status === 'active' ? PowerOff : Power}
                             color={u.status === 'active' ? '#D97706' : '#16A34A'}
-                            title={u.status === 'active' ? t('users.suspend') : t('users.activate')}
+                            tooltip={u.status === 'active' ? t('users.suspend') : t('users.activate')}
                             onClick={() => handleToggleStatus(u)}
                             disabled={actionId === u._id + '_status'}
                           />
-                          <IconBtn icon={Trash2}  color="#DC2626" title={t('common.delete')}     onClick={() => setDeleteTarget(u)} />
+                          <IconBtn icon={Trash2}  color="#DC2626" tooltip={t('common.delete')}          onClick={() => setDeleteTarget(u)} />
                         </>
                       )}
                     </div>
@@ -408,25 +422,73 @@ const UsersPage = () => {
         </form>
       </Modal>
 
-      {/* ── RESET PIN modal ── */}
-      <Modal open={!!resetTarget} onClose={closeReset} title={t('common.resetPin') + ' — ' + (resetTarget?.name || '')} width={400}>
-        <form onSubmit={handleResetPin} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-          <p style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>
-            {t('users.resetPinHint')}
-          </p>
-          <Input
-            label={t('users.form.newPin')}
-            value={newPin}
-            onChange={(e) => setNewPin(e.target.value.replace(/\D/g, '').slice(0, 5))}
-            placeholder="12345"
-            maxLength={5}
-            icon={<Hash size={15} color="var(--text-secondary)" />}
-          />
-          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '4px' }}>
-            <Button type="button" variant="secondary" onClick={closeReset}>{t('common.cancel')}</Button>
-            <Button type="submit" variant="primary" loading={formLoading} icon={<Hash size={14} />}>{t('common.resetPin')}</Button>
+      {/* ── RESET PIN modal — confirmation ── */}
+      <Modal open={!!resetPinTarget} onClose={closeResetPin} title={t('common.resetPin') + ' — ' + (resetPinTarget?.name || '')} width={420}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '14px 16px', borderRadius: '12px', background: 'var(--color-info-light)', border: '1px solid rgba(2,132,199,0.3)' }}>
+            <Hash size={18} color="#0284C7" style={{ flexShrink: 0, marginTop: '1px' }} />
+            <p style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text)', margin: 0, lineHeight: 1.6 }}>
+              {t('common.resetPinConfirm', { name: resetPinTarget?.name })}
+            </p>
           </div>
-        </form>
+          <p style={{ fontFamily: 'var(--font)', fontSize: '12px', color: 'var(--text-secondary)', margin: 0 }}>
+            {t('common.resetAutoHint')}
+          </p>
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '4px' }}>
+            <Button type="button" variant="secondary" onClick={closeResetPin}>{t('common.cancel')}</Button>
+            <Button type="button" variant="primary" loading={formLoading} onClick={handleResetPin} icon={<Hash size={14} />}>{t('common.resetPin')}</Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* ── RESET PASSWORD modal — confirmation ── */}
+      <Modal open={!!resetPwdTarget} onClose={closeResetPwd} title={t('common.resetPassword') + ' — ' + (resetPwdTarget?.name || '')} width={420}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '14px 16px', borderRadius: '12px', background: 'var(--color-warning-light)', border: '1px solid rgba(217,119,6,0.3)' }}>
+            <KeyRound size={18} color="#D97706" style={{ flexShrink: 0, marginTop: '1px' }} />
+            <p style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text)', margin: 0, lineHeight: 1.6 }}>
+              {t('common.resetPasswordConfirm', { name: resetPwdTarget?.name })}
+            </p>
+          </div>
+          <p style={{ fontFamily: 'var(--font)', fontSize: '12px', color: 'var(--text-secondary)', margin: 0 }}>
+            {t('common.resetAutoHint')}
+          </p>
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '4px' }}>
+            <Button type="button" variant="secondary" onClick={closeResetPwd}>{t('common.cancel')}</Button>
+            <Button type="button" variant="primary" loading={formLoading} onClick={handleResetPassword} icon={<KeyRound size={14} />}>{t('common.resetPassword')}</Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* ── Résultat reset — affiche le nouveau credential généré ── */}
+      <Modal open={!!resetResult} onClose={closeResult} title={resetResult?.type === 'password' ? t('common.resetPassword') : t('common.resetPin')} width={420}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'var(--color-success-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <p style={{ fontFamily: 'var(--font)', fontWeight: 600, fontSize: '14px', color: 'var(--text)', margin: 0 }}>
+              {t('common.resetSuccess', { name: resetResult?.userName })}
+            </p>
+          </div>
+          <div style={{ background: 'var(--surface)', border: '1.5px dashed var(--border)', borderRadius: '12px', padding: '16px 20px', textAlign: 'center' }}>
+            <p style={{ fontFamily: 'var(--font)', fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 8px' }}>
+              {resetResult?.type === 'password' ? t('common.newPasswordGenerated') : t('common.newPinGenerated')}
+            </p>
+            <p style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: resetResult?.type === 'pin' ? '32px' : '20px', color: resetResult?.type === 'pin' ? '#0284C7' : '#7C3AED', letterSpacing: resetResult?.type === 'pin' ? '10px' : '3px', margin: 0 }}>
+              {resetResult?.value}
+            </p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', padding: '10px 14px', borderRadius: '10px', background: 'var(--color-error-light)', border: '1px solid rgba(220,38,38,0.2)' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2.5" style={{ flexShrink: 0, marginTop: '1px' }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <p style={{ fontFamily: 'var(--font)', fontSize: '12px', color: '#DC2626', margin: 0, lineHeight: 1.5 }}>
+              {t('common.resetCopyHint')}
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '4px' }}>
+            <Button type="button" variant="primary" onClick={closeResult}>{t('common.understood')}</Button>
+          </div>
+        </div>
       </Modal>
 
       {/* ── DELETE modal ── */}

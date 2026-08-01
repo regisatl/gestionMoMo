@@ -429,6 +429,7 @@ const fr = {
     sync:     'Synchroniser',
     disable:  'Désactiver',
     enable:   'Activer',
+    resetPasswordHint: 'Le nouveau mot de passe sera appliqué au marchand lié à ce compte.',
     tableHeaders: {
       merchant:    'Marchand',
       momoAccount: 'Numéro MoMo',
