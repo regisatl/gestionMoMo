@@ -332,8 +332,8 @@ const UsersPage = () => {
                       ) : (
                         <>
                           <IconBtn icon={Pencil}   color="#0A66C2" tooltip={t('common.edit')}           onClick={() => openEdit(u)} />
-                          <IconBtn icon={KeyRound} color="#7C3AED" tooltip={t('common.resetPassword')}  onClick={() => { setResetPwdTarget(u); setNewPassword(''); }} />
-                          <IconBtn icon={Hash}     color="#0284C7" tooltip={t('common.resetPin')}       onClick={() => { setResetPinTarget(u); setNewPin(''); }} />
+                          <IconBtn icon={KeyRound} color="#7C3AED" tooltip={t('common.resetPassword')}  onClick={() => setResetPwdTarget(u)} />
+                          <IconBtn icon={Hash}     color="#0284C7" tooltip={t('common.resetPin')}       onClick={() => setResetPinTarget(u)} />
                           <IconBtn
                             icon={u.status === 'active' ? PowerOff : Power}
                             color={u.status === 'active' ? '#D97706' : '#16A34A'}
@@ -371,22 +371,23 @@ const UsersPage = () => {
             icon={<User size={15} color="var(--text-secondary)" />}
             error={formErrors.name} required
           />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-            <Input
-              label={t('users.form.phone')}
-              value={form.phone} onChange={setField('phone')}
-              placeholder="+2290112345678"
-              icon={<Phone size={15} color="var(--text-secondary)" />}
-              error={formErrors.phone} required
-            />
-            <Input
-              label={t('users.form.email')}
-              type="email" value={form.email} onChange={setField('email')}
-              placeholder="jean@example.com"
-              icon={<Mail size={15} color="var(--text-secondary)" />}
-              error={formErrors.email}
-            />
-          </div>
+          <Input
+            label={t('users.form.phone')}
+            value={form.phone} onChange={setField('phone')}
+            placeholder="+2290112345678"
+            icon={<Phone size={15} color="var(--text-secondary)" />}
+            error={formErrors.phone} required
+            autoComplete="tel"
+          />
+          <Input
+            label={t('users.form.email')}
+            type="email"
+            autoComplete="email"
+            value={form.email} onChange={setField('email')}
+            placeholder="jean@example.com"
+            icon={<Mail size={15} color="var(--text-secondary)" />}
+            error={formErrors.email}
+          />
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <label style={{ fontFamily: 'var(--font)', fontWeight: 500, fontSize: '13px', color: 'var(--text-secondary)' }}>
               {t('users.form.role')} <span style={{ color: 'var(--color-error)' }}>*</span>

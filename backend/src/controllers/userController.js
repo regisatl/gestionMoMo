@@ -140,15 +140,21 @@ exports.getUserById = async (req, res, next) => {
 // ─── PATCH /api/users/:id ─────────────────────────────────────────────────────
 exports.updateUser = async (req, res, next) => {
   try {
-    const { name, email, businessName, businessAddress, language, theme, avatar } = req.body;
+    const { name, email, phone, businessName, businessAddress, language, theme, avatar } = req.body;
 
     if (req.user.role !== 'super_admin' && req.user._id.toString() !== req.params.id) {
       return res.status(403).json({ error: 'Accès refusé.' });
     }
 
+    // Seul le super_admin peut modifier le numéro de téléphone
+    const updateData = { name, email, businessName, businessAddress, language, theme, avatar };
+    if (req.user.role === 'super_admin' && phone) {
+      updateData.phone = phone;
+    }
+
     const user = await User.findByIdAndUpdate(
       req.params.id,
-      { name, email, businessName, businessAddress, language, theme, avatar },
+      updateData,
       { new: true, runValidators: true }
     );
 

@@ -344,8 +344,8 @@ const MerchantsPage = () => {
                       ) : (
                         <>
                           <IconBtn icon={Pencil}    color="#0A66C2" tooltip={t('common.edit')}            onClick={() => openEdit(m)} />
-                          <IconBtn icon={KeyRound}  color="#7C3AED" tooltip={t('common.resetPassword')}   onClick={() => { setResetPwdTarget(m); setNewPassword(''); }} />
-                          <IconBtn icon={Hash}      color="#0284C7" tooltip={t('common.resetPin')}        onClick={() => { setResetPinTarget(m); setNewPin(''); }} />
+                          <IconBtn icon={KeyRound}  color="#7C3AED" tooltip={t('common.resetPassword')}   onClick={() => setResetPwdTarget(m)} />
+                          <IconBtn icon={Hash}      color="#0284C7" tooltip={t('common.resetPin')}        onClick={() => setResetPinTarget(m)} />
                           <IconBtn
                             icon={m.status === 'active' ? PowerOff : Power}
                             color={m.status === 'active' ? '#D97706' : '#16A34A'}
@@ -385,22 +385,23 @@ const MerchantsPage = () => {
             icon={<User size={15} color="var(--text-secondary)" />}
             error={formErrors.name} required
           />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-            <Input
-              label={t('merchants.form.phone')}
-              value={form.phone} onChange={setField('phone')}
-              placeholder="+2290112345678"
-              icon={<Phone size={15} color="var(--text-secondary)" />}
-              error={formErrors.phone} required
-            />
-            <Input
-              label={t('merchants.form.email')}
-              type="email" value={form.email} onChange={setField('email')}
-              placeholder="jean@example.com"
-              icon={<Mail size={15} color="var(--text-secondary)" />}
-              error={formErrors.email}
-            />
-          </div>
+          <Input
+            label={t('merchants.form.phone')}
+            value={form.phone} onChange={setField('phone')}
+            placeholder="+2290112345678"
+            icon={<Phone size={15} color="var(--text-secondary)" />}
+            error={formErrors.phone} required
+            autoComplete="tel"
+          />
+          <Input
+            label={t('merchants.form.email')}
+            type="email"
+            autoComplete="email"
+            value={form.email} onChange={setField('email')}
+            placeholder="jean@example.com"
+            icon={<Mail size={15} color="var(--text-secondary)" />}
+            error={formErrors.email}
+          />
           <Input
             label={t('merchants.form.businessName')}
             value={form.businessName} onChange={setField('businessName')}
