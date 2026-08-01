@@ -3,6 +3,7 @@ import { CheckCheck, AlertCircle, AlertTriangle, Info, ArrowLeftRight, Settings,
 import { useTranslation } from 'react-i18next';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
+import Loader from '../components/ui/Loader';
 import { useNotifications } from '../context/NotificationContext';
 const TYPE_ICONS = {
   success:     CheckCheck,
@@ -20,7 +21,7 @@ const TYPE_COLORS = {
 
 const NotificationsPage = () => {
   const { t } = useTranslation();
-  const { notifications, unreadCount, markAsRead, markAllAsRead, addToast } = useNotifications();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, addToast, loading } = useNotifications();
 
   const handleMarkAllAsRead = async () => {
     await markAllAsRead();
@@ -32,6 +33,14 @@ const NotificationsPage = () => {
     : unreadCount === 1
       ? t('notifications.unread', { count: unreadCount })
       : t('notifications.allRead');
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+        <Loader message="Chargement des notifications..." />
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '680px', margin: '0 auto', width: '100%' }}>

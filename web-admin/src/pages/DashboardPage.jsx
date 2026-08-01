@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
+import Loader from '../components/ui/Loader';
 import api from '../services/api';
 import useChartTheme from '../hooks/useChartTheme';
 
@@ -154,6 +155,14 @@ const DashboardPage = () => {
   const chartOptions = buildChartOptions();
 
   const TYPE_COLORS = { deposit: '#16A34A', withdrawal: '#DC2626', transfer: '#0A66C2', payment: '#7C3AED', refund: '#D97706' };
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+        <Loader message="Chargement du tableau de bord..." />
+      </div>
+    );
+  }
 
   const noDataEl = (
     <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>

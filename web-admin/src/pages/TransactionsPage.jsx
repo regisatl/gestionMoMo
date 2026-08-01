@@ -6,6 +6,7 @@ import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import Loader from '../components/ui/Loader';
 import api from '../services/api';
 
 const TYPE_COLORS = { deposit: '#16A34A', withdrawal: '#DC2626', transfer: '#0A66C2', payment: '#7C3AED', refund: '#D97706' };
@@ -52,6 +53,14 @@ const TransactionsPage = () => {
   const totalLabel = pagination.total <= 1
     ? t('transactions.transactionCount', { count: pagination.total })
     : t('transactions.transactionCountPlural', { count: pagination.total });
+
+  if (loading && transactions.length === 0) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+        <Loader message="Chargement des transactions..." />
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>

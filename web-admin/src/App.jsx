@@ -7,6 +7,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import DashboardLayout from './components/layout/DashboardLayout';
+import Loader from './components/ui/Loader';
 
 // Pages
 import LoginPage from './pages/LoginPage';
@@ -23,7 +24,7 @@ import AccountsPage from './pages/AccountsPage';
 // Route protégée
 const ProtectedRoute = ({ children, roles }) => {
   const { user, isLoading } = useAuth();
-  if (isLoading) return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font)', color: 'var(--text-secondary)' }}>Chargement...</div>;
+  if (isLoading) return <Loader message="Vérification de la session..." overlay />;
   if (!user) return <Navigate to="/login" replace />;
   if (roles && !roles.includes(user.role)) return <Navigate to="/" replace />;
   return children;

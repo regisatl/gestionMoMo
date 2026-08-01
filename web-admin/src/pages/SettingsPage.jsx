@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import Loader from '../components/ui/Loader';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -171,7 +172,11 @@ const SettingsPage = () => {
   };
 
   return (
-    <div style={{ maxWidth: '580px', margin: '0 auto', width: '100%' }}>
+    <div style={{ maxWidth: '580px', margin: '0 auto', width: '100%', position: 'relative' }}>
+      {/* Overlay loader pendant sauvegarde */}
+      {(profileLoading || pwdLoading) && (
+        <Loader message={profileLoading ? 'Enregistrement...' : 'Mise à jour du mot de passe...'} overlay />
+      )}
       <Card>
         <TabBar active={tab} onChange={setTab} t={t} />
 

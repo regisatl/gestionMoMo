@@ -10,14 +10,16 @@ export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [toasts, setToasts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const fetchNotifications = useCallback(async () => {
-    if (!user) return;
+    if (!user) { setLoading(false); return; }
     try {
       const { data } = await api.get('/notifications?limit=30');
       setNotifications(data.notifications);
       setUnreadCount(data.unreadCount);
     } catch (_) {}
+    finally { setLoading(false); }
   }, [user]);
 
   useEffect(() => { fetchNotifications(); }, [fetchNotifications]);
@@ -66,7 +68,7 @@ export const NotificationProvider = ({ children }) => {
 
   return (
     <NotificationContext.Provider
-      value={{ notifications, unreadCount, toasts, markAsRead, markAllAsRead, dismissToast, addToast, fetchNotifications }}
+      value={{ notifications, unreadCount, toasts, loading, markAsRead, markAllAsRead, dismissToast, addToast, fetchNotifications }}
     >
       {children}
     </NotificationContext.Provider>

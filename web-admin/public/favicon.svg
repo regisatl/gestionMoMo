@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0A66C2"/>
+      <stop offset="100%" stop-color="#0A3A6B"/>
+    </linearGradient>
+    <linearGradient id="wave" x1="0" y1="0" x2="64" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#60B4FF" stop-opacity="0.7"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Fond arrondi -->
+  <rect width="64" height="64" rx="16" fill="url(#bg)"/>
+
+  <!-- Ondes de signal (arcs concentriques) -->
+  <path d="M 44 42 Q 52 32 44 22" stroke="white" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.3"/>
+  <path d="M 47 45 Q 58 32 47 19" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.18"/>
+
+  <!-- Lettre M stylisée -->
+  <path d="M 12 44 L 12 20 L 22 35 L 32 20 L 32 44" stroke="url(#wave)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Point MoMo (cercle accent) -->
+  <circle cx="38" cy="32" r="4.5" fill="#60B4FF"/>
+  <circle cx="38" cy="32" r="2.2" fill="white"/>
+</svg>

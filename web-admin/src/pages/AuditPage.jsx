@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
+import Loader from '../components/ui/Loader';
 import api from '../services/api';
 
 const ACTION_COLORS = {
@@ -42,6 +43,14 @@ const AuditPage = () => {
   const entryLabel = pagination.total <= 1
     ? t('audit.entryCount', { count: pagination.total })
     : t('audit.entryCountPlural', { count: pagination.total });
+
+  if (loading && logs.length === 0) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+        <Loader message="Chargement des journaux d'audit..." />
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>

@@ -10,6 +10,7 @@ import Card from '../components/ui/Card';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import useChartTheme from '../hooks/useChartTheme';
+import Loader from '../components/ui/Loader';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, Filler);
 
@@ -118,9 +119,17 @@ const ReportsPage = () => {
 
   const noDataEl = (
     <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontFamily: 'var(--font)', fontSize: '13px', gap: '8px' }}>
-      {loading ? t('common.loading') : t('reports.noData')}
+      {t('reports.noData')}
     </div>
   );
+
+  if (loading && chartData.length === 0) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+        <Loader message="Génération des rapports..." />
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>

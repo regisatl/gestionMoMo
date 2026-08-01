@@ -10,6 +10,7 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Modal from '../components/ui/Modal';
 import Tooltip from '../components/ui/Tooltip';
+import Loader from '../components/ui/Loader';
 import { useNotifications } from '../context/NotificationContext';
 import api from '../services/api';
 
@@ -231,6 +232,14 @@ const AccountsPage = () => {
   const countLabel = pagination.total <= 1
     ? t('accounts.accountCount', { count: pagination.total })
     : t('accounts.accountCountPlural', { count: pagination.total });
+
+  if (loading && accounts.length === 0) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+        <Loader message="Chargement des comptes MoMo..." />
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>

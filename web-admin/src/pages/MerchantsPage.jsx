@@ -10,6 +10,7 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Modal from '../components/ui/Modal';
 import Tooltip from '../components/ui/Tooltip';
+import Loader from '../components/ui/Loader';
 import { useNotifications } from '../context/NotificationContext';
 import api from '../services/api';
 
@@ -249,6 +250,14 @@ const MerchantsPage = () => {
   const countLabel = pagination.total <= 1
     ? t('merchants.merchantCount', { count: pagination.total })
     : t('merchants.merchantCountPlural', { count: pagination.total });
+
+  if (loading && merchants.length === 0) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+        <Loader message="Chargement des marchands..." />
+      </div>
+    );
+  }
 
   /* ────────────────── Render ────────────────── */
   return (
