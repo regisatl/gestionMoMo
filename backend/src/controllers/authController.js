@@ -208,3 +208,21 @@ exports.changePin = async (req, res, next) => {
     next(err);
   }
 };
+
+// POST /api/auth/verify-pin  — Mobile : vérifie l'ancien PIN avant changement
+exports.verifyPin = async (req, res, next) => {
+  try {
+    const { pin } = req.body;
+    if (!pin || pin.length !== 5) {
+      return res.status(400).json({ error: 'PIN invalide.' });
+    }
+    const user = await User.findById(req.user._id).select('+pinHash');
+    const valid = await user.comparePin(pin);
+    if (!valid) {
+      return res.status(400).json({ error: 'PIN actuel incorrect.' });
+    }
+    res.json({ valid: true });
+  } catch (err) {
+    next(err);
+  }
+};

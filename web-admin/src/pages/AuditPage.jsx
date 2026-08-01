@@ -6,9 +6,13 @@ import api from '../services/api';
 
 const ACTION_COLORS = {
   user_login: '#16A34A', user_logout: '#6B7280', user_login_failed: '#DC2626',
-  user_created: '#0A66C2', user_deleted: '#DC2626', user_suspended: '#D97706',
+  user_created: '#0A66C2', user_updated: '#0A66C2',
+  user_deleted: '#DC2626', user_restored: '#16A34A',
+  user_suspended: '#D97706', user_activated: '#16A34A',
   transaction_created: '#0A66C2', transaction_deleted: '#DC2626', transaction_restored: '#16A34A',
-  password_changed: '#D97706', momo_callback_received: '#7C3AED',
+  password_changed: '#D97706', password_reset: '#D97706', password_reset_admin: '#7C3AED',
+  pin_changed: '#0284C7', pin_reset_admin: '#0284C7',
+  momo_callback_received: '#7C3AED',
 };
 
 const AuditPage = () => {
@@ -53,10 +57,17 @@ const AuditPage = () => {
             <option value="user_login">{t('audit.actions.user_login')}</option>
             <option value="user_login_failed">{t('audit.actions.user_login_failed')}</option>
             <option value="user_created">{t('audit.actions.user_created')}</option>
+            <option value="user_updated">{t('audit.actions.user_updated')}</option>
+            <option value="user_deleted">{t('audit.actions.user_deleted')}</option>
+            <option value="user_restored">{t('audit.actions.user_restored')}</option>
             <option value="user_suspended">{t('audit.actions.user_suspended')}</option>
+            <option value="user_activated">{t('audit.actions.user_activated')}</option>
+            <option value="password_changed">{t('audit.actions.password_changed')}</option>
+            <option value="password_reset_admin">{t('audit.actions.password_reset_admin')}</option>
+            <option value="pin_changed">{t('audit.actions.pin_changed')}</option>
+            <option value="pin_reset_admin">{t('audit.actions.pin_reset_admin')}</option>
             <option value="transaction_created">{t('audit.actions.transaction_created')}</option>
             <option value="transaction_deleted">{t('audit.actions.transaction_deleted')}</option>
-            <option value="password_changed">{t('audit.actions.password_changed')}</option>
             <option value="momo_callback_received">{t('audit.actions.momo_callback_received')}</option>
           </select>
           <span style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text-secondary)' }}>

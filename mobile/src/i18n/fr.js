@@ -56,6 +56,24 @@
     pinSubtitle: 'Saisissez votre code PIN à 5 chiffres',
   },
 
+  // ─── Changement de PIN (profil) ───────────────────────────────
+  changePin: {
+    title:               'Changer le PIN',
+    stepCurrentTitle:    'PIN actuel',
+    stepCurrentSubtitle: 'Saisissez votre code PIN actuel pour continuer',
+    stepNewTitle:        'Nouveau PIN',
+    stepNewSubtitle:     'Choisissez un nouveau code PIN à 5 chiffres',
+    stepConfirmTitle:    'Confirmer',
+    stepConfirmSubtitle: 'Ressaisissez votre nouveau PIN pour confirmer',
+    successTitle:        'PIN modifié',
+    successMessage:      'Votre code PIN a été changé avec succès. Utilisez-le dès votre prochaine connexion.',
+    errorTitle:          'Erreur',
+    wrongCurrentPin:     'PIN actuel incorrect.',
+    pinMismatch:         'Les deux PIN ne correspondent pas.',
+    changeError:         'Impossible de changer le PIN. Réessayez.',
+    verifying:           'Vérification...',
+  },
+
   // ─── Login screen ─────────────────────────────────────────────
   login: {
     featureSec:  'Sécurisé',

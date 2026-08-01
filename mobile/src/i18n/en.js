@@ -60,6 +60,24 @@
     featureLive: 'Live',
   },
 
+  // ─── Change PIN (profile) ─────────────────────────────────────
+  changePin: {
+    title:               'Change PIN',
+    stepCurrentTitle:    'Current PIN',
+    stepCurrentSubtitle: 'Enter your current PIN code to continue',
+    stepNewTitle:        'New PIN',
+    stepNewSubtitle:     'Choose a new 5-digit PIN code',
+    stepConfirmTitle:    'Confirm',
+    stepConfirmSubtitle: 'Re-enter your new PIN to confirm',
+    successTitle:        'PIN changed',
+    successMessage:      'Your PIN has been changed successfully. Use it on your next login.',
+    errorTitle:          'Error',
+    wrongCurrentPin:     'Current PIN is incorrect.',
+    pinMismatch:         'The two PINs do not match.',
+    changeError:         'Unable to change PIN. Please try again.',
+    verifying:           'Verifying...',
+  },
+
   // ─── Navigation (tabs) ────────────────────────────────────────
   nav: {
     home: 'Home',

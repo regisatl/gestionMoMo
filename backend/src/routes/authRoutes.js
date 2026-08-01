@@ -83,4 +83,18 @@ router.patch(
   authController.changePin
 );
 
+// POST /api/auth/verify-pin — mobile, vérifie l'ancien PIN avant changement
+router.post(
+  '/verify-pin',
+  protect,
+  [
+    body('pin')
+      .notEmpty().withMessage('PIN requis')
+      .isLength({ min: 5, max: 5 }).withMessage('PIN : exactement 5 chiffres')
+      .isNumeric().withMessage('Le PIN doit contenir uniquement des chiffres'),
+  ],
+  validate,
+  authController.verifyPin
+);
+
 module.exports = router;

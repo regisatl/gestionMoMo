@@ -15,6 +15,7 @@ import NewTransactionScreen from '../screens/transactions/NewTransactionScreen';
 import ReportsScreen from '../screens/reports/ReportsScreen';
 import NotificationsScreen from '../screens/notifications/NotificationsScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
+import ChangePinScreen from '../screens/profile/ChangePinScreen';
 import AdminNavigator from './AdminNavigator';
 import { useAuth } from '../context/AuthContext';
 
@@ -26,6 +27,14 @@ const TransactionsStack = () => (
     <Stack.Screen name="TransactionsList" component={TransactionsScreen} />
     <Stack.Screen name="TransactionDetail" component={TransactionDetailScreen} />
     <Stack.Screen name="NewTransaction" component={NewTransactionScreen} />
+  </Stack.Navigator>
+);
+
+/* Stack profil — permet la navigation vers ChangePinScreen */
+const ProfileStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
+    <Stack.Screen name="ProfileMain" component={ProfileScreen} />
+    <Stack.Screen name="ChangePin"   component={ChangePinScreen} />
   </Stack.Navigator>
 );
 
@@ -101,7 +110,7 @@ const MainNavigator = () => {
       />
       <Tab.Screen
         name="Profile"
-        component={ProfileScreen}
+        component={ProfileStack}
         options={{
           tabBarLabel: t('nav.profile'),
           tabBarIcon: ({ color, size }) => (

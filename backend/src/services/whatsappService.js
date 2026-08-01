@@ -121,8 +121,14 @@ const formatNumber = (phone) => {
 
 const _sendNow = async (to, message) => {
   const chatId = formatNumber(to);
-  await client.sendMessage(chatId, message);
-  console.log(`[WhatsApp] ✉️  Message envoyé à ${to}`);
+  try {
+    await client.sendMessage(chatId, message);
+    console.log(`[WhatsApp] ✉️  Message envoyé à ${to}`);
+  } catch (err) {
+    // "No LID for user" → le destinataire n'a pas de compte WhatsApp
+    // ou le numéro n'est pas enregistré. On log silencieusement et on continue.
+    console.warn(`[WhatsApp] Message non délivré à ${to} : ${err.message}`);
+  }
 };
 
 // ─── Envoi public ─────────────────────────────────────────────────────────────

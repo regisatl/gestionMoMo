@@ -34,7 +34,7 @@ const SettingRow = ({ iconName, label, value, onPress, rightElement, theme, icon
 
 const Separator = ({ theme }) => <View style={{ height: 1, backgroundColor: theme.border }} />;
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ navigation }) => {
   const { t }    = useTranslation();
   const theme    = useTheme();
   const { user, logout, updateUser } = useAuth();
@@ -105,7 +105,7 @@ const ProfileScreen = () => {
   };
 
   const handleChangePin = () => {
-    toast.info('Bientôt disponible', 'Le changement de PIN sera disponible prochainement');
+    navigation.navigate('ChangePin');
   };
 
   const roleLabels = {
