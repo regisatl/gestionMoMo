@@ -11,6 +11,7 @@ import Button from '../../components/ui/Button';
 import Icon from '../../components/ui/Icon';
 import Input from '../../components/ui/Input';
 import AdminFormModal from '../../components/ui/AdminFormModal';
+import Tooltip from '../../components/ui/Tooltip';
 import useToast from '../../hooks/useToast';
 import api from '../../services/api';
 
@@ -19,12 +20,14 @@ const CURRENCIES = ['XOF', 'XAF', 'USD', 'EUR'];
 const ENVS       = ['sandbox', 'production'];
 const EMPTY_FORM = { merchantId: '', momoAccountNumber: '', currency: 'XOF', momoEnvironment: 'sandbox' };
 
-const ActionBtn = ({ iconName, color, onPress, disabled }) => (
-  <TouchableOpacity onPress={onPress} disabled={disabled} activeOpacity={0.7}
-    style={{ width: 34, height: 34, borderRadius: 10, backgroundColor: `${color}18`,
-      alignItems: 'center', justifyContent: 'center', marginLeft: 5, opacity: disabled ? 0.4 : 1 }}>
-    <Icon name={iconName} size={17} color={color} />
-  </TouchableOpacity>
+const ActionBtn = ({ iconName, color, onPress, disabled, tooltip }) => (
+  <Tooltip content={tooltip} placement="top">
+    <TouchableOpacity onPress={onPress} disabled={disabled} activeOpacity={0.7}
+      style={{ width: 34, height: 34, borderRadius: 10, backgroundColor: `${color}18`,
+        alignItems: 'center', justifyContent: 'center', marginLeft: 5, opacity: disabled ? 0.4 : 1 }}>
+      <Icon name={iconName} size={17} color={color} />
+    </TouchableOpacity>
+  </Tooltip>
 );
 
 const AdminAccountsScreen = ({ navigation }) => {
@@ -178,16 +181,20 @@ const AdminAccountsScreen = ({ navigation }) => {
           {isActing
             ? <ActivityIndicator size="small" color={theme.colors.primary} />
             : <View style={{ flexDirection: 'row' }}>
-                <ActionBtn iconName="pencil-outline"  color="#0A66C2" onPress={() => {
+                <ActionBtn iconName="pencil-outline"  color="#0A66C2" tooltip={t('admin.common.edit')}   onPress={() => {
                   setEditTarget(a);
                   const ci = CURRENCIES.indexOf(a.currency); const ei = ENVS.indexOf(a.momoEnvironment);
                   setCurrencyIndex(ci >= 0 ? ci : 0); setEnvIndex(ei >= 0 ? ei : 0);
                   setForm({ merchantId: '', momoAccountNumber: a.momoAccountNumber, currency: a.currency, momoEnvironment: a.momoEnvironment });
                   setErrors({});
                 }} />
-                <ActionBtn iconName="sync"   color="#16A34A" onPress={() => handleSync(a)} disabled={actionId === a._id + '_sync'} />
-                <ActionBtn iconName={a.isActive ? 'power-off' : 'power'}
-                  color={a.isActive ? '#D97706' : '#16A34A'} onPress={() => handleToggleActive(a)} />
+                <ActionBtn iconName="sync"   color="#16A34A" tooltip={t('admin.common.sync')}   onPress={() => handleSync(a)} disabled={actionId === a._id + '_sync'} />
+                <ActionBtn
+                  iconName={a.isActive ? 'power-off' : 'power'}
+                  color={a.isActive ? '#D97706' : '#16A34A'}
+                  tooltip={a.isActive ? t('admin.common.disable') : t('admin.common.enable')}
+                  onPress={() => handleToggleActive(a)}
+                />
               </View>
           }
         </View>

@@ -13,6 +13,7 @@ import Button from '../../components/ui/Button';
 import Icon from '../../components/ui/Icon';
 import Input from '../../components/ui/Input';
 import AdminFormModal from '../../components/ui/AdminFormModal';
+import Tooltip from '../../components/ui/Tooltip';
 import useToast from '../../hooks/useToast';
 import api from '../../services/api';
 
@@ -22,13 +23,15 @@ const ROLES    = ['client', 'merchant', 'super_admin'];
 const ROLE_COLORS = { super_admin: '#7C3AED', merchant: '#0A66C2', client: '#16A34A' };
 const EMPTY_FORM  = { name: '', phone: '', email: '', password: '', role: 'client' };
 
-const ActionBtn = ({ iconName, color, onPress, disabled }) => {
+const ActionBtn = ({ iconName, color, onPress, disabled, tooltip }) => {
   return (
-    <TouchableOpacity onPress={onPress} disabled={disabled} activeOpacity={0.7}
-      style={{ width: 34, height: 34, borderRadius: 10, backgroundColor: `${color}18`,
-        alignItems: 'center', justifyContent: 'center', marginLeft: 5, opacity: disabled ? 0.4 : 1 }}>
-      <Icon name={iconName} size={17} color={color} />
-    </TouchableOpacity>
+    <Tooltip content={tooltip} placement="top">
+      <TouchableOpacity onPress={onPress} disabled={disabled} activeOpacity={0.7}
+        style={{ width: 34, height: 34, borderRadius: 10, backgroundColor: `${color}18`,
+          alignItems: 'center', justifyContent: 'center', marginLeft: 5, opacity: disabled ? 0.4 : 1 }}>
+        <Icon name={iconName} size={17} color={color} />
+      </TouchableOpacity>
+    </Tooltip>
   );
 };
 
@@ -64,13 +67,11 @@ const AdminUsersScreen = ({ navigation }) => {
   const [showDeleted, setShowDeleted] = useState(false);
   const [createOpen, setCreateOpen]   = useState(false);
   const [editTarget, setEditTarget]   = useState(null);
-  const [secTarget, setSecTarget]     = useState(null);  // modal Sécurité (reset mdp + pin)
+  const [secTarget, setSecTarget]     = useState(null);  // modal Sécurité
   const [formLoading, setFormLoading] = useState(false);
   const [actionId, setActionId]       = useState(null);
   const [form, setForm]               = useState(EMPTY_FORM);
   const [errors, setErrors]           = useState({});
-  const [newPin, setNewPin]           = useState('');
-  const [newPassword, setNewPassword] = useState('');
 
   const sf = (key) => (val) => setForm((f) => ({ ...f, [key]: val }));
 
@@ -133,23 +134,19 @@ const AdminUsersScreen = ({ navigation }) => {
   };
 
   const handleResetPin = async () => {
-    if (!/^\d{5}$/.test(newPin)) { toast.error(t('admin.users.pinInvalid')); return; }
     setFormLoading(true);
     try {
-      await api.patch(`/users/${secTarget._id}/reset-pin`, { newPin });
-      toast.success(t('admin.users.pinReset'));
-      setNewPin('');
+      const { data } = await api.patch(`/users/${secTarget._id}/reset-pin`);
+      toast.success(t('admin.users.pinReset'), `PIN : ${data.newPin}`);
     } catch (err) { toast.error(t('common.error'), err.response?.data?.error); }
     finally { setFormLoading(false); }
   };
 
   const handleResetPassword = async () => {
-    if (newPassword.length < 8) { toast.error(t('admin.users.passwordTooShort')); return; }
     setFormLoading(true);
     try {
-      await api.patch(`/users/${secTarget._id}/reset-password`, { newPassword });
-      toast.success(t('admin.users.passwordReset'));
-      setNewPassword('');
+      const { data } = await api.patch(`/users/${secTarget._id}/reset-password`);
+      toast.success(t('admin.users.passwordReset'), `MDP : ${data.newPassword}`);
     } catch (err) { toast.error(t('common.error'), err.response?.data?.error); }
     finally { setFormLoading(false); }
   };
@@ -237,13 +234,23 @@ const AdminUsersScreen = ({ navigation }) => {
           {isActing
             ? <ActivityIndicator size="small" color={theme.colors.primary} />
             : u.isDeleted
-              ? <ActionBtn iconName="restore" color="#16A34A" onPress={() => handleRestore(u)} />
+              ? <ActionBtn iconName="restore" color="#16A34A" tooltip={t('admin.common.restore')} onPress={() => handleRestore(u)} />
               : <View style={{ flexDirection: 'row' }}>
-                  <ActionBtn iconName="pencil-outline" color="#0A66C2" onPress={() => { setEditTarget(u); setForm({ name: u.name, email: u.email || '', phone: u.phone, password: '', role: u.role }); setErrors({}); }} />
-                  <ActionBtn iconName="shield-key-outline" color="#7C3AED" onPress={() => { setSecTarget(u); setNewPin(''); setNewPassword(''); }} />
-                  <ActionBtn iconName={u.status === 'active' ? 'pause-circle-outline' : 'play-circle-outline'}
-                    color={u.status === 'active' ? '#D97706' : '#16A34A'} onPress={() => handleToggleStatus(u)} />
-                  <ActionBtn iconName="trash-can-outline" color="#DC2626" onPress={() => handleDelete(u)} />
+                  <ActionBtn iconName="pencil-outline"   color="#0A66C2" tooltip={t('admin.common.edit')}     onPress={() => { setEditTarget(u); setForm({ name: u.name, email: u.email || '', phone: u.phone, password: '', role: u.role }); setErrors({}); }} />
+                  <ActionBtn iconName="shield-key-outline" color="#7C3AED" tooltip={t('admin.common.security')} onPress={() => { setSecTarget(u); }} />
+                  <ActionBtn
+                    iconName={u.status === 'active' ? 'pause-circle-outline' : 'play-circle-outline'}
+                    color={u.status === 'active' ? '#D97706' : '#16A34A'}
+                    tooltip={u.status === 'active' ? t('admin.common.suspend') : t('admin.common.activate')}
+                    onPress={() => handleToggleStatus(u)}
+                    disabled={u.role === 'super_admin' && pagination.total <= 1}
+                  />
+                  <ActionBtn
+                    iconName="trash-can-outline" color="#DC2626"
+                    tooltip={t('admin.common.delete')}
+                    onPress={() => handleDelete(u)}
+                    disabled={u.role === 'super_admin' && pagination.total <= 1}
+                  />
                 </View>
           }
         </View>
@@ -338,54 +345,37 @@ const AdminUsersScreen = ({ navigation }) => {
       </AdminFormModal>
 
       {/* RESET PIN modal */}
-      <AdminFormModal visible={!!secTarget} onClose={() => { setSecTarget(null); setNewPin(''); setNewPassword(''); }} title={t('admin.common.security')}>
+      <AdminFormModal visible={!!secTarget} onClose={() => setSecTarget(null)} title={t('admin.common.security')}>
+        <Text style={{ fontFamily: theme.typography.fontFamily.regular, fontSize: 13, color: theme.textSecondary, marginBottom: 16, lineHeight: 20 }}>
+          {t('admin.common.securityHint', { name: secTarget?.name || '' })}
+        </Text>
+
         {/* ── Mot de passe web-admin ── */}
-        <View style={{ backgroundColor: `${theme.colors.primary}10`, borderRadius: 12, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: `${theme.colors.primary}25` }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+        <View style={{ backgroundColor: `${theme.colors.primary}10`, borderRadius: 12, padding: 14, marginBottom: 12, borderWidth: 1, borderColor: `${theme.colors.primary}25` }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
             <Icon name="monitor-lock" size={16} color={theme.colors.primary} />
             <Text style={{ fontFamily: theme.typography.fontFamily.bold, fontSize: 13, color: theme.colors.primary }}>
               {t('admin.common.webPassword')}
             </Text>
           </View>
-          <Input
-            label={t('admin.users.newPassword')}
-            value={newPassword}
-            onChangeText={setNewPassword}
-            secureTextEntry
-            placeholder="Minimum 8 caractères"
-          />
-          <Button
-            title={t('admin.common.resetPassword')}
-            onPress={handleResetPassword}
-            loading={formLoading}
-            fullWidth
-            style={{ marginTop: 4 }}
-          />
+          <Text style={{ fontFamily: theme.typography.fontFamily.regular, fontSize: 12, color: theme.textSecondary, marginBottom: 10, lineHeight: 18 }}>
+            {t('admin.common.resetPasswordDesc')}
+          </Text>
+          <Button title={t('admin.common.resetPassword')} onPress={handleResetPassword} loading={formLoading} fullWidth />
         </View>
 
         {/* ── PIN mobile ── */}
         <View style={{ backgroundColor: '#7C3AED10', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#7C3AED25' }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
             <Icon name="cellphone-key" size={16} color="#7C3AED" />
             <Text style={{ fontFamily: theme.typography.fontFamily.bold, fontSize: 13, color: '#7C3AED' }}>
               {t('admin.common.mobilePin')}
             </Text>
           </View>
-          <Input
-            label={t('admin.users.newPin')}
-            value={newPin}
-            onChangeText={(v) => setNewPin(v.replace(/\D/g, '').slice(0, 5))}
-            placeholder="5 chiffres"
-            keyboardType="numeric"
-            maxLength={5}
-          />
-          <Button
-            title={t('admin.common.resetPin')}
-            onPress={handleResetPin}
-            loading={formLoading}
-            fullWidth
-            style={{ marginTop: 4, backgroundColor: '#7C3AED' }}
-          />
+          <Text style={{ fontFamily: theme.typography.fontFamily.regular, fontSize: 12, color: theme.textSecondary, marginBottom: 10, lineHeight: 18 }}>
+            {t('admin.common.resetPinDesc')}
+          </Text>
+          <Button title={t('admin.common.resetPin')} onPress={handleResetPin} loading={formLoading} fullWidth style={{ backgroundColor: '#7C3AED' }} />
         </View>
       </AdminFormModal>
 
