@@ -120,13 +120,27 @@ const formatNumber = (phone) => {
 };
 
 const _sendNow = async (to, message) => {
-  const chatId = formatNumber(to);
+  // Méthode 1 : résolution via getNumberId() (gère les comptes LID modernes)
+  // Méthode 2 : fallback sur le format @c.us classique si getNumberId échoue
+  let chatId;
+  try {
+    const resolved = await client.getNumberId(to.replace(/\D/g, ''));
+    if (resolved) {
+      chatId = resolved._serialized; // format correct résolu par WhatsApp
+    } else {
+      // Numéro introuvable dans WhatsApp
+      console.warn(`[WhatsApp] Numéro non trouvé sur WhatsApp : ${to}`);
+      return;
+    }
+  } catch (_) {
+    // getNumberId non disponible ou erreur → fallback @c.us
+    chatId = formatNumber(to);
+  }
+
   try {
     await client.sendMessage(chatId, message);
-    console.log(`[WhatsApp] ✉️  Message envoyé à ${to}`);
+    console.log(`[WhatsApp] ✉️  Message envoyé à ${to} (${chatId})`);
   } catch (err) {
-    // "No LID for user" → le destinataire n'a pas de compte WhatsApp
-    // ou le numéro n'est pas enregistré. On log silencieusement et on continue.
     console.warn(`[WhatsApp] Message non délivré à ${to} : ${err.message}`);
   }
 };
