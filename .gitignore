@@ -12,3 +12,5 @@ android/.gradle/
 android/app/build/
 ios/Pods/
 ios/build/
+backend/.wwebjs_cache/
+backend/.wwebjs_auth/

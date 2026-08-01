@@ -421,45 +421,73 @@ const AccountsPage = () => {
         </form>
       </Modal>
 
-      {/* ── RESET PASSWORD modal ── */}
+      {/* ── RESET PASSWORD modal — confirmation ── */}
       <Modal open={!!resetPwdTarget} onClose={closeResetPwd} title={t('common.resetPassword') + ' — ' + (resetPwdTarget?.merchantId?.businessName || resetPwdTarget?.merchantId?.name || '')} width={420}>
-        <form onSubmit={handleResetPassword} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-          <p style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>
-            {t('accounts.resetPasswordHint')}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '14px 16px', borderRadius: '12px', background: 'var(--color-warning-light)', border: '1px solid rgba(217,119,6,0.3)' }}>
+            <KeyRound size={18} color="#D97706" style={{ flexShrink: 0, marginTop: '1px' }} />
+            <p style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text)', margin: 0, lineHeight: 1.6 }}>
+              {t('common.resetPasswordConfirm', { name: resetPwdTarget?.merchantId?.businessName || resetPwdTarget?.merchantId?.name })}
+            </p>
+          </div>
+          <p style={{ fontFamily: 'var(--font)', fontSize: '12px', color: 'var(--text-secondary)', margin: 0 }}>
+            {t('common.resetAutoHint')}
           </p>
-          <Input
-            label={t('merchants.form.newPassword')}
-            type="password" value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            placeholder="Minimum 6 caractères"
-            required
-          />
           <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '4px' }}>
             <Button type="button" variant="secondary" onClick={closeResetPwd}>{t('common.cancel')}</Button>
-            <Button type="submit" variant="primary" loading={formLoading} icon={<KeyRound size={14} />}>{t('common.resetPassword')}</Button>
+            <Button type="button" variant="primary" loading={formLoading} onClick={handleResetPassword} icon={<KeyRound size={14} />}>{t('common.resetPassword')}</Button>
           </div>
-        </form>
+        </div>
       </Modal>
 
-      {/* ── RESET PIN modal ── */}
+      {/* ── RESET PIN modal — confirmation ── */}
       <Modal open={!!resetPinTarget} onClose={closeResetPin} title={t('common.resetPin') + ' — ' + (resetPinTarget?.merchantId?.businessName || resetPinTarget?.merchantId?.name || '')} width={420}>
-        <form onSubmit={handleResetPin} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-          <p style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>
-            {t('users.resetPinHint')}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '14px 16px', borderRadius: '12px', background: 'var(--color-info-light)', border: '1px solid rgba(2,132,199,0.3)' }}>
+            <Hash size={18} color="#0284C7" style={{ flexShrink: 0, marginTop: '1px' }} />
+            <p style={{ fontFamily: 'var(--font)', fontSize: '13px', color: 'var(--text)', margin: 0, lineHeight: 1.6 }}>
+              {t('common.resetPinConfirm', { name: resetPinTarget?.merchantId?.businessName || resetPinTarget?.merchantId?.name })}
+            </p>
+          </div>
+          <p style={{ fontFamily: 'var(--font)', fontSize: '12px', color: 'var(--text-secondary)', margin: 0 }}>
+            {t('common.resetAutoHint')}
           </p>
-          <Input
-            label={t('users.form.newPin')}
-            value={newPin}
-            onChange={(e) => setNewPin(e.target.value.replace(/\D/g, '').slice(0, 5))}
-            placeholder="12345"
-            maxLength={5}
-            icon={<Hash size={15} color="var(--text-secondary)" />}
-          />
           <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '4px' }}>
             <Button type="button" variant="secondary" onClick={closeResetPin}>{t('common.cancel')}</Button>
-            <Button type="submit" variant="primary" loading={formLoading} icon={<Hash size={14} />}>{t('common.resetPin')}</Button>
+            <Button type="button" variant="primary" loading={formLoading} onClick={handleResetPin} icon={<Hash size={14} />}>{t('common.resetPin')}</Button>
           </div>
-        </form>
+        </div>
+      </Modal>
+
+      {/* ── Résultat reset — affiche le nouveau credential généré ── */}
+      <Modal open={!!resetResult} onClose={closeResult} title={resetResult?.type === 'password' ? t('common.resetPassword') : t('common.resetPin')} width={420}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'var(--color-success-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <p style={{ fontFamily: 'var(--font)', fontWeight: 600, fontSize: '14px', color: 'var(--text)', margin: 0 }}>
+              {t('common.resetSuccess', { name: resetResult?.userName })}
+            </p>
+          </div>
+          <div style={{ background: 'var(--surface)', border: '1.5px dashed var(--border)', borderRadius: '12px', padding: '16px 20px', textAlign: 'center' }}>
+            <p style={{ fontFamily: 'var(--font)', fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 8px' }}>
+              {resetResult?.type === 'password' ? t('common.newPasswordGenerated') : t('common.newPinGenerated')}
+            </p>
+            <p style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: resetResult?.type === 'pin' ? '32px' : '20px', color: resetResult?.type === 'pin' ? '#0284C7' : '#7C3AED', letterSpacing: resetResult?.type === 'pin' ? '10px' : '3px', margin: 0 }}>
+              {resetResult?.value}
+            </p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', padding: '10px 14px', borderRadius: '10px', background: 'var(--color-error-light)', border: '1px solid rgba(220,38,38,0.2)' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2.5" style={{ flexShrink: 0, marginTop: '1px' }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <p style={{ fontFamily: 'var(--font)', fontSize: '12px', color: '#DC2626', margin: 0, lineHeight: 1.5 }}>
+              {t('common.resetCopyHint')}
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '4px' }}>
+            <Button type="button" variant="primary" onClick={closeResult}>{t('common.understood')}</Button>
+          </div>
+        </div>
       </Modal>
 
     </div>
