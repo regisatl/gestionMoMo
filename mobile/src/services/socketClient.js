@@ -1,7 +1,9 @@
 import { io } from 'socket.io-client';
 
+// 10.0.2.2 = émulateur Android (redirect vers localhost)
+// Pour un vrai téléphone, utilise l'IP locale du PC sur le même réseau Wi-Fi
 const SOCKET_URL = __DEV__
-  ? 'http://10.0.2.2:5000'
+  ? 'http://10.38.9.90:5000'  // Téléphone physique → IP locale du PC
   : 'https://api.gestionmomo.com';
 
 let socket = null;
