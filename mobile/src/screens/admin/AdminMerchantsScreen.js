@@ -6,6 +6,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import PlexusBackground from '../../components/ui/PlexusBackground';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
@@ -33,6 +34,7 @@ const AdminMerchantsScreen = ({ navigation }) => {
   const { t } = useTranslation();
   const theme = useTheme();
   const toast = useToast();
+  const { user: currentUser, updateUser } = useAuth();
 
   const [merchants, setMerchants]   = useState([]);
   const [pagination, setPagination] = useState({ total: 0, pages: 1 });
@@ -97,7 +99,11 @@ const AdminMerchantsScreen = ({ navigation }) => {
     if (form.email.trim() && !EMAIL_RE.test(form.email.trim())) { setErrors({ email: t('admin.users.emailInvalid') }); return; }
     setFormLoading(true);
     try {
-      await api.patch(`/users/${editTarget._id}`, { name: form.name, email: form.email || undefined, businessName: form.businessName || undefined });
+      const { data } = await api.patch(`/users/${editTarget._id}`, { name: form.name, email: form.email || undefined, businessName: form.businessName || undefined });
+      // Si le marchand modifié est l'utilisateur connecté, on met à jour le contexte Auth
+      if (currentUser?._id === editTarget._id) {
+        updateUser(data.user);
+      }
       toast.success(t('admin.merchants.updated'));
       setEditTarget(null); setForm(EMPTY_FORM); setErrors({}); load(true);
     } catch (err) { toast.error(t('common.error'), err.response?.data?.error); }

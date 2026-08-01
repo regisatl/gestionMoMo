@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import PlexusBackground from '../../components/ui/PlexusBackground';
 import ModalWrapper from '../../components/ui/ModalWrapper';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +12,7 @@ import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Icon from '../../components/ui/Icon';
 import useToast from '../../hooks/useToast';
+import api from '../../services/api';
 
 const SettingRow = ({ iconName, label, value, onPress, rightElement, theme, iconColor }) => (
   <TouchableOpacity
@@ -35,11 +37,31 @@ const Separator = ({ theme }) => <View style={{ height: 1, backgroundColor: them
 const ProfileScreen = () => {
   const { t }    = useTranslation();
   const theme    = useTheme();
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const { language, changeLanguage, supportedLanguages } = useLanguage();
   const toast    = useToast();
 
   const [showLangModal, setShowLangModal] = React.useState(false);
+
+  // Re-fetch les données du profil à chaque fois que l'écran redevient actif,
+  // pour refléter les modifications faites depuis un autre écran (ex: admin).
+  useFocusEffect(
+    React.useCallback(() => {
+      let active = true;
+      const fetchProfile = async () => {
+        try {
+          const { data } = await api.get('/auth/me');
+          if (active && data?.user) {
+            updateUser(data.user);
+          }
+        } catch (_) {
+          // Silencieux — on garde les données en cache si la requête échoue
+        }
+      };
+      fetchProfile();
+      return () => { active = false; };
+    }, [])
+  );
 
   const handleLogout = () => {
     Alert.alert(
