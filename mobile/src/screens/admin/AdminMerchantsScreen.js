@@ -46,12 +46,13 @@ const AdminMerchantsScreen = ({ navigation }) => {
   const [showDeleted, setShowDeleted]   = useState(false);
   const [createOpen, setCreateOpen]     = useState(false);
   const [editTarget, setEditTarget]     = useState(null);
-  const [resetTarget, setResetTarget]   = useState(null);
+  const [secTarget, setSecTarget]       = useState(null);  // modal Sécurité (reset mdp + pin)
   const [formLoading, setFormLoading]   = useState(false);
   const [actionId, setActionId]         = useState(null);
   const [form, setForm]                 = useState(EMPTY_FORM);
   const [errors, setErrors]             = useState({});
   const [newPassword, setNewPassword]   = useState('');
+  const [newPin, setNewPin]             = useState('');
 
   const sf = (key) => (val) => setForm((f) => ({ ...f, [key]: val }));
 
@@ -111,12 +112,23 @@ const AdminMerchantsScreen = ({ navigation }) => {
   };
 
   const handleResetPassword = async () => {
-    if (newPassword.length < 6) { toast.error(t('admin.merchants.passwordTooShort')); return; }
+    if (newPassword.length < 8) { toast.error(t('admin.merchants.passwordTooShort')); return; }
     setFormLoading(true);
     try {
-      await api.patch(`/users/${resetTarget._id}/reset-password`, { newPassword });
+      await api.patch(`/users/${secTarget._id}/reset-password`, { newPassword });
       toast.success(t('admin.merchants.passwordReset'));
-      setResetTarget(null); setNewPassword('');
+      setNewPassword('');
+    } catch (err) { toast.error(t('common.error'), err.response?.data?.error); }
+    finally { setFormLoading(false); }
+  };
+
+  const handleResetPin = async () => {
+    if (!/^\d{5}$/.test(newPin)) { toast.error(t('admin.users.pinInvalid')); return; }
+    setFormLoading(true);
+    try {
+      await api.patch(`/users/${secTarget._id}/reset-pin`, { newPin });
+      toast.success(t('admin.users.pinReset'));
+      setNewPin('');
     } catch (err) { toast.error(t('common.error'), err.response?.data?.error); }
     finally { setFormLoading(false); }
   };
@@ -208,7 +220,7 @@ const AdminMerchantsScreen = ({ navigation }) => {
               ? <ActionBtn iconName="restore" color="#16A34A" onPress={() => handleRestore(m)} />
               : <View style={{ flexDirection: 'row' }}>
                   <ActionBtn iconName="pencil-outline" color="#0A66C2" onPress={() => { setEditTarget(m); setForm({ name: m.name, email: m.email || '', phone: m.phone, businessName: m.businessName || '', password: '' }); setErrors({}); }} />
-                  <ActionBtn iconName="lock-reset"     color="#7C3AED" onPress={() => { setResetTarget(m); setNewPassword(''); }} />
+                  <ActionBtn iconName="shield-key-outline" color="#7C3AED" onPress={() => { setSecTarget(m); setNewPassword(''); setNewPin(''); }} />
                   <ActionBtn iconName={m.status === 'active' ? 'pause-circle-outline' : 'play-circle-outline'}
                     color={m.status === 'active' ? '#D97706' : '#16A34A'} onPress={() => handleToggleStatus(m)} />
                   <ActionBtn iconName="trash-can-outline" color="#DC2626" onPress={() => handleDelete(m)} />
@@ -312,13 +324,56 @@ const AdminMerchantsScreen = ({ navigation }) => {
         <Button title={t('common.save')} onPress={handleEdit} loading={formLoading} fullWidth style={{ marginTop: 4 }} />
       </AdminFormModal>
 
-      {/* RESET PASSWORD */}
-      <AdminFormModal visible={!!resetTarget} onClose={() => { setResetTarget(null); setNewPassword(''); }} title={t('admin.merchants.resetPasswordTitle')}>
-        <Text style={{ fontFamily: theme.typography.fontFamily.regular, fontSize: 13, color: theme.textSecondary, marginBottom: 16, lineHeight: 20 }}>
-          {t('admin.merchants.resetPasswordHint')}
-        </Text>
-        <Input label={t('admin.merchants.newPassword')} value={newPassword} onChangeText={setNewPassword} secureTextEntry placeholder="Minimum 6 caractères" />
-        <Button title={t('admin.merchants.resetPassword')} onPress={handleResetPassword} loading={formLoading} fullWidth style={{ marginTop: 4 }} />
+      {/* SECURITE : reset mot de passe + reset PIN */}
+      <AdminFormModal visible={!!secTarget} onClose={() => { setSecTarget(null); setNewPassword(''); setNewPin(''); }} title={t('admin.common.security')}>
+        {/* ── Mot de passe web-admin ── */}
+        <View style={{ backgroundColor: `${theme.colors.primary}10`, borderRadius: 12, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: `${theme.colors.primary}25` }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+            <Icon name="monitor-lock" size={16} color={theme.colors.primary} />
+            <Text style={{ fontFamily: theme.typography.fontFamily.bold, fontSize: 13, color: theme.colors.primary }}>
+              {t('admin.common.webPassword')}
+            </Text>
+          </View>
+          <Input
+            label={t('admin.merchants.newPassword')}
+            value={newPassword}
+            onChangeText={setNewPassword}
+            secureTextEntry
+            placeholder="Minimum 8 caractères"
+          />
+          <Button
+            title={t('admin.common.resetPassword')}
+            onPress={handleResetPassword}
+            loading={formLoading}
+            fullWidth
+            style={{ marginTop: 4 }}
+          />
+        </View>
+
+        {/* ── PIN mobile ── */}
+        <View style={{ backgroundColor: '#7C3AED10', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#7C3AED25' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+            <Icon name="cellphone-key" size={16} color="#7C3AED" />
+            <Text style={{ fontFamily: theme.typography.fontFamily.bold, fontSize: 13, color: '#7C3AED' }}>
+              {t('admin.common.mobilePin')}
+            </Text>
+          </View>
+          <Input
+            label={t('admin.users.newPin')}
+            value={newPin}
+            onChangeText={(v) => setNewPin(v.replace(/\D/g, '').slice(0, 5))}
+            placeholder="5 chiffres"
+            keyboardType="numeric"
+            maxLength={5}
+          />
+          <Button
+            title={t('admin.common.resetPin')}
+            onPress={handleResetPin}
+            loading={formLoading}
+            fullWidth
+            style={{ marginTop: 4, backgroundColor: '#7C3AED' }}
+          />
+        </View>
       </AdminFormModal>
 
     </SafeAreaView>

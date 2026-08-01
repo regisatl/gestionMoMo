@@ -18,7 +18,8 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = useCallback(async (phone, password) => {
-    const { data } = await api.post('/auth/login', { phone, password });
+    // loginType: 'password' → le backend vérifie passwordHash (web-admin)
+    const { data } = await api.post('/auth/login', { phone, password, loginType: 'password' });
     const { user: u, accessToken, refreshToken } = data;
 
     localStorage.setItem('accessToken', accessToken);

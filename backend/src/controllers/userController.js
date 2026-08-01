@@ -45,17 +45,21 @@ exports.getAllUsers = async (req, res, next) => {
 // POST /api/users — créer un utilisateur (super_admin)
 exports.createUser = async (req, res, next) => {
   try {
-    const { name, phone, email, password, role, businessName, businessAddress } = req.body;
+    const { name, phone, email, password, pin, role, businessName, businessAddress } = req.body;
 
-    if (!name || !phone || !password) {
-      return res.status(400).json({ error: 'Nom, téléphone et mot de passe sont requis.' });
+    if (!name || !phone) {
+      return res.status(400).json({ error: 'Nom et téléphone sont requis.' });
+    }
+    if (!password && !pin) {
+      return res.status(400).json({ error: 'Un mot de passe (web-admin) ou un PIN mobile est requis.' });
     }
 
     const user = await User.create({
       name,
       phone,
       email:           email || undefined,
-      passwordHash:    password,
+      passwordHash:    password || null,
+      pinHash:         pin      || null,
       role:            role || 'client',
       status:          'active',
       businessName:    businessName  || null,
@@ -137,12 +141,12 @@ exports.updateUserStatus = async (req, res, next) => {
   }
 };
 
-// PATCH /api/users/:id/reset-password — super_admin : force un nouveau mot de passe
+// PATCH /api/users/:id/reset-password — super_admin : force un nouveau mot de passe web-admin
 exports.resetPassword = async (req, res, next) => {
   try {
     const { newPassword } = req.body;
-    if (!newPassword || newPassword.length < 6) {
-      return res.status(400).json({ error: 'Le nouveau mot de passe doit faire au moins 6 caractères.' });
+    if (!newPassword || newPassword.length < 8) {
+      return res.status(400).json({ error: 'Le nouveau mot de passe doit faire au moins 8 caractères.' });
     }
 
     const user = await User.findById(req.params.id).select('+passwordHash');
@@ -166,10 +170,10 @@ exports.resetPin = async (req, res, next) => {
       return res.status(400).json({ error: 'Le PIN doit être exactement 5 chiffres.' });
     }
 
-    const user = await User.findById(req.params.id).select('+passwordHash');
+    const user = await User.findById(req.params.id).select('+pinHash');
     if (!user) return res.status(404).json({ error: 'Utilisateur introuvable.' });
 
-    user.passwordHash = newPin;
+    user.pinHash = newPin;
     await user.save();
 
     await auditAction('pin_reset_admin', req, user._id, 'User', { resetBy: req.user._id });

@@ -28,10 +28,19 @@ const userSchema = new mongoose.Schema(
       trim: true,
       match: [/^\S+@\S+\.\S+$/, 'Email invalide'],
     },
+    // Mot de passe web-admin (bcrypt, min 8 caractères)
     passwordHash: {
       type: String,
-      required: true,
-      select: false, // Jamais retourné par défaut
+      required: false,
+      default: null,
+      select: false,
+    },
+    // PIN mobile (bcrypt, exactement 5 chiffres)
+    pinHash: {
+      type: String,
+      required: false,
+      default: null,
+      select: false,
     },
     role: {
       type: String,
@@ -76,16 +85,27 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Hash du mot de passe avant sauvegarde
+// Hash du mot de passe web-admin avant sauvegarde
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('passwordHash')) return next();
-  this.passwordHash = await bcrypt.hash(this.passwordHash, 12);
+  if (this.isModified('passwordHash') && this.passwordHash) {
+    this.passwordHash = await bcrypt.hash(this.passwordHash, 12);
+  }
+  if (this.isModified('pinHash') && this.pinHash) {
+    this.pinHash = await bcrypt.hash(this.pinHash, 12);
+  }
   next();
 });
 
-// Méthode de comparaison mot de passe
+// Comparaison mot de passe web-admin
 userSchema.methods.comparePassword = async function (candidatePassword) {
+  if (!this.passwordHash) return false;
   return bcrypt.compare(candidatePassword, this.passwordHash);
+};
+
+// Comparaison PIN mobile
+userSchema.methods.comparePin = async function (candidatePin) {
+  if (!this.pinHash) return false;
+  return bcrypt.compare(candidatePin, this.pinHash);
 };
 
 // Index pour recherche performante

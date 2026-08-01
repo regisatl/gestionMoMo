@@ -21,7 +21,8 @@ const MERCHANTS = [
     name:            'Kofi Mensah',
     phone:           '+2290101111111',
     email:           'kofi.mensah@example.com',
-    passwordHash:    '12345',          // PIN mobile 5 chiffres
+    passwordHash:    'Admin@Kofi2024',   // mot de passe web-admin (min 8 chars)
+    pinHash:         '12345',            // PIN mobile (5 chiffres)
     role:            'merchant',
     status:          'active',
     businessName:    'Kofi Mobile Money Services',
@@ -45,7 +46,8 @@ const MERCHANTS = [
     name:            'Ama Adjovi',
     phone:           '+2290102222222',
     email:           'ama.adjovi@example.com',
-    passwordHash:    '54321',
+    passwordHash:    'Admin@Ama2024',    // mot de passe web-admin
+    pinHash:         '54321',            // PIN mobile
     role:            'merchant',
     status:          'active',
     businessName:    'Adjovi Tech & Pay',
@@ -71,7 +73,8 @@ const CLIENTS = [
     name:         'Brice Ahounou',
     phone:        '+2290103333333',
     email:        'brice.ahounou@example.com',
-    passwordHash: '11111',
+    passwordHash: 'Admin@Brice2024',  // mot de passe web-admin
+    pinHash:      '11111',             // PIN mobile
     role:         'client',
     status:       'active',
     language:     'fr',
@@ -81,7 +84,8 @@ const CLIENTS = [
     name:         'Fatoumata Diallo',
     phone:        '+2290104444444',
     email:        'fatoumata.diallo@example.com',
-    passwordHash: '99999',
+    passwordHash: 'Admin@Fato2024',   // mot de passe web-admin
+    pinHash:      '99999',             // PIN mobile
     role:         'client',
     status:       'active',
     language:     'fr',
@@ -122,7 +126,7 @@ async function seed() {
 
     console.log(`✅ Marchand créé : ${user.name} (${user.phone})`);
     console.log(`   └─ Compte MoMo : ${account.momoAccountNumber} — Solde : ${account.balance} XOF`);
-    results.push({ name: user.name, phone: user.phone, pin: userData.passwordHash, role: 'merchant', account: account.momoAccountNumber });
+    results.push({ name: user.name, phone: user.phone, pin: userData.pinHash, password: userData.passwordHash, role: 'merchant', account: account.momoAccountNumber });
   }
 
   // ---- Clients ----
@@ -136,21 +140,23 @@ async function seed() {
 
     const user = await User.create(userData);
     console.log(`✅ Client créé : ${user.name} (${user.phone})`);
-    results.push({ name: user.name, phone: user.phone, pin: userData.passwordHash, role: 'client' });
+    results.push({ name: user.name, phone: user.phone, pin: userData.pinHash, password: userData.passwordHash, role: 'client' });
   }
 
   // ---- Résumé ----
-  console.log('\n─────────────────────────────────────────────');
+  console.log('\n─────────────────────────────────────────────────────────────');
   console.log('RÉCAPITULATIF DES COMPTES DE TEST');
-  console.log('─────────────────────────────────────────────');
+  console.log('─────────────────────────────────────────────────────────────');
   for (const r of results) {
     if (r.skipped) continue;
-    const line = r.role === 'merchant'
-      ? `[${r.role.toUpperCase()}] ${r.name} | Tél: ${r.phone} | PIN: ${r.pin} | Compte: ${r.account}`
-      : `[${r.role.toUpperCase()}]  ${r.name} | Tél: ${r.phone} | PIN: ${r.pin}`;
-    console.log(line);
+    console.log(`[${r.role.toUpperCase().padEnd(8)}] ${r.name}`);
+    console.log(`             Tél       : ${r.phone}`);
+    console.log(`             PIN mob.  : ${r.pin}`);
+    console.log(`             MDP web   : ${r.password}`);
+    if (r.account) console.log(`             Compte    : ${r.account}`);
+    console.log('');
   }
-  console.log('─────────────────────────────────────────────\n');
+  console.log('─────────────────────────────────────────────────────────────\n');
 
   await mongoose.disconnect();
   console.log('🔌 Déconnecté de MongoDB');

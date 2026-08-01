@@ -31,12 +31,12 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   /**
-   * Connexion par code PIN à 5 chiffres.
-   * Le PIN est envoyé comme `password` au backend — le backend
-   * accepte désormais un PIN de 5 chiffres en plus des anciens mots de passe.
+   * Connexion par code PIN à 5 chiffres (mobile uniquement).
+   * On envoie loginType: 'pin' pour que le backend vérifie pinHash
+   * et non passwordHash.
    */
   const login = useCallback(async (phone, pin) => {
-    const { data } = await api.post('/auth/login', { phone, password: pin });
+    const { data } = await api.post('/auth/login', { phone, pin, loginType: 'pin' });
     const { user: u, accessToken: token, refreshToken } = data;
 
     await Promise.all([

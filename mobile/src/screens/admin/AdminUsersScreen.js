@@ -64,12 +64,13 @@ const AdminUsersScreen = ({ navigation }) => {
   const [showDeleted, setShowDeleted] = useState(false);
   const [createOpen, setCreateOpen]   = useState(false);
   const [editTarget, setEditTarget]   = useState(null);
-  const [resetTarget, setResetTarget] = useState(null);
+  const [secTarget, setSecTarget]     = useState(null);  // modal Sécurité (reset mdp + pin)
   const [formLoading, setFormLoading] = useState(false);
   const [actionId, setActionId]       = useState(null);
   const [form, setForm]               = useState(EMPTY_FORM);
   const [errors, setErrors]           = useState({});
   const [newPin, setNewPin]           = useState('');
+  const [newPassword, setNewPassword] = useState('');
 
   const sf = (key) => (val) => setForm((f) => ({ ...f, [key]: val }));
 
@@ -135,9 +136,20 @@ const AdminUsersScreen = ({ navigation }) => {
     if (!/^\d{5}$/.test(newPin)) { toast.error(t('admin.users.pinInvalid')); return; }
     setFormLoading(true);
     try {
-      await api.patch(`/users/${resetTarget._id}/reset-pin`, { newPin });
+      await api.patch(`/users/${secTarget._id}/reset-pin`, { newPin });
       toast.success(t('admin.users.pinReset'));
-      setResetTarget(null); setNewPin('');
+      setNewPin('');
+    } catch (err) { toast.error(t('common.error'), err.response?.data?.error); }
+    finally { setFormLoading(false); }
+  };
+
+  const handleResetPassword = async () => {
+    if (newPassword.length < 8) { toast.error(t('admin.users.passwordTooShort')); return; }
+    setFormLoading(true);
+    try {
+      await api.patch(`/users/${secTarget._id}/reset-password`, { newPassword });
+      toast.success(t('admin.users.passwordReset'));
+      setNewPassword('');
     } catch (err) { toast.error(t('common.error'), err.response?.data?.error); }
     finally { setFormLoading(false); }
   };
@@ -228,7 +240,7 @@ const AdminUsersScreen = ({ navigation }) => {
               ? <ActionBtn iconName="restore" color="#16A34A" onPress={() => handleRestore(u)} />
               : <View style={{ flexDirection: 'row' }}>
                   <ActionBtn iconName="pencil-outline" color="#0A66C2" onPress={() => { setEditTarget(u); setForm({ name: u.name, email: u.email || '', phone: u.phone, password: '', role: u.role }); setErrors({}); }} />
-                  <ActionBtn iconName="lock-reset"     color="#7C3AED" onPress={() => { setResetTarget(u); setNewPin(''); }} />
+                  <ActionBtn iconName="shield-key-outline" color="#7C3AED" onPress={() => { setSecTarget(u); setNewPin(''); setNewPassword(''); }} />
                   <ActionBtn iconName={u.status === 'active' ? 'pause-circle-outline' : 'play-circle-outline'}
                     color={u.status === 'active' ? '#D97706' : '#16A34A'} onPress={() => handleToggleStatus(u)} />
                   <ActionBtn iconName="trash-can-outline" color="#DC2626" onPress={() => handleDelete(u)} />
@@ -326,14 +338,55 @@ const AdminUsersScreen = ({ navigation }) => {
       </AdminFormModal>
 
       {/* RESET PIN modal */}
-      <AdminFormModal visible={!!resetTarget} onClose={() => { setResetTarget(null); setNewPin(''); }} title={t('admin.common.resetPin')}>
-        <Text style={{ fontFamily: theme.typography.fontFamily.regular, fontSize: 13, color: theme.textSecondary, marginBottom: 16, lineHeight: 20 }}>
-          {t('admin.users.pinHint')}
-        </Text>
-        <Input label={t('admin.users.newPin')} value={newPin}
-          onChangeText={(v) => setNewPin(v.replace(/\D/g, '').slice(0, 5))}
-          placeholder="1 2 3 4 5" keyboardType="numeric" maxLength={5} />
-        <Button title={t('admin.common.resetPin')} onPress={handleResetPin} loading={formLoading} fullWidth style={{ marginTop: 4 }} />
+      <AdminFormModal visible={!!secTarget} onClose={() => { setSecTarget(null); setNewPin(''); setNewPassword(''); }} title={t('admin.common.security')}>
+        {/* ── Mot de passe web-admin ── */}
+        <View style={{ backgroundColor: `${theme.colors.primary}10`, borderRadius: 12, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: `${theme.colors.primary}25` }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+            <Icon name="monitor-lock" size={16} color={theme.colors.primary} />
+            <Text style={{ fontFamily: theme.typography.fontFamily.bold, fontSize: 13, color: theme.colors.primary }}>
+              {t('admin.common.webPassword')}
+            </Text>
+          </View>
+          <Input
+            label={t('admin.users.newPassword')}
+            value={newPassword}
+            onChangeText={setNewPassword}
+            secureTextEntry
+            placeholder="Minimum 8 caractères"
+          />
+          <Button
+            title={t('admin.common.resetPassword')}
+            onPress={handleResetPassword}
+            loading={formLoading}
+            fullWidth
+            style={{ marginTop: 4 }}
+          />
+        </View>
+
+        {/* ── PIN mobile ── */}
+        <View style={{ backgroundColor: '#7C3AED10', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#7C3AED25' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+            <Icon name="cellphone-key" size={16} color="#7C3AED" />
+            <Text style={{ fontFamily: theme.typography.fontFamily.bold, fontSize: 13, color: '#7C3AED' }}>
+              {t('admin.common.mobilePin')}
+            </Text>
+          </View>
+          <Input
+            label={t('admin.users.newPin')}
+            value={newPin}
+            onChangeText={(v) => setNewPin(v.replace(/\D/g, '').slice(0, 5))}
+            placeholder="5 chiffres"
+            keyboardType="numeric"
+            maxLength={5}
+          />
+          <Button
+            title={t('admin.common.resetPin')}
+            onPress={handleResetPin}
+            loading={formLoading}
+            fullWidth
+            style={{ marginTop: 4, backgroundColor: '#7C3AED' }}
+          />
+        </View>
       </AdminFormModal>
 
     </SafeAreaView>

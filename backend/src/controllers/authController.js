@@ -16,18 +16,23 @@ const signRefreshToken = (id) =>
 // POST /api/auth/register
 exports.register = async (req, res, next) => {
   try {
-    const { name, phone, email, password, role, businessName } = req.body;
+    const { name, phone, email, password, pin, role, businessName } = req.body;
 
     // Seul un super_admin peut créer des marchands
     if (role === 'merchant' && (!req.user || req.user.role !== 'super_admin')) {
       return res.status(403).json({ error: 'Seul un super admin peut créer un marchand.' });
     }
 
+    if (!password && !pin) {
+      return res.status(400).json({ error: 'Un mot de passe (web) ou un PIN (mobile) est requis.' });
+    }
+
     const user = await User.create({
       name,
       phone,
       email,
-      passwordHash: password,
+      passwordHash: password || null,
+      pinHash:      pin      || null,
       role: role || 'client',
       status: 'active',
       businessName: businessName || null,
@@ -50,12 +55,42 @@ exports.register = async (req, res, next) => {
 // POST /api/auth/login
 exports.login = async (req, res, next) => {
   try {
-    const { phone, password } = req.body;
+    const { phone, password, pin, loginType } = req.body;
 
-    const user = await User.findOne({ phone }).select('+passwordHash +refreshToken');
-    if (!user || !(await user.comparePassword(password))) {
+    // loginType: 'pin' → mobile, 'password' → web-admin
+    // Fallback : si loginType absent, on devine selon ce qui est fourni
+    const isMobile = loginType === 'pin' || (!loginType && pin && !password);
+    const credential = isMobile ? pin : password;
+
+    if (!credential) {
+      return res.status(400).json({ error: 'Identifiant de connexion manquant (password ou pin).' });
+    }
+
+    const user = await User.findOne({ phone }).select('+passwordHash +pinHash +refreshToken');
+    if (!user) {
       await AuditFail(req, phone);
-      return res.status(401).json({ error: 'Numéro de téléphone ou mot de passe incorrect.' });
+      return res.status(401).json({ error: 'Numéro de téléphone ou identifiant incorrect.' });
+    }
+
+    // Vérifie le bon champ selon le type de connexion
+    const isValid = isMobile
+      ? await user.comparePin(credential)
+      : await user.comparePassword(credential);
+
+    if (!isValid) {
+      await AuditFail(req, phone);
+      const msg = isMobile
+        ? 'Numéro de téléphone ou PIN incorrect.'
+        : 'Numéro de téléphone ou mot de passe incorrect.';
+      return res.status(401).json({ error: msg });
+    }
+
+    // Le web-admin ne peut pas se connecter avec un PIN, et vice-versa
+    if (isMobile && !user.pinHash) {
+      return res.status(403).json({ error: 'Ce compte ne possède pas de PIN mobile. Contactez l\'administrateur.' });
+    }
+    if (!isMobile && !user.passwordHash) {
+      return res.status(403).json({ error: 'Ce compte ne possède pas de mot de passe web. Contactez l\'administrateur.' });
     }
 
     if (user.status !== 'active') {
@@ -158,13 +193,13 @@ exports.changePassword = async (req, res, next) => {
 exports.changePin = async (req, res, next) => {
   try {
     const { currentPin, newPin } = req.body;
-    const user = await User.findById(req.user._id).select('+passwordHash');
+    const user = await User.findById(req.user._id).select('+pinHash');
 
-    if (!(await user.comparePassword(currentPin))) {
+    if (!(await user.comparePin(currentPin))) {
       return res.status(400).json({ error: 'PIN actuel incorrect.' });
     }
 
-    user.passwordHash = newPin;
+    user.pinHash = newPin;
     await user.save();
     await auditAction('pin_changed', req, user._id, 'User');
 

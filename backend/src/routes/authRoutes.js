@@ -6,7 +6,7 @@ const { protect } = require('../middleware/auth');
 const validate = require('../middleware/validate');
 
 // POST /api/auth/register
-// Le mot de passe peut être un PIN à 5 chiffres (mobile) ou un mot de passe (web)
+// password → web-admin (min 8 chars), pin → mobile (exactement 5 chiffres)
 router.post(
   '/register',
   [
@@ -15,13 +15,20 @@ router.post(
       .trim()
       .notEmpty().withMessage('Le numéro de téléphone est requis')
       .matches(/^\+22901\d{8}$/).withMessage('Numéro invalide. Format attendu : +229 01 XX XX XX XX'),
-    body('password').isLength({ min: 5 }).withMessage('Mot de passe / PIN : minimum 5 caractères'),
+    body('password')
+      .optional()
+      .isLength({ min: 8 }).withMessage('Mot de passe web-admin : minimum 8 caractères'),
+    body('pin')
+      .optional()
+      .isLength({ min: 5, max: 5 }).withMessage('PIN mobile : exactement 5 chiffres')
+      .isNumeric().withMessage('Le PIN doit contenir uniquement des chiffres'),
   ],
   validate,
   authController.register
 );
 
 // POST /api/auth/login
+// loginType: 'pin' (mobile) ou 'password' (web-admin)
 router.post(
   '/login',
   [
@@ -29,7 +36,9 @@ router.post(
       .trim()
       .notEmpty().withMessage('Numéro de téléphone requis')
       .matches(/^\+22901\d{8}$/).withMessage('Numéro invalide. Format attendu : +229 01 XX XX XX XX'),
-    body('password').notEmpty().withMessage('Mot de passe / PIN requis'),
+    body('loginType')
+      .optional()
+      .isIn(['pin', 'password']).withMessage('loginType doit être "pin" ou "password"'),
   ],
   validate,
   authController.login
