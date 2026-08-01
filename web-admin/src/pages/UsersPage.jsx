@@ -66,7 +66,7 @@ const UsersPage = () => {
   const [formErrors, setFormErrors]   = useState({});
   const [formLoading, setFormLoading] = useState(false);
   const [actionId, setActionId]       = useState(null);
-  const [resetResult, setResetResult] = useState(null); // { type: 'password'|'pin', value, userName }
+  const [resetResult, setResetResult] = useState(null); // supprimé — plus utilisé
   const [deleteReason, setDeleteReason] = useState('');
 
   const setField = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
@@ -158,9 +158,9 @@ const UsersPage = () => {
   const handleResetPin = async () => {
     setFormLoading(true);
     try {
-      const { data } = await api.patch(`/users/${resetPinTarget._id}/reset-pin`);
+      await api.patch(`/users/${resetPinTarget._id}/reset-pin`);
       setResetPinTarget(null);
-      setResetResult({ type: 'pin', value: data.newPin, userName: resetPinTarget.name });
+      addToast({ type: 'success', title: t('toast.pinReset'), message: t('toast.resetSentToUser', { name: resetPinTarget.name }) });
     } catch (err) {
       addToast({ type: 'error', title: t('toast.pinError'), message: err.response?.data?.error });
     } finally {
@@ -172,9 +172,9 @@ const UsersPage = () => {
   const handleResetPassword = async () => {
     setFormLoading(true);
     try {
-      const { data } = await api.patch(`/users/${resetPwdTarget._id}/reset-password`);
+      await api.patch(`/users/${resetPwdTarget._id}/reset-password`);
       setResetPwdTarget(null);
-      setResetResult({ type: 'password', value: data.newPassword, userName: resetPwdTarget.name });
+      addToast({ type: 'success', title: t('toast.passwordReset'), message: t('toast.resetSentToUser', { name: resetPwdTarget.name }) });
     } catch (err) {
       addToast({ type: 'error', title: t('toast.passwordError'), message: err.response?.data?.error });
     } finally {
@@ -233,7 +233,6 @@ const UsersPage = () => {
   const closeResetPin = () => { setResetPinTarget(null); };
   const closeResetPwd = () => { setResetPwdTarget(null); };
   const closeDelete   = () => { setDeleteTarget(null); setDeleteReason(''); };
-  const closeResult   = () => { setResetResult(null); };
 
   const roleLabel = (r) => ({ super_admin: t('users.roles.super_admin'), merchant: t('users.roles.merchant'), client: t('users.roles.client') }[r] || r);
   const roleColor = (r) => ({ super_admin: '#7C3AED', merchant: '#0A66C2', client: '#16A34A' }[r] || '#6B7280');
@@ -473,37 +472,6 @@ const UsersPage = () => {
           <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '4px' }}>
             <Button type="button" variant="secondary" onClick={closeResetPwd}>{t('common.cancel')}</Button>
             <Button type="button" variant="primary" loading={formLoading} onClick={handleResetPassword} icon={<KeyRound size={14} />}>{t('common.resetPassword')}</Button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* ── Résultat reset — affiche le nouveau credential généré ── */}
-      <Modal open={!!resetResult} onClose={closeResult} title={resetResult?.type === 'password' ? t('common.resetPassword') : t('common.resetPin')} width={420}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'var(--color-success-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-            <p style={{ fontFamily: 'var(--font)', fontWeight: 600, fontSize: '14px', color: 'var(--text)', margin: 0 }}>
-              {t('common.resetSuccess', { name: resetResult?.userName })}
-            </p>
-          </div>
-          <div style={{ background: 'var(--surface)', border: '1.5px dashed var(--border)', borderRadius: '12px', padding: '16px 20px', textAlign: 'center' }}>
-            <p style={{ fontFamily: 'var(--font)', fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 8px' }}>
-              {resetResult?.type === 'password' ? t('common.newPasswordGenerated') : t('common.newPinGenerated')}
-            </p>
-            <p style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: resetResult?.type === 'pin' ? '32px' : '20px', color: resetResult?.type === 'pin' ? '#0284C7' : '#7C3AED', letterSpacing: resetResult?.type === 'pin' ? '10px' : '3px', margin: 0 }}>
-              {resetResult?.value}
-            </p>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', padding: '10px 14px', borderRadius: '10px', background: 'var(--color-error-light)', border: '1px solid rgba(220,38,38,0.2)' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2.5" style={{ flexShrink: 0, marginTop: '1px' }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            <p style={{ fontFamily: 'var(--font)', fontSize: '12px', color: '#DC2626', margin: 0, lineHeight: 1.5 }}>
-              {t('common.resetCopyHint')}
-            </p>
-          </div>
-          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '4px' }}>
-            <Button type="button" variant="primary" onClick={closeResult}>{t('common.understood')}</Button>
           </div>
         </div>
       </Modal>
