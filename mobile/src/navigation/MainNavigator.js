@@ -15,6 +15,8 @@ import NewTransactionScreen from '../screens/transactions/NewTransactionScreen';
 import ReportsScreen from '../screens/reports/ReportsScreen';
 import NotificationsScreen from '../screens/notifications/NotificationsScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
+import AdminNavigator from './AdminNavigator';
+import { useAuth } from '../context/AuthContext';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -28,9 +30,11 @@ const TransactionsStack = () => (
 );
 
 const MainNavigator = () => {
-  const { t } = useTranslation();
-  const theme = useTheme();
+  const { t }    = useTranslation();
+  const theme    = useTheme();
+  const { user } = useAuth();
   const { unreadCount } = useNotifications();
+  const isSuperAdmin = user?.role === 'super_admin';
 
   return (
     <Tab.Navigator
@@ -105,6 +109,18 @@ const MainNavigator = () => {
           ),
         }}
       />
+      {isSuperAdmin && (
+        <Tab.Screen
+          name="Admin"
+          component={AdminNavigator}
+          options={{
+            tabBarLabel: 'Admin',
+            tabBarIcon: ({ color, size }) => (
+              <Icon name="shield-crown-outline" size={size ?? 24} color={color} />
+            ),
+          }}
+        />
+      )}
     </Tab.Navigator>
   );
 };
