@@ -3,7 +3,7 @@ import { Eye, EyeOff } from 'lucide-react';
 
 const Input = ({
   label, value, onChange, placeholder, type = 'text',
-  error, icon, style, required, disabled, name, id,
+  error, icon, style, required, disabled, name, id, autoComplete,
 }) => {
   const [focused, setFocused]       = useState(false);
   const [showPwd, setShowPwd]       = useState(false);
@@ -44,6 +44,7 @@ const Input = ({
           placeholder={placeholder}
           required={required}
           disabled={disabled}
+          autoComplete={autoComplete || 'off'}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           style={{

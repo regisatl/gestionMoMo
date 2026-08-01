@@ -143,11 +143,17 @@ const MerchantsPage = () => {
 
   const handleEdit = async (e) => {
     e.preventDefault();
-    if (!form.name.trim()) { setFormErrors({ name: t('merchants.form.nameRequired') }); return; }
+    const errs = {};
+    if (!form.name.trim()) errs.name = t('merchants.form.nameRequired');
+    if (form.phone.trim() && !PHONE_RE.test(form.phone.trim())) errs.phone = t('merchants.form.phoneInvalid');
+    if (Object.keys(errs).length) { setFormErrors(errs); return; }
     setFormLoading(true);
     try {
       await api.patch(`/users/${editTarget._id}`, {
-        name: form.name, email: form.email || undefined, businessName: form.businessName || undefined,
+        name: form.name,
+        email: form.email || undefined,
+        phone: form.phone || undefined,
+        businessName: form.businessName || undefined,
       });
       addToast({ type: 'success', title: t('toast.merchantUpdated') });
       setEditTarget(null);
@@ -377,13 +383,14 @@ const MerchantsPage = () => {
 
       {/* ── CREATE modal ── */}
       <Modal open={createOpen} onClose={closeCreate} title={t('merchants.newMerchant')} width={540}>
-        <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+        <form onSubmit={handleCreate} autoComplete="off" style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
           <Input
             label={t('merchants.form.fullName')}
             value={form.name} onChange={setField('name')}
             placeholder="Jean Dupont"
             icon={<User size={15} color="var(--text-secondary)" />}
             error={formErrors.name} required
+            autoComplete="new-password"
           />
           <Input
             label={t('merchants.form.phone')}
@@ -391,28 +398,30 @@ const MerchantsPage = () => {
             placeholder="+2290112345678"
             icon={<Phone size={15} color="var(--text-secondary)" />}
             error={formErrors.phone} required
-            autoComplete="tel"
+            autoComplete="new-password"
           />
           <Input
             label={t('merchants.form.email')}
             type="email"
-            autoComplete="email"
             value={form.email} onChange={setField('email')}
             placeholder="jean@example.com"
             icon={<Mail size={15} color="var(--text-secondary)" />}
             error={formErrors.email}
+            autoComplete="new-password"
           />
           <Input
             label={t('merchants.form.businessName')}
             value={form.businessName} onChange={setField('businessName')}
             placeholder={t('merchants.form.businessNamePlaceholder')}
             icon={<Building2 size={15} color="var(--text-secondary)" />}
+            autoComplete="new-password"
           />
           <Input
             label={t('merchants.form.password')}
             type="password" value={form.password} onChange={setField('password')}
             placeholder="••••••••"
             error={formErrors.password} required
+            autoComplete="new-password"
           />
           <p style={{ fontFamily: 'var(--font)', fontSize: '12px', color: 'var(--text-secondary)', margin: 0, paddingTop: '2px' }}>
             {t('merchants.form.hint')}
@@ -428,7 +437,15 @@ const MerchantsPage = () => {
       <Modal open={!!editTarget} onClose={closeEdit} title={t('common.edit') + ' — ' + (editTarget?.businessName || editTarget?.name || '')} width={480}>
         <form onSubmit={handleEdit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
           <Input label={t('merchants.form.fullName')} value={form.name} onChange={setField('name')} error={formErrors.name} required />
-          <Input label={t('merchants.form.email')} type="email" value={form.email} onChange={setField('email')} />
+          <Input label={t('merchants.form.email')} type="email" autoComplete="email" value={form.email} onChange={setField('email')} error={formErrors.email} />
+          <Input
+            label={t('merchants.form.phone')}
+            value={form.phone}
+            onChange={setField('phone')}
+            icon={<Phone size={15} color="var(--text-secondary)" />}
+            error={formErrors.phone}
+            autoComplete="tel"
+          />
           <Input label={t('merchants.form.businessName')} value={form.businessName} onChange={setField('businessName')} />
           <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '4px' }}>
             <Button type="button" variant="secondary" onClick={closeEdit}>{t('common.cancel')}</Button>

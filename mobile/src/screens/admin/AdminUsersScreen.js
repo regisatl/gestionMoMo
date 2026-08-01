@@ -117,11 +117,18 @@ const AdminUsersScreen = ({ navigation }) => {
   };
 
   const handleEdit = async () => {
-    if (!form.name.trim()) { setErrors({ name: t('admin.users.nameRequired') }); return; }
-    if (form.email.trim() && !EMAIL_RE.test(form.email.trim())) { setErrors({ email: t('admin.users.emailInvalid') }); return; }
+    const e = {};
+    if (!form.name.trim()) e.name = t('admin.users.nameRequired');
+    if (form.email.trim() && !EMAIL_RE.test(form.email.trim())) e.email = t('admin.users.emailInvalid');
+    if (form.phone.trim() && !PHONE_RE.test(form.phone.trim())) e.phone = t('admin.users.phoneInvalid');
+    if (Object.keys(e).length) { setErrors(e); return; }
     setFormLoading(true);
     try {
-      const { data } = await api.patch(`/users/${editTarget._id}`, { name: form.name, email: form.email || undefined });
+      const { data } = await api.patch(`/users/${editTarget._id}`, {
+        name: form.name,
+        email: form.email || undefined,
+        phone: form.phone || undefined,
+      });
       // Si l'utilisateur modifié est l'utilisateur connecté, on met à jour le contexte Auth
       if (currentUser?._id === editTarget._id) {
         updateUser(data.user);
@@ -340,7 +347,13 @@ const AdminUsersScreen = ({ navigation }) => {
       <AdminFormModal visible={!!editTarget} onClose={() => { setEditTarget(null); setErrors({}); }} title={t('admin.users.editTitle')}>
         <Input label={t('admin.users.name')}  value={form.name}  onChangeText={sf('name')}  error={errors.name} />
         <Input label={t('admin.users.email')} value={form.email} onChangeText={sf('email')} keyboardType="email-address" autoCapitalize="none" error={errors.email} />
-        <Input label={t('admin.users.phone')} value={form.phone} editable={false} style={{ opacity: 0.6 }} />
+        <Input
+          label={t('admin.users.phone')}
+          value={form.phone}
+          onChangeText={sf('phone')}
+          keyboardType="phone-pad"
+          error={errors.phone}
+        />
         <Button title={t('common.save')} onPress={handleEdit} loading={formLoading} fullWidth style={{ marginTop: 4 }} />
       </AdminFormModal>
 
