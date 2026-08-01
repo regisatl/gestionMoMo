@@ -97,10 +97,11 @@ const fr = {
     userDeleted:   'Utilisateur supprimé',
     userRestored:  'Utilisateur restauré',
     // Mot de passe / PIN
-    passwordReset: 'Mot de passe réinitialisé',
-    pinReset:      'PIN réinitialisé',
-    pinError:      'Erreur PIN',
-    pinInvalid:    'Le PIN doit être exactement 5 chiffres.',
+    passwordReset:   'Mot de passe réinitialisé',
+    pinReset:        'PIN réinitialisé',
+    resetSentToUser: 'Les nouveaux identifiants ont été envoyés à {{name}} par email et notification.',
+    pinError:        'Erreur PIN',
+    pinInvalid:      'Le PIN doit être exactement 5 chiffres.',
     // Comptes
     accountCreated:  'Compte créé',
     accountUpdated:  'Compte mis à jour',

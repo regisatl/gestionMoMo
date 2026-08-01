@@ -99,6 +99,7 @@ const en = {
     // Password / PIN
     passwordReset:       'Password reset',
     pinReset:            'PIN reset',
+    resetSentToUser:     'New credentials have been sent to {{name}} by email and notification.',
     pinError:            'PIN error',
     pinInvalid:          'PIN must be exactly 5 digits.',
     // Accounts
