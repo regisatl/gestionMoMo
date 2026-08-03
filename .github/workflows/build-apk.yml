@@ -1,0 +1,115 @@
+name: Build APK Android
+
+on:
+  # Déclenché manuellement depuis l'onglet Actions de GitHub
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Type de build'
+        required: true
+        default: 'debug'
+        type: choice
+        options:
+          - debug
+          - release
+
+  # Déclenché automatiquement à chaque push sur main ou develop
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'mobile/**'
+
+jobs:
+  build-android:
+    name: Build APK ${{ github.event.inputs.build_type || 'debug' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Récupérer le code ──────────────────────────────────────────────
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ── 2. Node.js ────────────────────────────────────────────────────────
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: mobile/package-lock.json
+
+      # ── 3. Java 17 (requis par React Native 0.74) ─────────────────────────
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # ── 4. Android SDK ────────────────────────────────────────────────────
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      # ── 5. Cache Gradle ───────────────────────────────────────────────────
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            mobile/android/.gradle
+          key: gradle-${{ hashFiles('mobile/android/**/*.gradle*', 'mobile/android/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: gradle-
+
+      # ── 6. Installer les dépendances npm ─────────────────────────────────
+      - name: Install npm dependencies
+        working-directory: mobile
+        run: npm install
+
+      # ── 7. Donner les droits d'exécution à Gradle wrapper ────────────────
+      - name: Make gradlew executable
+        working-directory: mobile/android
+        run: chmod +x gradlew
+
+      # ── 8. Build APK Debug ────────────────────────────────────────────────
+      - name: Build APK Debug
+        if: ${{ github.event.inputs.build_type != 'release' }}
+        working-directory: mobile/android
+        run: ./gradlew assembleDebug --no-daemon
+
+      # ── 9. Build APK Release ──────────────────────────────────────────────
+      - name: Build APK Release
+        if: ${{ github.event.inputs.build_type == 'release' }}
+        working-directory: mobile/android
+        run: ./gradlew assembleRelease --no-daemon
+
+      # ── 10. Uploader l'APK Debug comme artifact téléchargeable ───────────
+      - name: Upload APK Debug
+        if: ${{ github.event.inputs.build_type != 'release' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: GestionMoMo-Debug-${{ github.run_number }}
+          path: mobile/android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
+
+      # ── 11. Uploader l'APK Release comme artifact téléchargeable ─────────
+      - name: Upload APK Release
+        if: ${{ github.event.inputs.build_type == 'release' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: GestionMoMo-Release-${{ github.run_number }}
+          path: mobile/android/app/build/outputs/apk/release/app-release.apk
+          retention-days: 30
+
+      # ── 12. Afficher le résumé dans l'interface GitHub ───────────────────
+      - name: Build summary
+        run: |
+          echo "## APK Build terminé ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Paramètre | Valeur |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Type | ${{ github.event.inputs.build_type || 'debug' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build # | ${{ github.run_number }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "👇 Télécharge l'APK dans l'onglet **Artifacts** ci-dessous." >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,23 @@
+# Dépendances
+node_modules/
+
+# Build artifacts Android (générés — pas besoin dans git)
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+
+# Build artifacts iOS
+ios/build/
+ios/Pods/
+ios/DerivedData/
+
+# Metro bundler
+.metro-health-check*
+
+# APK distribués localement
+dist/
+
+# Divers
+*.log
+.DS_Store
