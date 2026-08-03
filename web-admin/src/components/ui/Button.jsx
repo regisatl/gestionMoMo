@@ -1,5 +1,42 @@
 import React from 'react';
 
+/* ── Spinner SVG inline — animé en CSS, aucune dépendance ── */
+const SPIN_KEYFRAMES = `
+@keyframes btn-spin {
+  from { transform: rotate(0deg);   }
+  to   { transform: rotate(360deg); }
+}
+`;
+
+const Spinner = ({ size = 15, color = 'currentColor' }) => (
+  <>
+    <style>{SPIN_KEYFRAMES}</style>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      style={{ animation: 'btn-spin 0.75s linear infinite', flexShrink: 0 }}
+      aria-hidden="true"
+    >
+      {/* Arc de fond */}
+      <circle
+        cx="12" cy="12" r="9"
+        stroke={color}
+        strokeOpacity="0.25"
+        strokeWidth="2.5"
+      />
+      {/* Arc animé */}
+      <path
+        d="M12 3 a9 9 0 0 1 9 9"
+        stroke={color}
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  </>
+);
+
 const styles = {
   base: {
     display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
@@ -9,15 +46,15 @@ const styles = {
     whiteSpace: 'nowrap', letterSpacing: '0.2px',
   },
   variants: {
-    primary:   { background: 'var(--color-primary)',       color: '#fff' },
-    secondary: { background: 'var(--surface)',             color: 'var(--text)',             border: '1px solid var(--border)' },
-    outline:   { background: 'transparent',                color: 'var(--color-primary)',    border: '1.5px solid var(--color-primary)' },
-    ghost:     { background: 'transparent',                color: 'var(--color-primary)' },
-    danger:    { background: 'var(--color-error)',         color: '#fff' },
-    success:   { background: 'var(--color-success)',       color: '#fff' },
+    primary:   { background: 'var(--color-primary)',   color: '#fff' },
+    secondary: { background: 'var(--surface)',         color: 'var(--text)',          border: '1px solid var(--border)' },
+    outline:   { background: 'transparent',            color: 'var(--color-primary)', border: '1.5px solid var(--color-primary)' },
+    ghost:     { background: 'transparent',            color: 'var(--color-primary)' },
+    danger:    { background: 'var(--color-error)',     color: '#fff' },
+    success:   { background: 'var(--color-success)',   color: '#fff' },
   },
   sizes: {
-    sm: { fontSize: '12px', padding: '6px 12px', height: '32px' },
+    sm: { fontSize: '12px', padding: '6px 12px',  height: '32px' },
     md: { fontSize: '14px', padding: '8px 16px',  height: '38px' },
     lg: { fontSize: '15px', padding: '10px 22px', height: '44px' },
   },
@@ -29,6 +66,9 @@ const Button = ({
   icon, type = 'button', style, ...props
 }) => {
   const isDisabled = disabled || loading;
+
+  /* Couleur du spinner selon la variante */
+  const spinnerColor = ['primary', 'danger', 'success'].includes(variant) ? '#fff' : 'var(--color-primary)';
 
   return (
     <button
@@ -49,7 +89,7 @@ const Button = ({
       onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
       {...props}
     >
-      {loading ? <span style={{ fontSize: '14px' }}>⏳</span> : icon}
+      {loading ? <Spinner size={parseInt(styles.sizes[size].fontSize) + 2} color={spinnerColor} /> : icon}
       {children}
     </button>
   );

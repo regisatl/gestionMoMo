@@ -105,7 +105,7 @@ exports.createUser = async (req, res, next) => {
     // Notification in-app de bienvenue
     await notificationService.create({
       userId: user._id,
-      title:  'Bienvenue sur GestionMoMo 🎉',
+      title:  'Bienvenue sur GestionMoMo',
       message: `Bonjour ${name} ! Votre compte a été créé avec succès. Numéro : ${phone}`,
       type: 'system',
       resourceType: 'user',

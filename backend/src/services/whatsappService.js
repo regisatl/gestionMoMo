@@ -83,7 +83,7 @@ const init = () => {
 
   // ── Authentifié ──
   client.on('authenticated', () => {
-    console.log('🔐 [WhatsApp] Session authentifiée — QR code non requis au prochain démarrage.');
+    console.log('[WhatsApp] Session authentifiee — QR code non requis au prochain demarrage.');
   });
 
   // ── Échec d'authentification ──
@@ -105,7 +105,7 @@ const init = () => {
   });
 
   client.initialize();
-  console.log('⏳ [WhatsApp] Initialisation en cours...');
+  console.log('[WhatsApp] Initialisation en cours...');
 };
 
 // ─── Envoi immédiat (interne) ─────────────────────────────────────────────────

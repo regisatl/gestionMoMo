@@ -14,6 +14,9 @@ const fr = {
     updatingPassword: 'Mise à jour du mot de passe...',
     default:       'Chargement...',
   },
+
+  // ─── Commun ───────────────────────────────────────────────────
+  common: {
     appName: 'GestionMoMo',
     loading: 'Chargement...',
     save: 'Enregistrer',

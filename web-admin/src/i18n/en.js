@@ -14,6 +14,9 @@ const en = {
     updatingPassword: 'Updating password...',
     default:          'Loading...',
   },
+
+  // ─── Common ───────────────────────────────────────────────────
+  common: {
     appName: 'GestionMoMo',
     loading: 'Loading...',
     save: 'Save',
