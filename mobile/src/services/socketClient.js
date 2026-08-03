@@ -4,7 +4,7 @@ import { io } from 'socket.io-client';
 // Pour un vrai téléphone, utilise l'IP locale du PC sur le même réseau Wi-Fi
 const SOCKET_URL = __DEV__
   ? 'http://10.38.9.90:5000'  // Téléphone physique → IP locale du PC
-  : 'https://api.gestionmomo.com';
+  : 'https://gestionmomo.onrender.com';
 
 let socket = null;
 const listeners = {};

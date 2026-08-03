@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // Pour un vrai téléphone, utilise l'IP locale du PC sur le même réseau Wi-Fi
 const BASE_URL = __DEV__
   ? 'http://10.38.9.90:5000/api'  // Téléphone physique → IP locale du PC
-  : 'https://api.gestionmomo.com/api';
+  : 'https://gestionmomo.onrender.com/api';
 
 const api = axios.create({
   baseURL: BASE_URL,

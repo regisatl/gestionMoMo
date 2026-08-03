@@ -5,7 +5,7 @@ services:
     region: frankfurt        # le plus proche de l'Afrique de l'Ouest disponible
     plan: free               # passe à "starter" si tu as besoin du disque WhatsApp
     rootDir: backend
-    buildCommand: npm install
+    buildCommand: PUPPETEER_SKIP_DOWNLOAD=true npm install
     startCommand: node src/server.js
     healthCheckPath: /health
 
@@ -75,6 +75,13 @@ services:
       # puis mets WHATSAPP_ENABLED=true et redémarre le service.
       - key: WHATSAPP_ENABLED
         value: "false"
+
+      # Puppeteer — ne pas télécharger Chrome pendant npm install
+      # whatsapp-web.js utilise puppeteer-core avec le Chrome système
+      - key: PUPPETEER_SKIP_DOWNLOAD
+        value: "true"
+      - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
+        value: "true"
 
       # Super Admin initial (créé automatiquement au 1er démarrage si absent)
       - key: SUPER_ADMIN_PHONE
