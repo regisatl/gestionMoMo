@@ -5,7 +5,7 @@ services:
     region: frankfurt        # le plus proche de l'Afrique de l'Ouest disponible
     plan: free               # passe à "starter" si tu as besoin du disque WhatsApp
     rootDir: backend
-    buildCommand: PUPPETEER_SKIP_DOWNLOAD=true npm install
+    buildCommand: npm install
     startCommand: node src/server.js
     healthCheckPath: /health
 
