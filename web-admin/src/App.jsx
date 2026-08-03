@@ -24,7 +24,7 @@ import AccountsPage from './pages/AccountsPage';
 // Route protégée
 const ProtectedRoute = ({ children, roles }) => {
   const { user, isLoading } = useAuth();
-  if (isLoading) return <Loader message="Vérification de la session..." overlay />;
+  if (isLoading) return <Loader message="loader.session" overlay />;
   if (!user) return <Navigate to="/login" replace />;
   if (roles && !roles.includes(user.role)) return <Navigate to="/" replace />;
   return children;

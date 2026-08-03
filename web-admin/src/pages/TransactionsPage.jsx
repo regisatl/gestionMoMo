@@ -57,7 +57,7 @@ const TransactionsPage = () => {
   if (loading && transactions.length === 0) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-        <Loader message="Chargement des transactions..." />
+        <Loader message="loader.transactions" />
       </div>
     );
   }

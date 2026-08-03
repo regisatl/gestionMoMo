@@ -3,6 +3,7 @@
  * Animation "réseau MoMo" entièrement CSS, sans CSS custom properties dans les keyframes.
  */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const KEYFRAMES = `
 @keyframes gm-pulse {
@@ -63,7 +64,15 @@ const WAVES = [
   { delay: '1.3s' },
 ];
 
-const Loader = ({ message, overlay = false }) => (
+const Loader = ({ message, overlay = false }) => {
+  const { t } = useTranslation();
+  // Si message commence par "loader." c'est une clé i18n → on traduit.
+  // Sinon on affiche tel quel. Si absent → loader.default.
+  const label = message
+    ? (message.startsWith('loader.') ? t(message) : message)
+    : t('loader.default');
+
+  return (
   <>
     <style>{KEYFRAMES}</style>
     <div style={{
@@ -180,14 +189,14 @@ const Loader = ({ message, overlay = false }) => (
           GestionMoMo
         </span>
 
-        {message && (
+        {label && (
           <span style={{
             fontFamily: 'Manrope, var(--font, sans-serif)',
             fontSize: '12px',
             color: 'var(--text-secondary, #6B7280)',
             animation: 'gm-blink 1.8s ease-in-out infinite',
           }}>
-            {message}
+            {label}
           </span>
         )}
 
@@ -205,6 +214,7 @@ const Loader = ({ message, overlay = false }) => (
       </div>
     </div>
   </>
-);
+  );
+};
 
 export default Loader;

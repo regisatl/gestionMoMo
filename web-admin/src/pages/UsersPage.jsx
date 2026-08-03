@@ -245,7 +245,7 @@ const UsersPage = () => {
   if (loading && users.length === 0) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-        <Loader message="Chargement des utilisateurs..." />
+        <Loader message="loader.users" />
       </div>
     );
   }

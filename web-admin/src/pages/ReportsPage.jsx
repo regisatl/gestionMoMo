@@ -126,7 +126,7 @@ const ReportsPage = () => {
   if (loading && chartData.length === 0) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-        <Loader message="Génération des rapports..." />
+        <Loader message="loader.reports" />
       </div>
     );
   }

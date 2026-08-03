@@ -159,7 +159,7 @@ const DashboardPage = () => {
   if (loading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-        <Loader message="Chargement du tableau de bord..." />
+        <Loader message="loader.dashboard" />
       </div>
     );
   }

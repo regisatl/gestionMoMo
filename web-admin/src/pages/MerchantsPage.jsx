@@ -254,7 +254,7 @@ const MerchantsPage = () => {
   if (loading && merchants.length === 0) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-        <Loader message="Chargement des marchands..." />
+        <Loader message="loader.merchants" />
       </div>
     );
   }

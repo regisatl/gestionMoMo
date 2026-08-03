@@ -175,7 +175,10 @@ const SettingsPage = () => {
     <div style={{ maxWidth: '580px', margin: '0 auto', width: '100%', position: 'relative' }}>
       {/* Overlay loader pendant sauvegarde */}
       {(profileLoading || pwdLoading) && (
-        <Loader message={profileLoading ? 'Enregistrement...' : 'Mise à jour du mot de passe...'} overlay />
+        <Loader
+          message={profileLoading ? 'loader.saving' : 'loader.updatingPassword'}
+          overlay
+        />
       )}
       <Card>
         <TabBar active={tab} onChange={setTab} t={t} />

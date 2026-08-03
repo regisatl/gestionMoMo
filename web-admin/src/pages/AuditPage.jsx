@@ -47,7 +47,7 @@ const AuditPage = () => {
   if (loading && logs.length === 0) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-        <Loader message="Chargement des journaux d'audit..." />
+        <Loader message="loader.audit" />
       </div>
     );
   }

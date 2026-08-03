@@ -12,6 +12,7 @@ import React, { useEffect, useRef } from 'react';
 import {
   View, Text, Animated, Easing, StyleSheet, Platform,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 
 // ─── Constantes ──────────────────────────────────────────────────────────────
@@ -208,14 +209,19 @@ const LoadingDots = ({ color }) => {
 // ─── Composant principal ──────────────────────────────────────────────────────
 
 /**
- * Loader — GestionMoMo
- *
- * @param {string}  [message]   Texte affiché sous l'animation
- * @param {boolean} [fullscreen] Si true, prend tout l'écran (défaut: true)
- * @param {object}  [style]     Styles supplémentaires pour le conteneur
+ * @param {string}  [message]    Clé i18n loader.xxx OU texte libre. Si absent → loader.default.
+ * @param {boolean} [fullscreen] Prend tout l'écran si true (défaut: true)
+ * @param {object}  [style]      Styles supplémentaires
  */
 const Loader = ({ message, fullscreen = true, style }) => {
-  const theme = useTheme();
+  const { t } = useTranslation();
+  const theme  = useTheme();
+
+  // Résolution du message : clé i18n ou texte libre
+  const label = message
+    ? (message.startsWith('loader.') ? t(message) : message)
+    : t('loader.default');
+
   const primary = theme.colors?.primary || '#0A66C2';
   const accent  = '#60B4FF';
 
@@ -247,9 +253,9 @@ const Loader = ({ message, fullscreen = true, style }) => {
         <Text style={[styles.title, { color: theme.text, fontFamily: theme.typography?.fontFamily?.extraBold }]}>
           GestionMoMo
         </Text>
-        {message ? (
+        {label ? (
           <Text style={[styles.message, { color: theme.textSecondary, fontFamily: theme.typography?.fontFamily?.regular }]}>
-            {message}
+            {label}
           </Text>
         ) : null}
         <LoadingDots color={primary} />

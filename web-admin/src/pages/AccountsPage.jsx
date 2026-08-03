@@ -236,7 +236,7 @@ const AccountsPage = () => {
   if (loading && accounts.length === 0) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-        <Loader message="Chargement des comptes MoMo..." />
+        <Loader message="loader.accounts" />
       </div>
     );
   }

@@ -1,7 +1,20 @@
 ﻿const fr = {
   // ─── Commun ───────────────────────────────────────────────────
-  common: {
-    appName: 'GestionMoMo',
+  // ─── Loader ───────────────────────────────────────────────────
+  loader: {
+    session:       'Vérification de la session...',
+    dashboard:     'Chargement du tableau de bord...',
+    transactions:  'Chargement des transactions...',
+    accounts:      'Chargement des comptes MoMo...',
+    reports:       'Génération des rapports...',
+    merchants:     'Chargement des marchands...',
+    users:         'Chargement des utilisateurs...',
+    audit:         'Chargement des journaux d\'audit...',
+    notifications: 'Chargement des notifications...',
+    saving:        'Enregistrement...',
+    updatingPassword: 'Mise à jour du mot de passe...',
+    default:       'Chargement...',
+  },
     loading: 'Chargement...',
     save: 'Enregistrer',
     cancel: 'Annuler',

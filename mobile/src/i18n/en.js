@@ -1,7 +1,20 @@
 ﻿const en = {
   // ─── Common ───────────────────────────────────────────────────
-  common: {
-    appName: 'GestionMoMo',
+  // ─── Loader ───────────────────────────────────────────────────
+  loader: {
+    session:          'Verifying session...',
+    dashboard:        'Loading dashboard...',
+    transactions:     'Loading transactions...',
+    accounts:         'Loading MoMo accounts...',
+    reports:          'Generating reports...',
+    merchants:        'Loading merchants...',
+    users:            'Loading users...',
+    audit:            'Loading audit logs...',
+    notifications:    'Loading notifications...',
+    saving:           'Saving...',
+    updatingPassword: 'Updating password...',
+    default:          'Loading...',
+  },
     loading: 'Loading...',
     save: 'Save',
     cancel: 'Cancel',
