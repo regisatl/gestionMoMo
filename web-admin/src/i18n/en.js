@@ -130,6 +130,8 @@ const en = {
     // Auth
     logoutSuccess:       'Signed out',
     logoutSuccessMsg:    'See you next time.',
+    loginSuccess:        'Welcome, {{name}}!',
+    loginSuccessMsg:     'You are now signed in.',
   },
 
   // ─── Sidebar / Navigation ─────────────────────────────────────

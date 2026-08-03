@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Menu, Sun, Moon, Bell, Languages } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { useLanguage } from '../../context/LanguageContext';
 import Tooltip from '../ui/Tooltip';
@@ -10,6 +11,7 @@ import Tooltip from '../ui/Tooltip';
 const Header = ({ title, sidebarCollapsed, onToggleSidebar }) => {
   const { t } = useTranslation();
   const { isDark, toggleTheme } = useTheme();
+  const { user } = useAuth();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const { language, changeLanguage, supportedLanguages } = useLanguage();
   const [showNotifPanel, setShowNotifPanel] = useState(false);
@@ -17,6 +19,8 @@ const Header = ({ title, sidebarCollapsed, onToggleSidebar }) => {
   const notifRef = useRef(null);
   const langRef = useRef(null);
   const navigate = useNavigate();
+
+  const roleLabel = t(`settings.roles.${user?.role}`, { defaultValue: user?.role });
 
   useEffect(() => {
     const handler = (e) => {
@@ -230,6 +234,42 @@ const Header = ({ title, sidebarCollapsed, onToggleSidebar }) => {
             </div>
           )}
         </div>
+        {/* Avatar profil — cliquable vers /settings */}
+        <Tooltip content={roleLabel} placement="bottom">
+          <button
+            onClick={() => navigate('/settings')}
+            aria-label={t('nav.settings')}
+            style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center',
+              gap: '2px', background: 'none', border: 'none',
+              cursor: 'pointer', padding: '2px 4px', borderRadius: '10px',
+              transition: 'background 0.15s',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-primary-alpha)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'none'; }}
+          >
+            {/* Cercle initial */}
+            <div style={{
+              width: '34px', height: '34px', borderRadius: '50%',
+              background: 'var(--color-primary-alpha)',
+              border: '2px solid var(--color-primary)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: 'var(--font)', fontWeight: 700, fontSize: '14px',
+              color: 'var(--color-primary)', flexShrink: 0,
+            }}>
+              {user?.name?.charAt(0)?.toUpperCase() || '?'}
+            </div>
+            {/* Label rôle */}
+            <span style={{
+              fontFamily: 'var(--font)', fontWeight: 600, fontSize: '9px',
+              color: 'var(--color-primary)', letterSpacing: '0.3px',
+              textTransform: 'uppercase', lineHeight: 1, whiteSpace: 'nowrap',
+            }}>
+              {roleLabel}
+            </span>
+          </button>
+        </Tooltip>
+
       </div>
     </header>
   );

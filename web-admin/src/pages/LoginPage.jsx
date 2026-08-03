@@ -75,7 +75,7 @@ const LoginPage = () => {
     setError('');
     try {
       const user = await login(phone.trim(), password);
-      navigate(user.role === 'client' ? '/' : '/');
+      navigate('/', { state: { justLoggedIn: true } });
     } catch (err) {
       setError(err.response?.data?.error || t('auth.invalidCredentials'));
     } finally {

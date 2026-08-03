@@ -107,19 +107,47 @@ const HomeScreen = ({ navigation }) => {
                 {user?.name}
               </Text>
             </View>
-            <TouchableOpacity
-              onPress={() => navigation.navigate('Notifications')}
-              style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}
-            >
-              <Icon name="bell-outline" size={22} color="#FFF" />
-              {unreadCount > 0 && (
-                <View style={{ position: 'absolute', top: 6, right: 6, width: 14, height: 14, borderRadius: 7, backgroundColor: theme.colors.error, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: theme.colors.primary }}>
-                  <Text style={{ fontSize: 8, color: '#FFF', fontFamily: theme.typography.fontFamily.bold }}>
-                    {unreadCount > 9 ? '9+' : unreadCount}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              {/* Avatar profil — cliquable vers l'onglet Profile */}
+              <TouchableOpacity
+                onPress={() => navigation.navigate('Profile')}
+                activeOpacity={0.75}
+                style={{ alignItems: 'center', gap: 3 }}
+              >
+                <View style={{
+                  width: 40, height: 40, borderRadius: 20,
+                  backgroundColor: 'rgba(255,255,255,0.25)',
+                  borderWidth: 2, borderColor: 'rgba(255,255,255,0.6)',
+                  alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <Text style={{ fontFamily: theme.typography.fontFamily.extraBold, fontSize: 16, color: '#FFF' }}>
+                    {user?.name?.charAt(0)?.toUpperCase() || '?'}
                   </Text>
                 </View>
-              )}
-            </TouchableOpacity>
+                <Text style={{
+                  fontFamily: theme.typography.fontFamily.semiBold,
+                  fontSize: 9, color: 'rgba(255,255,255,0.85)',
+                  textTransform: 'uppercase', letterSpacing: 0.4,
+                }}>
+                  {t(`profile.roles.${user?.role}`, { defaultValue: user?.role })}
+                </Text>
+              </TouchableOpacity>
+
+              {/* Cloche notifications */}
+              <TouchableOpacity
+                onPress={() => navigation.navigate('Notifications')}
+                style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <Icon name="bell-outline" size={22} color="#FFF" />
+                {unreadCount > 0 && (
+                  <View style={{ position: 'absolute', top: 6, right: 6, width: 14, height: 14, borderRadius: 7, backgroundColor: theme.colors.error, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: theme.colors.primary }}>
+                    <Text style={{ fontSize: 8, color: '#FFF', fontFamily: theme.typography.fontFamily.bold }}>
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Balance */}

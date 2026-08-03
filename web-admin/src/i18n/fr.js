@@ -130,6 +130,8 @@ const fr = {
     // Auth
     logoutSuccess:       'Déconnexion réussie',
     logoutSuccessMsg:    'À bientôt.',
+    loginSuccess:        'Bienvenue, {{name}} !',
+    loginSuccessMsg:     'Vous êtes maintenant connecté.',
   },
 
   // ─── Sidebar / Navigation ─────────────────────────────────────

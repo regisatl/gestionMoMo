@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../context/AuthContext';
+import { useNotifications } from '../../context/NotificationContext';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import ToastContainer from '../ui/Toast';
@@ -22,6 +24,25 @@ const DashboardLayout = ({ children }) => {
   const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const { user } = useAuth();
+  const { addToast } = useNotifications();
+
+  // Toast de bienvenue affiché une seule fois après la connexion
+  // La ref évite le double-déclenchement causé par React.StrictMode
+  const welcomeToastFired = React.useRef(false);
+  useEffect(() => {
+    if (location.state?.justLoggedIn && !welcomeToastFired.current) {
+      welcomeToastFired.current = true;
+      const firstName = user?.name?.split(' ')[0] || user?.name || '';
+      addToast({
+        type: 'success',
+        title: t('toast.loginSuccess', { name: firstName }),
+        message: t('toast.loginSuccessMsg'),
+      });
+      window.history.replaceState({}, '');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const titleKey = PAGE_TITLE_KEYS[location.pathname] || 'common.appName';
   const title = t(titleKey);
