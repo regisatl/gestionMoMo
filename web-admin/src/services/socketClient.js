@@ -1,11 +1,15 @@
 import { io } from 'socket.io-client';
 
+// En développement : connexion relative via proxy Vite
+// En production : connexion directe vers le backend hébergé
+const SOCKET_URL = import.meta.env.VITE_API_URL || '/';
+
 let socket = null;
 const listeners = {};
 
 export const connectSocket = (token) => {
   if (socket?.connected) return;
-  socket = io('/', {
+  socket = io(SOCKET_URL, {
     auth: { token },
     transports: ['websocket'],
     reconnection: true,

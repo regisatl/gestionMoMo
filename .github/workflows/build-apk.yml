@@ -20,6 +20,7 @@ on:
       - develop
     paths:
       - 'mobile/**'
+      - '.github/workflows/build-apk.yml'
 
 jobs:
   build-android:
