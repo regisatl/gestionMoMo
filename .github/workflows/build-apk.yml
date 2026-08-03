@@ -36,8 +36,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: mobile/package-lock.json
 
       # ── 3. Java 17 (requis par React Native 0.74) ─────────────────────────
       - name: Setup Java 17
@@ -75,13 +73,13 @@ jobs:
       - name: Build APK Debug
         if: ${{ github.event.inputs.build_type != 'release' }}
         working-directory: mobile/android
-        run: ./gradlew assembleDebug --no-daemon
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
 
       # ── 9. Build APK Release ──────────────────────────────────────────────
       - name: Build APK Release
         if: ${{ github.event.inputs.build_type == 'release' }}
         working-directory: mobile/android
-        run: ./gradlew assembleRelease --no-daemon
+        run: ./gradlew assembleRelease --no-daemon --stacktrace
 
       # ── 10. Uploader l'APK Debug comme artifact téléchargeable ───────────
       - name: Upload APK Debug
