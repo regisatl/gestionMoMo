@@ -22,11 +22,27 @@ const app = express();
 app.use(helmet());
 
 // CORS
-app.use(cors({
-  origin: [
+// En développement : CLIENT_URL et MOBILE_URL suffisent.
+// En production : CORS_ORIGINS peut contenir plusieurs URLs séparées par des virgules
+// ex: https://gestionmomo.onrender.com,https://app.gestionmomo.com
+const getAllowedOrigins = () => {
+  if (process.env.CORS_ORIGINS) {
+    return process.env.CORS_ORIGINS.split(',').map((o) => o.trim());
+  }
+  return [
     process.env.CLIENT_URL || 'http://localhost:3000',
     process.env.MOBILE_URL || 'exp://localhost:8081',
-  ],
+  ];
+};
+
+app.use(cors({
+  origin: (origin, callback) => {
+    const allowed = getAllowedOrigins();
+    // Autoriser les requêtes sans origin (ex: apps mobiles natives, Postman)
+    if (!origin) return callback(null, true);
+    if (allowed.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS bloqué pour l'origine : ${origin}`));
+  },
   credentials: true,
 }));
 
