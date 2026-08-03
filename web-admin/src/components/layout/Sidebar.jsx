@@ -7,27 +7,25 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
-import { useNotifications } from '../../context/NotificationContext';
 import styles from './Sidebar.module.css';
 import Tooltip from '../ui/Tooltip';
 
 const Sidebar = ({ collapsed, onToggle }) => {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
-  const { addToast } = useNotifications();
   const navigate = useNavigate();
   const [showConfirm, setShowConfirm] = React.useState(false);
 
   const NAV_ITEMS = [
-    { path: '/',              labelKey: 'nav.dashboard',     Icon: LayoutDashboard, roles: ['super_admin', 'merchant'] },
-    { path: '/transactions',  labelKey: 'nav.transactions',  Icon: ArrowLeftRight,  roles: ['super_admin', 'merchant'] },
+    { path: '/',              labelKey: 'nav.dashboard',     Icon: LayoutDashboard, roles: ['super_admin', 'merchant', 'client'] },
+    { path: '/transactions',  labelKey: 'nav.transactions',  Icon: ArrowLeftRight,  roles: ['super_admin', 'merchant', 'client'] },
     { path: '/accounts',      labelKey: 'nav.accounts',      Icon: CreditCard,      roles: ['super_admin', 'merchant'] },
     { path: '/reports',       labelKey: 'nav.reports',       Icon: BarChart2,       roles: ['super_admin', 'merchant'] },
     { path: '/merchants',     labelKey: 'nav.merchants',     Icon: Store,           roles: ['super_admin'] },
     { path: '/users',         labelKey: 'nav.users',         Icon: Users,           roles: ['super_admin'] },
-    { path: '/notifications', labelKey: 'nav.notifications', Icon: Bell,            roles: ['super_admin', 'merchant'] },
+    { path: '/notifications', labelKey: 'nav.notifications', Icon: Bell,            roles: ['super_admin', 'merchant', 'client'] },
     { path: '/audit',         labelKey: 'nav.audit',         Icon: ClipboardList,   roles: ['super_admin'] },
-    { path: '/settings',      labelKey: 'nav.settings',      Icon: Settings,        roles: ['super_admin', 'merchant'] },
+    { path: '/settings',      labelKey: 'nav.settings',      Icon: Settings,        roles: ['super_admin', 'merchant', 'client'] },
   ];
 
   const visibleItems = NAV_ITEMS.filter((item) => item.roles.includes(user?.role));
@@ -35,8 +33,7 @@ const Sidebar = ({ collapsed, onToggle }) => {
   const handleLogoutConfirmed = async () => {
     setShowConfirm(false);
     await logout();
-    addToast({ type: 'success', title: t('toast.logoutSuccess'), message: t('toast.logoutSuccessMsg') });
-    navigate('/login');
+    navigate('/login', { state: { loggedOut: true } });
   };
 
   return (

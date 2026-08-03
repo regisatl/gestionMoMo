@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Smartphone, Lock, ArrowRight, TrendingUp, Shield, Zap } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
@@ -50,10 +50,11 @@ const StatPill = ({ icon: Icon, label, value, delay }) => (
 
 /* ─── Page ───────────────────────────────────────────────────────── */
 const LoginPage = () => {
-  const { t }        = useTranslation();
+  const { t } = useTranslation();
   const { isDark }   = useTheme();
   const navigate     = useNavigate();
   const { login }    = useAuth();
+  const { state }    = useLocation();
 
   const [phone, setPhone]       = useState('');
   const [password, setPassword] = useState('');
@@ -345,6 +346,29 @@ const LoginPage = () => {
                 {t('auth.subtitle')}
               </p>
             </div>
+
+            {/* Bandeau de déconnexion réussie */}
+            {state?.loggedOut && (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: '10px',
+                background: isDark ? 'rgba(22,163,74,0.12)' : '#F0FDF4',
+                border: `1px solid ${isDark ? 'rgba(22,163,74,0.4)' : '#BBF7D0'}`,
+                borderRadius: '12px', padding: '12px 16px', marginBottom: '20px',
+                animation: 'slideUpFade 0.3s ease both',
+              }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#4ade80' : '#16a34a'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/>
+                </svg>
+                <div>
+                  <div style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 600, fontSize: '13px', color: isDark ? '#4ade80' : '#15803d' }}>
+                    {t('toast.logoutSuccess')}
+                  </div>
+                  <div style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 400, fontSize: '12px', color: isDark ? '#86efac' : '#16a34a', marginTop: '1px' }}>
+                    {t('toast.logoutSuccessMsg')}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Message d'erreur */}
             {error && (
