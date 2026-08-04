@@ -16,9 +16,11 @@ import { validateBeninPhone } from '../../utils/validation';
 import api from '../../services/api';
 
 const TYPES = [
-  { key: 'deposit',    icon: 'arrow-bottom-left',  color: '#16A34A' },
-  { key: 'withdrawal', icon: 'arrow-top-right',    color: '#DC2626' },
-  { key: 'transfer',   icon: 'swap-horizontal',    color: '#0A66C2' },
+  { key: 'deposit',     icon: 'arrow-bottom-left',    color: '#16A34A' },
+  { key: 'withdrawal',  icon: 'arrow-top-right',      color: '#DC2626' },
+  { key: 'transfer',    icon: 'swap-horizontal',      color: '#0A66C2' },
+  { key: 'credit_sale', icon: 'cellphone-wireless',   color: '#D97706' },
+  { key: 'data_sale',   icon: 'wifi',                 color: '#7C3AED' },
 ];
 
 const NewTransactionScreen = ({ navigation, route }) => {
@@ -128,19 +130,32 @@ const NewTransactionScreen = ({ navigation, route }) => {
           <Text style={{ fontFamily: theme.typography.fontFamily.semiBold, fontSize: 13, color: theme.textSecondary, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>
             {t('transactions.transactionType')}
           </Text>
-          <View style={{ flexDirection: 'row', gap: 10, marginBottom: 24 }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 24 }}>
             {TYPES.map((typeItem) => (
               <TouchableOpacity
                 key={typeItem.key}
                 onPress={() => setType(typeItem.key)}
-                style={{ flex: 1, alignItems: 'center', paddingVertical: 14, borderRadius: 14, borderWidth: 2, borderColor: type === typeItem.key ? typeItem.color : theme.border, backgroundColor: type === typeItem.key ? `${typeItem.color}10` : theme.backgroundCard }}
+                style={{
+                  width: '47%',
+                  alignItems: 'center',
+                  paddingVertical: 14,
+                  borderRadius: 14,
+                  borderWidth: 2,
+                  borderColor: type === typeItem.key ? typeItem.color : theme.border,
+                  backgroundColor: type === typeItem.key ? `${typeItem.color}10` : theme.backgroundCard,
+                }}
               >
                 <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: `${typeItem.color}18`, alignItems: 'center', justifyContent: 'center', marginBottom: 6 }}>
                   <Icon name={typeItem.icon} size={20} color={typeItem.color} />
                 </View>
-                <Text style={{ fontFamily: theme.typography.fontFamily.semiBold, fontSize: 12, color: type === typeItem.key ? typeItem.color : theme.textSecondary }}>
+                <Text style={{ fontFamily: theme.typography.fontFamily.semiBold, fontSize: 12, color: type === typeItem.key ? typeItem.color : theme.textSecondary, textAlign: 'center' }}>
                   {t(`transactions.types.${typeItem.key}`)}
                 </Text>
+                {type === typeItem.key && (
+                  <Text style={{ fontFamily: theme.typography.fontFamily.regular, fontSize: 10, color: typeItem.color, textAlign: 'center', marginTop: 2, paddingHorizontal: 4 }}>
+                    {t(`transactions.typeDescriptions.${typeItem.key}`)}
+                  </Text>
+                )}
               </TouchableOpacity>
             ))}
           </View>

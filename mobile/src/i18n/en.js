@@ -102,6 +102,7 @@
     reports: 'Reports',
     notifications: 'Alerts',
     profile: 'Profile',
+    admin: 'Admin',
   },
 
   // ─── Home ─────────────────────────────────────────────────────
@@ -158,16 +159,20 @@
     newTransactionButton: 'New transaction',
     // Types
     types: {
-      deposit: 'Deposit',
-      withdrawal: 'Withdrawal',
-      transfer: 'Transfer',
-      payment: 'Payment',
-      refund: 'Refund',
+      deposit:     'Deposit',
+      withdrawal:  'Withdrawal',
+      transfer:    'Transfer',
+      payment:     'Payment',
+      refund:      'Refund',
+      credit_sale: 'Credit sale',
+      data_sale:   'Data plan sale',
     },
     typeDescriptions: {
-      deposit: 'Receive money',
-      withdrawal: 'Withdraw money',
-      transfer: 'Send to another account',
+      deposit:     'Receive money',
+      withdrawal:  'Withdraw money',
+      transfer:    'Send to another account',
+      credit_sale: 'Sell phone credit',
+      data_sale:   'Sell data / internet plan',
     },
     // Filters
     filters: {
@@ -234,7 +239,7 @@
     },
     languageNames: {
       fr: 'Français',
-
+      en: 'English',
     },
   },
 

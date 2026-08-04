@@ -100,6 +100,7 @@
     reports: 'Rapports',
     notifications: 'Alertes',
     profile: 'Profil',
+    admin: 'Admin',
   },
 
   // ─── Accueil ──────────────────────────────────────────────────
@@ -156,16 +157,20 @@
     newTransactionButton: 'Nouvelle transaction',
     // Types
     types: {
-      deposit: 'Dépôt',
-      withdrawal: 'Retrait',
-      transfer: 'Transfert',
-      payment: 'Paiement',
-      refund: 'Remboursement',
+      deposit:     'Dépôt',
+      withdrawal:  'Retrait',
+      transfer:    'Transfert',
+      payment:     'Paiement',
+      refund:      'Remboursement',
+      credit_sale: 'Vente crédit',
+      data_sale:   'Vente forfait',
     },
     typeDescriptions: {
-      deposit: "Recevoir de l'argent",
-      withdrawal: "Retirer de l'argent",
-      transfer: 'Envoyer à un autre compte',
+      deposit:     "Recevoir de l'argent",
+      withdrawal:  "Retirer de l'argent",
+      transfer:    'Envoyer à un autre compte',
+      credit_sale: 'Vente de crédit téléphonique',
+      data_sale:   'Vente de forfait data / internet',
     },
     // Filtres
     filters: {
@@ -232,7 +237,7 @@
     },
     languageNames: {
       fr: 'Français',
-
+      en: 'English',
     },
   },
 

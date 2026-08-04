@@ -123,7 +123,7 @@ const MainNavigator = () => {
           name="Admin"
           component={AdminNavigator}
           options={{
-            tabBarLabel: 'Admin',
+            tabBarLabel: t('nav.admin'),
             tabBarIcon: ({ color, size }) => (
               <Icon name="shield-crown-outline" size={size ?? 24} color={color} />
             ),

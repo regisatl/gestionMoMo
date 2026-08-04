@@ -16,11 +16,13 @@ import useToast from '../../hooks/useToast';
 import api from '../../services/api';
 
 const TYPE_META = {
-  deposit:    { icon: 'arrow-bottom-left',   color: '#16A34A' },
-  withdrawal: { icon: 'arrow-top-right',     color: '#DC2626' },
-  transfer:   { icon: 'swap-horizontal',     color: '#0A66C2' },
-  payment:    { icon: 'credit-card-outline', color: '#7C3AED' },
-  refund:     { icon: 'refresh',             color: '#D97706' },
+  deposit:     { icon: 'arrow-bottom-left',   color: '#16A34A' },
+  withdrawal:  { icon: 'arrow-top-right',     color: '#DC2626' },
+  transfer:    { icon: 'swap-horizontal',     color: '#0A66C2' },
+  payment:     { icon: 'credit-card-outline', color: '#7C3AED' },
+  refund:      { icon: 'refresh',             color: '#D97706' },
+  credit_sale: { icon: 'cellphone-wireless',  color: '#D97706' },
+  data_sale:   { icon: 'wifi',                color: '#7C3AED' },
 };
 
 const QuickAction = ({ iconName, label, onPress, theme }) => (
@@ -166,11 +168,43 @@ const HomeScreen = ({ navigation }) => {
           )}
 
           {/* Quick actions */}
-          <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-            <QuickAction iconName="plus-circle-outline"          label={t('home.addMoney')}  onPress={() => navigation.navigate('Transactions', { screen: 'NewTransaction', params: { type: 'deposit' } })}    theme={theme} />
-            <QuickAction iconName="send-outline"                 label={t('home.sendMoney')} onPress={() => navigation.navigate('Transactions', { screen: 'NewTransaction', params: { type: 'transfer' } })}   theme={theme} />
-            <QuickAction iconName="arrow-up-circle-outline"      label={t('home.withdraw')}  onPress={() => navigation.navigate('Transactions', { screen: 'NewTransaction', params: { type: 'withdrawal' } })} theme={theme} />
-            <QuickAction iconName="dots-horizontal-circle-outline" label={t('common.more')} onPress={() => navigation.navigate('Reports')} theme={theme} />
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around', rowGap: 16 }}>
+            <QuickAction
+              iconName="plus-circle-outline"
+              label={t('home.addMoney')}
+              onPress={() => navigation.navigate('Transactions', { screen: 'NewTransaction', params: { type: 'deposit' } })}
+              theme={theme}
+            />
+            <QuickAction
+              iconName="arrow-up-circle-outline"
+              label={t('home.withdraw')}
+              onPress={() => navigation.navigate('Transactions', { screen: 'NewTransaction', params: { type: 'withdrawal' } })}
+              theme={theme}
+            />
+            <QuickAction
+              iconName="send-outline"
+              label={t('home.sendMoney')}
+              onPress={() => navigation.navigate('Transactions', { screen: 'NewTransaction', params: { type: 'transfer' } })}
+              theme={theme}
+            />
+            <QuickAction
+              iconName="cellphone-wireless"
+              label={t('transactions.types.credit_sale')}
+              onPress={() => navigation.navigate('Transactions', { screen: 'NewTransaction', params: { type: 'credit_sale' } })}
+              theme={theme}
+            />
+            <QuickAction
+              iconName="wifi"
+              label={t('transactions.types.data_sale')}
+              onPress={() => navigation.navigate('Transactions', { screen: 'NewTransaction', params: { type: 'data_sale' } })}
+              theme={theme}
+            />
+            <QuickAction
+              iconName="chart-bar"
+              label={t('nav.reports')}
+              onPress={() => navigation.navigate('Reports')}
+              theme={theme}
+            />
           </View>
         </View>
 
