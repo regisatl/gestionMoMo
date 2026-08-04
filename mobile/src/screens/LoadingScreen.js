@@ -6,7 +6,7 @@ const LoadingScreen = () => {
   return (
     <View style={{ flex: 1 }}>
       <Loader 
-        message="loader.session"
+        message="common.loader.session"
         fullscreen={true}
       />
     </View>

@@ -61,6 +61,8 @@
     passwordMinLength: 'Minimum 8 characters',
     pinRequired: 'Enter your 5-digit PIN',
     loginError: 'Connection error. Please try again.',
+    loginFailed: 'Login failed',
+    loginSuccess: 'Login successful',
     verifying: 'Verifying...',
     forgotPasswordTitle: 'Forgot PIN',
     resetPasswordButton: 'Reset',

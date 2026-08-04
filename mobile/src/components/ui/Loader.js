@@ -572,14 +572,8 @@ const Loader = ({
 
 
   const label = message
-
-    ? (
-        message.startsWith('loader.')
-        ? t(message)
-        : message
-      )
-
-    : t('loader.default');
+    ? t(message, { defaultValue: message })
+    : t('common.loader.default');
 
 
 

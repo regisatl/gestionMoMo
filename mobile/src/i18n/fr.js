@@ -1,21 +1,20 @@
 ﻿const fr = {
   // ─── Commun ───────────────────────────────────────────────────
   common: {
-  // ─── Loader ───────────────────────────────────────────────────
-  loader: {
-    session:       'Vérification de la session...',
-    dashboard:     'Chargement du tableau de bord...',
-    transactions:  'Chargement des transactions...',
-    accounts:      'Chargement des comptes MoMo...',
-    reports:       'Génération des rapports...',
-    merchants:     'Chargement des marchands...',
-    users:         'Chargement des utilisateurs...',
-    audit:         'Chargement des journaux d\'audit...',
-    notifications: 'Chargement des notifications...',
-    saving:        'Enregistrement...',
-    updatingPassword: 'Mise à jour du mot de passe...',
-    default:       'Chargement...',
-  },
+    loader: {
+      session:          'Vérification de la session...',
+      dashboard:        'Chargement du tableau de bord...',
+      transactions:     'Chargement des transactions...',
+      accounts:         'Chargement des comptes MoMo...',
+      reports:          'Génération des rapports...',
+      merchants:        'Chargement des marchands...',
+      users:            'Chargement des utilisateurs...',
+      audit:            'Chargement des journaux d\'audit...',
+      notifications:    'Chargement des notifications...',
+      saving:           'Enregistrement...',
+      updatingPassword: 'Mise à jour du mot de passe...',
+      default:          'Chargement...',
+    },
     loading: 'Chargement...',
     save: 'Enregistrer',
     cancel: 'Annuler',
@@ -63,11 +62,10 @@
     passwordMinLength: 'Minimum 8 caractères',
     pinRequired: 'Entrez votre code PIN à 5 chiffres',
     loginError: 'Erreur de connexion. Réessayez.',
-    verifying: 'Vérification en cours...',
+    loginFailed: 'Échec de la connexion',
+    loginSuccess: 'Connexion réussie',
     forgotPasswordTitle: 'PIN oublié',
     resetPasswordButton: 'Réinitialiser',
-    welcomeTitle: 'Bon retour !',
-    pinSubtitle: 'Saisissez votre code PIN à 5 chiffres',
   },
 
   // ─── Changement de PIN (profil) ───────────────────────────────
