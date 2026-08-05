@@ -1,5 +1,7 @@
 const Account = require('../models/Account');
 const { auditAction } = require('../middleware/auditMiddleware');
+const momoService = require('../services/momoService');
+const logger = require('../config/logger');
 
 // GET /api/accounts/me — compte du marchand connecté
 exports.getMyAccount = async (req, res, next) => {
@@ -85,14 +87,25 @@ exports.syncBalance = async (req, res, next) => {
     const account = await Account.findById(req.params.id).select('+momoApiKey');
     if (!account) return res.status(404).json({ error: 'Compte introuvable.' });
 
-    // TODO: appel réel à l'API MTN MoMo pour récupérer le solde
-    // const balance = await momoService.getBalance(account);
-    const simulatedBalance = account.balance; // Placeholder
+    let balance = account.balance;
+    let syncMessage = 'Synchronisation effectuée.';
+
+    try {
+      const momoBalance = await momoService.getBalance(account);
+      balance = parseFloat(momoBalance.availableBalance) || account.balance;
+      account.balance = balance;
+      syncMessage = `Solde synchronisé depuis MTN MoMo : ${balance} ${momoBalance.currency}`;
+      logger.info(`[Account] Sync OK — compte ${account._id}, solde: ${balance}`);
+    } catch (momoErr) {
+      // Si l'appel MoMo échoue, on garde le solde actuel sans bloquer
+      logger.warn(`[Account] Sync MoMo échouée pour ${account._id}: ${momoErr.message}`);
+      syncMessage = 'Synchronisation partielle (API MoMo indisponible).';
+    }
 
     account.lastSync = new Date();
     await account.save();
 
-    res.json({ account, message: 'Synchronisation effectuée.', balance: simulatedBalance });
+    res.json({ account, message: syncMessage, balance });
   } catch (err) {
     next(err);
   }

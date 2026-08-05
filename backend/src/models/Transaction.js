@@ -24,7 +24,7 @@ const transactionSchema = new mongoose.Schema(
 
     type: {
       type: String,
-      enum: ['deposit', 'withdrawal', 'transfer', 'payment', 'refund'],
+      enum: ['deposit', 'withdrawal', 'transfer', 'payment', 'refund', 'credit_sale', 'data_sale', 'unlimited'],
       required: true,
     },
     amount: {
@@ -34,6 +34,12 @@ const transactionSchema = new mongoose.Schema(
     },
     fee: { type: Number, default: 0 },
     currency: { type: String, default: 'XOF' },
+
+    // Champs spécifiques aux ventes crédit / forfait / illimité
+    operator:     { type: String, default: 'MTN' },          // Opérateur (MTN, Moov...)
+    packageCode:  { type: String, default: null },            // Code plan MTN (ex: DATA_1GB_7D)
+    packageLabel: { type: String, default: null },            // Libellé lisible (ex: 1 Go / 7 jours)
+    packageValidity: { type: String, default: null },         // Durée de validité (ex: 7 jours)
 
     status: {
       type: String,
